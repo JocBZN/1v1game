@@ -15,7 +15,7 @@ function LiveScore({ name, score, side, async: isAsync, sub }: { name: string; s
   const color = side === 'me' ? 'text-me' : 'text-foe';
   return (
     <div className={`flex min-w-0 flex-1 items-center gap-2 ${side === 'foe' ? 'flex-row-reverse text-right' : ''}`}>
-      <Avatar name={name} size={36} ring={side === 'me' ? '#22d3ee' : '#f472b6'} />
+      <Avatar name={name} size={36} ring={side === 'me' ? 'var(--color-me)' : 'var(--color-foe)'} />
       <div className="min-w-0">
         <div className="truncate text-xs font-bold text-muted">{name}</div>
         <div key={bump} className={`text-2xl font-black tabular-nums leading-tight ${color} ${bump ? 'animate-score' : ''}`}>{shown}</div>

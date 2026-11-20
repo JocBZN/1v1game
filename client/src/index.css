@@ -4,18 +4,28 @@
   --font-sans: 'Rubik', 'Twemoji Country Flags', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-flag: 'Twemoji Country Flags', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
 
-  --color-ink: #0b0b1a;
-  --color-ink-2: #13132a;
-  --color-panel: #1a1a36;
-  --color-panel-2: #23234a;
-  --color-line: #2e2e5c;
-  --color-muted: #8c8cb8;
+  /* "Arcade sunset": warm plum-black base, amber→coral fire for actions, mint vs coral for the two players. */
+  --color-ink: #0f0b17;
+  --color-ink-2: #171222;
+  --color-panel: #1f1830;
+  --color-panel-2: #2a2140;
+  --color-line: #3b3054;
+  --color-muted: #a99cc2;
+  --color-text: #f6f0ff;
 
-  --color-me: #22d3ee;
-  --color-foe: #f472b6;
-  --color-good: #34d399;
-  --color-bad: #f87171;
-  --color-gold: #fbbf24;
+  --color-me: #2ee6c4;
+  --color-foe: #ff6b8b;
+  --color-good: #3ddc97;
+  --color-bad: #ff5470;
+  --color-gold: #ffc857;
+
+  /* Main action gradient (JOACĂ, Încă un duel…) */
+  --color-fire-1: #ffd166;
+  --color-fire-2: #ff8a3d;
+  --color-fire-3: #ff4d6d;
+
+  --color-board-dark: #6f5e94;
+  --color-board-light: #ece6f6;
 
   --animate-pop: pop 0.35s cubic-bezier(0.2, 1.6, 0.4, 1) both;
   --animate-shake: shake 0.4s ease-in-out both;
@@ -46,8 +56,8 @@
   50% { transform: translateY(-6px); }
 }
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 24px 2px rgb(34 211 238 / 0.35), inset 0 -6px 0 rgb(0 0 0 / 0.25); }
-  50% { box-shadow: 0 0 44px 8px rgb(244 114 182 / 0.45), inset 0 -6px 0 rgb(0 0 0 / 0.25); }
+  0%, 100% { box-shadow: 0 0 28px 4px rgb(255 138 61 / 0.4), inset 0 -6px 0 rgb(0 0 0 / 0.25); }
+  50% { box-shadow: 0 0 52px 12px rgb(255 77 109 / 0.5), inset 0 -6px 0 rgb(0 0 0 / 0.25); }
 }
 @keyframes score-bump {
   0% { transform: scale(1); }
@@ -77,11 +87,12 @@ html, body, #root {
 body {
   margin: 0;
   background:
-    radial-gradient(1200px 600px at 50% -10%, rgb(99 102 241 / 0.18), transparent 60%),
-    radial-gradient(800px 500px at 100% 110%, rgb(236 72 153 / 0.12), transparent 60%),
+    radial-gradient(1100px 560px at 50% -12%, rgb(255 138 61 / 0.16), transparent 60%),
+    radial-gradient(700px 480px at 0% 105%, rgb(46 230 196 / 0.09), transparent 60%),
+    radial-gradient(700px 480px at 100% 105%, rgb(255 77 109 / 0.10), transparent 60%),
     var(--color-ink);
   background-attachment: fixed;
-  color: #eef0ff;
+  color: var(--color-text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
@@ -128,4 +139,135 @@ button:disabled {
 
 .safe-bottom {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* ------------------------------------------------------------------ first-visit intro splash
+   Timeline: swords clash at 850ms → flash/shake/shockwave → letters from 1050ms → icons 1750ms. */
+
+.splash-rays {
+  opacity: 0;
+  background: repeating-conic-gradient(from 0deg, rgb(255 138 61 / 0.22) 0deg 5deg, transparent 5deg 15deg);
+  mask-image: radial-gradient(circle, #000 0, transparent 42%);
+  animation: splash-fade-in 0.6s 0.1s ease-out forwards, splash-spin 12s linear infinite, splash-rays-pulse 0.7s 0.85s ease-out;
+}
+@keyframes splash-fade-in { to { opacity: 1; } }
+@keyframes splash-spin { to { rotate: 360deg; } }
+@keyframes splash-rays-pulse {
+  0% { scale: 1.6; filter: brightness(2.5); }
+  100% { scale: 1; filter: brightness(1); }
+}
+
+.splash-sword-l,
+.splash-sword-r {
+  filter: drop-shadow(0 0 18px rgb(255 209 102 / 0.55));
+  animation-duration: 1.15s, 0.6s;
+  animation-delay: 0.1s, 1.7s;
+  animation-fill-mode: both, forwards;
+}
+.splash-sword-l { animation-name: splash-sword-l, splash-sword-dim; }
+.splash-sword-r { animation-name: splash-sword-r, splash-sword-dim; }
+@keyframes splash-sword-l {
+  0% { transform: translate(-95vw, 40vh) rotate(-200deg); animation-timing-function: cubic-bezier(0.5, 0, 1, 0.6); }
+  65% { transform: translate(0, 0) rotate(-38deg); animation-timing-function: ease-out; }
+  72% { transform: translate(-16px, 8px) rotate(-50deg); }
+  100% { transform: translate(0, 0) rotate(-38deg); }
+}
+@keyframes splash-sword-r {
+  0% { transform: translate(95vw, 40vh) rotate(200deg); animation-timing-function: cubic-bezier(0.5, 0, 1, 0.6); }
+  65% { transform: translate(0, 0) rotate(38deg); animation-timing-function: ease-out; }
+  72% { transform: translate(16px, 8px) rotate(50deg); }
+  100% { transform: translate(0, 0) rotate(38deg); }
+}
+@keyframes splash-sword-dim { to { opacity: 0.45; } }
+
+.splash-flash {
+  opacity: 0;
+  animation: splash-flash 0.45s 0.85s ease-out forwards;
+}
+@keyframes splash-flash {
+  0% { opacity: 0.95; }
+  100% { opacity: 0; }
+}
+
+.splash-ring {
+  opacity: 0;
+  translate: -50% -50%;
+  animation: splash-ring 0.75s 0.85s cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
+}
+@keyframes splash-ring {
+  0% { transform: scale(0.2); opacity: 1; }
+  100% { transform: scale(9); opacity: 0; }
+}
+
+.splash-shake {
+  animation: splash-shake 0.55s 0.85s linear;
+}
+@keyframes splash-shake {
+  0%, 100% { transform: none; }
+  10% { transform: translate(-14px, 9px) rotate(-1.2deg); }
+  20% { transform: translate(12px, -10px) rotate(1deg); }
+  35% { transform: translate(-9px, -6px) rotate(-0.6deg); }
+  50% { transform: translate(8px, 7px) rotate(0.5deg); }
+  70% { transform: translate(-4px, 3px); }
+  85% { transform: translate(2px, -2px); }
+}
+
+.splash-letter {
+  opacity: 0;
+  background: linear-gradient(180deg, #fff6d6 0%, var(--color-fire-1) 30%, var(--color-fire-2) 62%, var(--color-fire-3) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(2px 0 0 var(--color-me)) drop-shadow(-2px 0 0 var(--color-foe)) drop-shadow(0 8px 24px rgb(255 77 109 / 0.45));
+  animation-name: splash-slam, splash-glitch;
+  animation-duration: 0.42s, 2.4s;
+  animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1), steps(1);
+  animation-fill-mode: forwards, none;
+  animation-iteration-count: 1, infinite;
+}
+@keyframes splash-slam {
+  0% { opacity: 0; transform: scale(4.2) translateY(-40px) rotate(-10deg); }
+  55% { opacity: 1; transform: scale(0.86) rotate(2deg); }
+  78% { transform: scale(1.08); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes splash-glitch {
+  0%, 84%, 100% { translate: 0 0; }
+  86% { translate: 6px -2px; filter: drop-shadow(9px 0 0 var(--color-me)) drop-shadow(-9px 0 0 var(--color-foe)); }
+  88% { translate: -7px 3px; filter: drop-shadow(-6px 0 0 var(--color-me)) drop-shadow(6px 0 0 var(--color-foe)); }
+  90% { translate: 3px 0; }
+  92% { translate: 0 0; }
+}
+
+.splash-sub {
+  opacity: 0;
+  animation: rise 0.45s 1.6s ease-out forwards;
+}
+
+.splash-icon {
+  opacity: 0;
+  animation: splash-icon-in 0.7s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+@keyframes splash-icon-in {
+  0% { opacity: 1; transform: translate(var(--from-x), var(--from-y)) rotate(-540deg) scale(0.3); }
+  80% { transform: translate(0, 0) rotate(12deg) scale(1.18); }
+  100% { opacity: 1; transform: none; }
+}
+
+.splash-hint {
+  opacity: 0;
+  animation: splash-hint 1.2s 2.6s ease-in-out infinite;
+}
+@keyframes splash-hint {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
+}
+
+.splash-exit {
+  pointer-events: none;
+  animation: splash-out 0.55s cubic-bezier(0.6, 0, 0.9, 0.4) forwards;
+}
+@keyframes splash-out {
+  0% { transform: none; opacity: 1; filter: none; }
+  100% { transform: scale(1.9); opacity: 0; filter: blur(14px) brightness(1.6); }
 }

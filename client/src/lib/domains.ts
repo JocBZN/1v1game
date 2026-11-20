@@ -15,19 +15,19 @@ export interface DomainMeta {
 export const DOMAINS: Record<DomainId, DomainMeta> = {
   trivia: {
     id: 'trivia', name: 'Cultură generală', short: 'Cultură', emoji: '🧠',
-    gradient: 'from-violet-500 to-fuchsia-500', color: '#a855f7', tagline: '5 întrebări · 10 secunde fiecare',
+    gradient: 'from-[#c4a3ff] to-[#7c5cff]', color: '#b18cff', tagline: '5 întrebări · 10 secunde fiecare',
   },
   chess: {
     id: 'chess', name: 'Puzzle șah', short: 'Șah', emoji: '♞',
-    gradient: 'from-emerald-400 to-teal-600', color: '#10b981', tagline: '90 de secunde · o greșeală = puzzle pierdut',
+    gradient: 'from-[#5ff0b4] to-[#13a88e]', color: '#3ddc97', tagline: '90 de secunde · o greșeală = puzzle pierdut',
   },
   math: {
     id: 'math', name: 'Calcul mental', short: 'Calcul', emoji: '🧮',
-    gradient: 'from-amber-400 to-orange-500', color: '#f59e0b', tagline: '60 de secunde · cât de repede poți',
+    gradient: 'from-[#ffd166] to-[#ff8a3d]', color: '#ffb547', tagline: '60 de secunde · cât de repede poți',
   },
   flags: {
     id: 'flags', name: 'Steaguri', short: 'Steaguri', emoji: '🚩',
-    gradient: 'from-sky-400 to-blue-600', color: '#0ea5e9', tagline: '8 steaguri · 6 secunde fiecare',
+    gradient: 'from-[#7fdcff] to-[#3a7bff]', color: '#5cc8ff', tagline: '8 steaguri · 6 secunde fiecare',
   },
 };
 

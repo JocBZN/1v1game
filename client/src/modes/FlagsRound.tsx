@@ -17,7 +17,7 @@ export function FlagsRound({ item, feedback, onAnswer, waiting }: ModeProps<Flag
       feedback={feedback}
       onAnswer={onAnswer}
       layout="grid"
-      accent="#38bdf8"
+      accent="#5cc8ff"
       header={
         item && (
           <div className="flex flex-col items-center">

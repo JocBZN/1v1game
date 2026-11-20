@@ -25,7 +25,7 @@ export function ResultScreen({ found, result, onAgain, onLeaderboard, onHome }: 
   onHome: () => void;
 }) {
   const title = result.result === 'win' ? 'VICTORIE' : result.result === 'loss' ? 'ÎNFRÂNGERE' : 'EGALITATE';
-  const grad = result.result === 'win' ? 'from-emerald-300 to-cyan-300' : result.result === 'loss' ? 'from-rose-400 to-pink-500' : 'from-amber-300 to-yellow-200';
+  const grad = result.result === 'win' ? 'from-fire-1 via-fire-2 to-fire-3' : result.result === 'loss' ? 'from-[#ff8fa3] to-bad' : 'from-gold to-[#fff1c1]';
   const emoji = result.result === 'win' ? '🏆' : result.result === 'loss' ? '💀' : '🤝';
   const general = result.ratingChanges?.general;
   const domainChanges = Object.entries(result.ratingChanges ?? {}).filter(([k]) => k !== 'general') as [DomainId, RatingChange][];
@@ -43,13 +43,13 @@ export function ResultScreen({ found, result, onAgain, onLeaderboard, onHome }: 
 
       <div className="mt-5 flex items-center justify-center gap-4 animate-rise">
         <div className="flex items-center gap-2">
-          <Avatar name={found?.you.name ?? 'Tu'} size={36} ring="#22d3ee" />
+          <Avatar name={found?.you.name ?? 'Tu'} size={36} ring="var(--color-me)" />
           <span className="text-4xl font-black text-me">{result.roundWins[0]}</span>
         </div>
         <span className="text-muted">–</span>
         <div className="flex items-center gap-2">
           <span className="text-4xl font-black text-foe">{result.roundWins[1]}</span>
-          <Avatar name={result.opponent.name} size={36} ring="#f472b6" />
+          <Avatar name={result.opponent.name} size={36} ring="var(--color-foe)" />
         </div>
       </div>
       <div className="mt-1 flex items-center justify-center gap-1 text-xs text-muted">
@@ -109,7 +109,7 @@ export function ResultScreen({ found, result, onAgain, onLeaderboard, onHome }: 
       )}
 
       <div className="mt-auto grid gap-3 pt-6">
-        <button onClick={onAgain} className="btn-game bg-gradient-to-r from-cyan-400 via-indigo-500 to-pink-500 py-4 text-xl text-white">
+        <button onClick={onAgain} className="btn-game bg-gradient-to-r from-fire-1 via-fire-2 to-fire-3 py-4 text-xl text-ink">
           ⚔️ Încă un duel
         </button>
         <div className="grid grid-cols-2 gap-3">

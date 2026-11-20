@@ -18,15 +18,15 @@ export function TriviaRound({ item, feedback, onAnswer, waiting }: ModeProps<Tri
       item={item}
       feedback={feedback}
       onAnswer={onAnswer}
-      accent="#c084fc"
+      accent="#b18cff"
       header={
         item && (
           <div className="text-center">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-violet-500/15 px-3 py-1 text-xs font-bold text-violet-300">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#b18cff]/15 px-3 py-1 text-xs font-bold text-[#cdb4ff]">
               {item.data.category}
               <span className="tracking-tighter" title={`Dificultate ${item.data.difficulty}/3`}>
-                <span className="text-amber-300">{'★'.repeat(item.data.difficulty)}</span>
-                <span className="text-violet-300/30">{'★'.repeat(3 - item.data.difficulty)}</span>
+                <span className="text-gold">{'★'.repeat(item.data.difficulty)}</span>
+                <span className="text-[#cdb4ff]/30">{'★'.repeat(3 - item.data.difficulty)}</span>
               </span>
             </div>
             <h2 className="text-2xl font-extrabold leading-snug">{item.data.q}</h2>

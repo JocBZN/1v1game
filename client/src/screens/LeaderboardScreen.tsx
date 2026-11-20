@@ -15,7 +15,7 @@ function Row({ e, mine, delay }: { e: LeaderboardEntry; mine: boolean; delay: nu
   const league = LEAGUE_META[e.league];
   return (
     <div
-      className={`flex items-center gap-3 rounded-2xl border px-3 py-2.5 animate-rise ${mine ? 'border-me bg-me/10 shadow-[0_0_24px_-8px_#22d3ee]' : 'border-line bg-panel/60'}`}
+      className={`flex items-center gap-3 rounded-2xl border px-3 py-2.5 animate-rise ${mine ? 'border-me bg-me/10 shadow-[0_0_24px_-8px_var(--color-me)]' : 'border-line bg-panel/60'}`}
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="w-8 text-center text-lg font-black tabular-nums text-muted">{e.rank <= 3 ? MEDALS[e.rank - 1] : e.rank}</div>

@@ -96,7 +96,7 @@ export function MathRound({ item, feedback, onAnswer, waiting }: ModeProps<MathI
             e.preventDefault();
             submit();
           }}
-          className="btn-game col-span-3 h-14 bg-gradient-to-r from-amber-400 to-orange-500 text-xl text-ink"
+          className="btn-game col-span-3 h-14 bg-gradient-to-r from-fire-1 to-fire-2 text-xl text-ink"
         >
           TRIMITE
         </button>

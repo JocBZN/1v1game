@@ -25,7 +25,7 @@ export function SearchingScreen({ me, since, onCancel }: { me: Me; since: number
         <div className="radar-ring absolute inset-0 rounded-full border-2 border-me/60" />
         <div className="radar-ring absolute inset-0 rounded-full border-2 border-foe/50" style={{ animationDelay: '0.6s' }} />
         <div className="radar-ring absolute inset-0 rounded-full border-2 border-me/40" style={{ animationDelay: '1.2s' }} />
-        <Avatar name={me.user.nickname} size={88} ring="#22d3ee" />
+        <Avatar name={me.user.nickname} size={88} ring="var(--color-me)" />
       </div>
       <h2 className="mt-8 text-2xl font-black">Căutăm un adversar…</h2>
       <p className="mt-2 text-4xl font-black tabular-nums text-me">

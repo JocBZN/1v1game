@@ -34,7 +34,7 @@ export function NicknameScreen({ onDone }: { onDone: (me: Me) => void }) {
       <div className="mb-10 text-center animate-rise">
         <div className="mb-3 text-7xl animate-float">⚔️</div>
         <h1 className="text-5xl font-black tracking-tight">
-          <span className="bg-gradient-to-r from-me to-foe bg-clip-text text-transparent">DUEL</span>
+          <span className="bg-gradient-to-r from-fire-1 via-fire-2 to-fire-3 bg-clip-text text-transparent">DUEL</span>
         </h1>
         <p className="mt-3 text-muted">1 contra 1. Trei runde. Domenii la întâmplare.</p>
       </div>
@@ -53,13 +53,13 @@ export function NicknameScreen({ onDone }: { onDone: (me: Me) => void }) {
           value={nick}
           onChange={(e) => setNick(e.target.value)}
           placeholder="ex. Fulgerul_92"
-          className="w-full rounded-2xl border-2 border-line bg-ink-2 px-4 py-4 text-xl font-bold outline-none transition focus:border-me"
+          className="w-full rounded-2xl border-2 border-line bg-ink-2 px-4 py-4 text-xl font-bold outline-none transition focus:border-fire-2"
         />
         {error && <p className="mt-3 text-sm font-semibold text-bad animate-shake">{error}</p>}
         <button
           type="submit"
           disabled={busy || nick.trim().length < 3}
-          className="btn-game mt-5 w-full bg-gradient-to-r from-cyan-400 to-indigo-500 py-4 text-xl text-ink disabled:opacity-40"
+          className="btn-game mt-5 w-full bg-gradient-to-r from-fire-1 via-fire-2 to-fire-3 py-4 text-xl text-ink disabled:opacity-40"
         >
           {busy ? 'Se creează…' : 'Intră în arenă'}
         </button>

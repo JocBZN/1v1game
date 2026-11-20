@@ -3,6 +3,7 @@ import { Chess, type Square } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import { WaitingNote } from './MathRound';
 import type { ModeProps } from './types';
+import { alpha, C } from '../lib/theme';
 
 interface PuzzleItem {
   fen: string;
@@ -106,13 +107,17 @@ export function ChessRound({ item, feedback, onAnswer, waiting }: ModeProps<Puzz
   if (!item) return <div className="m-auto text-muted">…</div>;
 
   const frame =
-    status === 'solved' ? '0 0 0 4px #34d399, 0 0 40px #34d39988' : status === 'failed' ? '0 0 0 4px #f87171, 0 0 40px #f8717188' : '0 0 0 2px #2e2e5c';
+    status === 'solved'
+      ? `0 0 0 4px ${C.good}, 0 0 40px ${alpha(C.good, 55)}`
+      : status === 'failed'
+        ? `0 0 0 4px ${C.bad}, 0 0 40px ${alpha(C.bad, 55)}`
+        : `0 0 0 2px ${C.line}`;
 
   return (
     <div className="flex flex-1 flex-col items-center">
       <div className="mb-2 flex w-full items-center justify-between text-xs font-bold">
         <span className="uppercase tracking-widest text-muted">Puzzle {item.data.index + 1}</span>
-        <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-emerald-300">{item.data.theme}</span>
+        <span className="rounded-full bg-good/15 px-3 py-1 text-good">{item.data.theme}</span>
         <span className="text-good">✓ {solvedCount}</span>
       </div>
 
@@ -125,8 +130,8 @@ export function ChessRound({ item, feedback, onAnswer, waiting }: ModeProps<Puzz
               boardOrientation: myColor === 'w' ? 'white' : 'black',
               allowDragging: status === 'thinking',
               animationDurationInMs: 180,
-              darkSquareStyle: { backgroundColor: '#4b5a8a' },
-              lightSquareStyle: { backgroundColor: '#c9d2ec' },
+              darkSquareStyle: { backgroundColor: C.boardDark },
+              lightSquareStyle: { backgroundColor: C.boardLight },
               squareStyles,
               arrows: hint ? [{ startSquare: hint[0], endSquare: hint[1], color: 'rgba(52, 211, 153, 0.9)' }] : [],
               canDragPiece: ({ piece }) => status === 'thinking' && piece.pieceType[0] === myColor,

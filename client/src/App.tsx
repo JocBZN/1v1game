@@ -11,6 +11,7 @@ import { RoundEndScreen } from './screens/RoundEndScreen';
 import { ResultScreen } from './screens/ResultScreen';
 import { LeaderboardScreen } from './screens/LeaderboardScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
+import { IntroSplash, shouldShowIntro } from './components/IntroSplash';
 
 type Route = 'home' | 'leaderboard' | 'profile';
 
@@ -94,6 +95,8 @@ function Game({ me, refreshMe, onSwitchPlayer }: { me: Me; refreshMe: () => void
 export default function App() {
   const [me, setMe] = useState<Me | null>(null);
   const [loading, setLoading] = useState(true);
+  // First-visit splash (overlays whatever is underneath, usually the nickname screen).
+  const [intro, setIntro] = useState(shouldShowIntro);
 
   const refreshMe = useCallback(() => {
     api.me().then(setMe).catch(() => {});
@@ -119,12 +122,20 @@ export default function App() {
     setMe(null);
   }, []);
 
-  if (loading) return <div className="flex h-full items-center justify-center text-muted">Se încarcă…</div>;
-  if (!me) return <NicknameScreen onDone={setMe} />;
-
-  return (
+  const content = loading ? (
+    <div className="flex h-full items-center justify-center text-muted">Se încarcă…</div>
+  ) : !me ? (
+    <NicknameScreen onDone={setMe} />
+  ) : (
     <DuelProvider key={me.user.id}>
       <Game me={me} refreshMe={refreshMe} onSwitchPlayer={switchPlayer} />
     </DuelProvider>
+  );
+
+  return (
+    <>
+      {content}
+      {intro && <IntroSplash onDone={() => setIntro(false)} />}
+    </>
   );
 }

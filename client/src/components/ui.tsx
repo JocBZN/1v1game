@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { LEAGUE_META } from '../lib/leagues';
+import { C } from '../lib/theme';
 import type { League } from '../lib/api';
 
 /** Re-renders on every animation frame (or every `ms`) and returns performance.now(). */
@@ -49,7 +50,7 @@ export function useAnimatedNumber(value: number, durationMs = 450): number {
   return shown;
 }
 
-const AVATAR_COLORS = ['#22d3ee', '#f472b6', '#a78bfa', '#34d399', '#fbbf24', '#fb7185', '#60a5fa', '#f97316'];
+const AVATAR_COLORS = ['#2ee6c4', '#ff6b8b', '#b18cff', '#ffc857', '#6fd3ff', '#ff8a3d', '#3ddc97', '#f78fb3'];
 
 export function Avatar({ name, size = 44, ring }: { name: string; size?: number; ring?: string }) {
   let h = 0;
@@ -86,7 +87,7 @@ export function TimerBar({ endsAt, totalMs, className = '' }: { endsAt: number; 
   const now = useNow();
   const left = Math.max(0, endsAt - now);
   const pct = totalMs > 0 ? Math.min(1, left / totalMs) : 0;
-  const color = pct > 0.5 ? '#34d399' : pct > 0.2 ? '#fbbf24' : '#f87171';
+  const color = pct > 0.5 ? C.good : pct > 0.2 ? C.gold : C.bad;
   return (
     <div className={`h-2.5 w-full overflow-hidden rounded-full bg-white/10 ${className}`}>
       <div className="h-full rounded-full" style={{ width: `${pct * 100}%`, background: color, boxShadow: `0 0 12px ${color}` }} />

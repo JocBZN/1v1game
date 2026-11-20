@@ -50,7 +50,7 @@ export function VsHeader({ found, roundWins }: { found: Found; roundWins: [numbe
   return (
     <div className="flex items-center justify-between gap-2">
       <div className="flex min-w-0 flex-1 flex-col items-center gap-2">
-        <Avatar name={found.you.name} size={64} ring="#22d3ee" />
+        <Avatar name={found.you.name} size={64} ring="var(--color-me)" />
         <div className="max-w-full truncate font-extrabold">{found.you.name}</div>
         <LeagueBadge league={found.you.league} small />
       </div>
@@ -63,7 +63,7 @@ export function VsHeader({ found, roundWins }: { found: Found; roundWins: [numbe
         </div>
       </div>
       <div className="flex min-w-0 flex-1 flex-col items-center gap-2">
-        <Avatar name={found.opponent.name} size={64} ring="#f472b6" />
+        <Avatar name={found.opponent.name} size={64} ring="var(--color-foe)" />
         <div className="flex max-w-full items-center gap-1">
           <span className="truncate font-extrabold">{found.opponent.name}</span>
         </div>

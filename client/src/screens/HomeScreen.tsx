@@ -60,7 +60,7 @@ export function HomeScreen({
         <button
           onClick={onPlay}
           disabled={!connected}
-          className="btn-game h-44 w-44 rounded-full bg-gradient-to-br from-cyan-400 via-indigo-500 to-pink-500 text-4xl text-white animate-glow disabled:opacity-50"
+          className="btn-game h-44 w-44 rounded-full bg-gradient-to-br from-fire-1 via-fire-2 to-fire-3 text-4xl text-white animate-glow disabled:opacity-50"
           style={{ textShadow: '0 3px 0 rgb(0 0 0 / 0.25)' }}
         >
           JOACĂ

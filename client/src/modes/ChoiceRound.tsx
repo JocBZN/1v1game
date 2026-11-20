@@ -75,7 +75,7 @@ export function ChoiceRound({
               {layout === 'list' && (
                 <span
                   className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-sm font-black text-ink"
-                  style={{ background: fb ? (isCorrect ? '#34d399' : isChosen ? '#f87171' : '#3a3a6a') : accent }}
+                  style={{ background: fb ? (isCorrect ? 'var(--color-good)' : isChosen ? 'var(--color-bad)' : 'var(--color-line)') : accent }}
                 >
                   {fb && isCorrect ? '✓' : fb && isChosen ? '✗' : LETTERS[i]}
                 </span>
