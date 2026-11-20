@@ -107,7 +107,7 @@ export function Screen({ children, className = '' }: { children: ReactNode; clas
 
 export function AsyncTag() {
   return (
-    <span className="rounded-md border border-white/15 bg-white/5 px-1.5 py-px text-[9px] font-bold uppercase tracking-widest text-muted" title="Adversar asincron">
+    <span className="rounded-md border border-white/15 bg-white/5 px-1.5 py-px text-[9px] font-bold uppercase tracking-widest text-muted" title="Asynchronous opponent">
       async
     </span>
   );

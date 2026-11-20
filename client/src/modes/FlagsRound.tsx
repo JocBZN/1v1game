@@ -21,7 +21,7 @@ export function FlagsRound({ item, feedback, onAnswer, waiting }: ModeProps<Flag
       header={
         item && (
           <div className="flex flex-col items-center">
-            <div className="text-sm font-bold uppercase tracking-widest text-muted">Al cui e steagul?</div>
+            <div className="text-sm font-bold uppercase tracking-widest text-muted">Whose flag is this?</div>
             <div className="flag mt-3 animate-pop text-[8.5rem] drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]">{item.data.flag}</div>
           </div>
         )

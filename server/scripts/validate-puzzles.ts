@@ -31,12 +31,12 @@ for (const p of puzzles) {
   }
 }
 
-console.log(`\n${kept.length} valide, ${removed} eliminate. Pe teme: ${JSON.stringify(byTheme)}`);
+console.log(`\n${kept.length} valid, ${removed} removed. By theme: ${JSON.stringify(byTheme)}`);
 if (removed && !dry) {
   fs.writeFileSync(file, JSON.stringify(kept, null, 1) + '\n');
-  console.log('Fișierul a fost rescris fără puzzle-urile invalide.');
+  console.log('The file was rewritten without the invalid puzzles.');
 }
 if (kept.length < 60) {
-  console.error('Atenție: mai puțin de 60 de puzzle-uri valide.');
+  console.error('Warning: fewer than 60 valid puzzles.');
   process.exitCode = 1;
 }

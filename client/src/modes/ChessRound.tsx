@@ -43,12 +43,12 @@ export function ChessRound({ item, feedback, onAnswer, waiting }: ModeProps<Puzz
     if (feedback.solved) {
       setStatus('solved');
       setSolvedCount((c) => c + 1);
-      setToast({ text: `Rezolvat! +${feedback.points}`, good: true, seq: feedback.seq });
+      setToast({ text: `Solved! +${feedback.points}`, good: true, seq: feedback.seq });
     } else if (feedback.failed) {
       setStatus('failed');
       const sol = feedback.solution as string | undefined;
       if (sol) setHint([sol.slice(0, 2), sol.slice(2, 4)]);
-      setToast({ text: 'Mutare greșită', good: false, seq: feedback.seq });
+      setToast({ text: 'Wrong move', good: false, seq: feedback.seq });
     } else if (feedback.reply) {
       const reply = feedback.reply as string;
       setStatus('opponent');
@@ -157,13 +157,13 @@ export function ChessRound({ item, feedback, onAnswer, waiting }: ModeProps<Puzz
       <div className="mt-3 text-center text-sm font-semibold text-muted">
         {status === 'thinking' && (
           <>
-            Mută {myColor === 'w' ? 'albul' : 'negrul'} <span className="inline-block h-3 w-3 rounded-full align-middle" style={{ background: myColor === 'w' ? '#fff' : '#111', boxShadow: '0 0 0 1px #888' }} />
+            {myColor === 'w' ? 'White' : 'Black'} to move <span className="inline-block h-3 w-3 rounded-full align-middle" style={{ background: myColor === 'w' ? '#fff' : '#111', boxShadow: '0 0 0 1px #888' }} />
           </>
         )}
-        {status === 'pending' && 'Se verifică…'}
-        {status === 'opponent' && 'Corect! Adversarul răspunde…'}
-        {status === 'solved' && <span className="text-good">Corect! Urmează următorul puzzle.</span>}
-        {status === 'failed' && <span className="text-bad">Puzzle pierdut. Săgeata arată mutarea corectă.</span>}
+        {status === 'pending' && 'Checking…'}
+        {status === 'opponent' && 'Correct! Opponent replies…'}
+        {status === 'solved' && <span className="text-good">Correct! Next puzzle coming up.</span>}
+        {status === 'failed' && <span className="text-bad">Puzzle lost. The arrow shows the right move.</span>}
       </div>
     </div>
   );

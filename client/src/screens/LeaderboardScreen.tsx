@@ -25,7 +25,7 @@ function Row({ e, mine, delay }: { e: LeaderboardEntry; mine: boolean; delay: nu
           {e.nickname} {mine && <span className="text-xs font-bold text-me">(tu)</span>}
         </div>
         <div className="text-[11px] text-muted">
-          {league.emoji} {league.name} · {e.wins}V {e.losses}Î{e.draws ? ` ${e.draws}E` : ''}
+          {league.emoji} {league.name} · {e.wins}W {e.losses}L{e.draws ? ` ${e.draws}D` : ''}
         </div>
       </div>
       <div className="text-xl font-black tabular-nums" style={{ color: league.color }}>{e.rating}</div>
@@ -55,7 +55,7 @@ export function LeaderboardScreen({ me, onBack }: { me: Me; onBack: () => void }
     <Screen>
       <header className="flex items-center gap-3">
         <button onClick={onBack} className="rounded-xl bg-panel-2 px-3 py-2 text-sm font-bold">←</button>
-        <h1 className="text-2xl font-black">Clasament</h1>
+        <h1 className="text-2xl font-black">Leaderboard</h1>
       </header>
 
       <div className="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
@@ -71,15 +71,15 @@ export function LeaderboardScreen({ me, onBack }: { me: Me; onBack: () => void }
           </button>
         ))}
       </div>
-      {track !== 'general' && <p className="mt-2 text-xs text-muted">Rating pe {DOMAINS[track].name.toLowerCase()} — se schimbă după fiecare rundă jucată în domeniu.</p>}
+      {track !== 'general' && <p className="mt-2 text-xs text-muted">{DOMAINS[track].name} rating — changes after every round played in this topic.</p>}
 
       <div className="mt-3 flex-1 space-y-2 pb-24">
-        {error && <p className="py-10 text-center text-bad">Nu s-a putut încărca clasamentul.</p>}
-        {!data && !error && <p className="py-10 text-center text-muted">Se încarcă…</p>}
+        {error && <p className="py-10 text-center text-bad">Couldn’t load the leaderboard.</p>}
+        {!data && !error && <p className="py-10 text-center text-muted">Loading…</p>}
         {data && data.rows.length === 0 && (
           <div className="py-12 text-center">
             <div className="text-5xl">🏁</div>
-            <p className="mt-3 text-muted">Nimeni n-a jucat încă aici. Fii primul!</p>
+            <p className="mt-3 text-muted">Nobody has played here yet. Be the first!</p>
           </div>
         )}
         {data?.rows.map((e, i) => (
@@ -95,13 +95,13 @@ export function LeaderboardScreen({ me, onBack }: { me: Me; onBack: () => void }
             {data.me ? (
               inTop ? (
                 <button onClick={() => myRowRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })} className="w-full rounded-2xl border border-me/50 bg-panel py-3 text-sm font-bold text-me">
-                  Ești pe locul #{data.me.rank} · arată-mă
+                  You’re #{data.me.rank} · show me
                 </button>
               ) : (
                 <Row e={data.me} mine delay={0} />
               )
             ) : (
-              <div className="rounded-2xl border border-line bg-panel py-3 text-center text-sm text-muted">Joacă un duel ca să apari în clasament.</div>
+              <div className="rounded-2xl border border-line bg-panel py-3 text-center text-sm text-muted">Play a duel to appear on the leaderboard.</div>
             )}
           </div>
         </div>

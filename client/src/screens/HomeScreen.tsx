@@ -23,11 +23,11 @@ export function HomeScreen({
         <div className="min-w-0 flex-1">
           <div className="truncate text-lg font-extrabold">{me.user.nickname}</div>
           <div className="text-xs text-muted">
-            {g.wins}V · {g.losses}Î{g.draws ? ` · ${g.draws}E` : ''}
+            {g.wins}W · {g.losses}L{g.draws ? ` · ${g.draws}D` : ''}
           </div>
         </div>
-        <button onClick={onSwitchPlayer} className="rounded-xl px-2 py-1 text-xs font-semibold text-muted hover:text-white" title="Joacă în acest tab cu alt nickname">
-          Alt jucător
+        <button onClick={onSwitchPlayer} className="rounded-xl px-2 py-1 text-xs font-semibold text-muted hover:text-white" title="Play in this tab with another nickname">
+          Switch player
         </button>
       </header>
 
@@ -37,7 +37,7 @@ export function HomeScreen({
       >
         <div className="flex items-center justify-between">
           <LeagueBadge league={me.league.id} />
-          <span className="text-xs font-bold uppercase tracking-widest text-muted">Rating general</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-muted">Overall rating</span>
         </div>
         <div className="mt-3 flex items-end gap-2">
           <span className="text-6xl font-black tabular-nums" style={{ color: league.color }}>{g.rating}</span>
@@ -48,11 +48,11 @@ export function HomeScreen({
               <div className={`h-full rounded-full bg-gradient-to-r ${league.gradient}`} style={{ width: `${prog.pct * 100}%` }} />
             </div>
             <div className="mt-1.5 text-xs text-muted">
-              Încă {prog.toGo} până la {LEAGUE_META[prog.next].emoji} {LEAGUE_META[prog.next].name}
+              {prog.toGo} more to {LEAGUE_META[prog.next].emoji} {LEAGUE_META[prog.next].name}
             </div>
           </div>
         ) : (
-          <div className="mt-3 text-sm text-muted">Ești în vârful piramidei. 👑</div>
+          <div className="mt-3 text-sm text-muted">You're at the top of the pyramid. 👑</div>
         )}
       </section>
 
@@ -63,9 +63,9 @@ export function HomeScreen({
           className="btn-game h-44 w-44 rounded-full bg-gradient-to-br from-fire-1 via-fire-2 to-fire-3 text-4xl text-white animate-glow disabled:opacity-50"
           style={{ textShadow: '0 3px 0 rgb(0 0 0 / 0.25)' }}
         >
-          JOACĂ
+          PLAY
         </button>
-        <p className="mt-5 text-center text-sm text-muted">{connected ? '3 runde · domenii alese la întâmplare' : 'Se conectează la server…'}</p>
+        <p className="mt-5 text-center text-sm text-muted">{connected ? '3 rounds · random topics' : 'Connecting to the server…'}</p>
         <div className="mt-4 flex gap-2">
           {DOMAIN_LIST.map((d) => (
             <div key={d.id} className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${d.gradient} text-xl shadow-lg`} title={d.name}>
@@ -77,10 +77,10 @@ export function HomeScreen({
 
       <nav className="grid grid-cols-2 gap-3 pb-2">
         <button onClick={() => onNavigate('leaderboard')} className="btn-game bg-panel-2 py-4 text-base text-white">
-          🏆 Clasament
+          🏆 Leaderboard
         </button>
         <button onClick={() => onNavigate('profile')} className="btn-game bg-panel-2 py-4 text-base text-white">
-          👤 Profil
+          👤 Profile
         </button>
       </nav>
     </Screen>

@@ -27,9 +27,13 @@ describe('speedPoints (trivia & flags)', () => {
 
 describe('questions.json', () => {
   const qs = loadQuestions();
-  it('has at least 200 questions, ~40 per subcategory', () => {
-    expect(qs.length).toBeGreaterThanOrEqual(200);
-    for (const c of TRIVIA_CATEGORIES) expect(qs.filter((q) => q.cat === c).length).toBeGreaterThanOrEqual(40);
+  it('has 400+ questions across 12 categories, at least 30 each', () => {
+    expect(qs.length).toBeGreaterThanOrEqual(400);
+    expect(TRIVIA_CATEGORIES).toHaveLength(12);
+    for (const c of TRIVIA_CATEGORIES) expect(qs.filter((q) => q.cat === c).length, c).toBeGreaterThanOrEqual(30);
+  });
+  it('is all in English (no Romanian-only question text)', () => {
+    for (const q of qs) expect(q.q, q.id).not.toMatch(/\b(Care|Cine|Câte|Ce |În ce)\b/);
   });
   it('is well formed: unique ids, 4 distinct options, difficulty 1–3', () => {
     expect(new Set(qs.map((q) => q.id)).size).toBe(qs.length);
@@ -46,7 +50,7 @@ describe('questions.json', () => {
 
 describe('trivia mode', () => {
   const content = triviaMode.generateRound(createRng(7));
-  it('5 questions, one per subcategory', () => {
+  it('5 questions from 5 different categories', () => {
     expect(content.items).toHaveLength(5);
     expect(new Set(content.items.map((i) => i.cat)).size).toBe(5);
   });

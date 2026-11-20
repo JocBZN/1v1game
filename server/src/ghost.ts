@@ -31,9 +31,9 @@ export function recordRound(userId: number, ratings: Record<RatingTrack, RatingS
 }
 
 const BOT_NAMES = [
-  'Andrei_92', 'IoanaQuiz', 'Vlad.Fulger', 'MihaelaR', 'Radu_Turbo', 'ElenaPop', 'CostinX', 'Bianca07',
-  'Tudor_Rege', 'Ana.Maria', 'Sorin_Dacul', 'IrinaN', 'Matei_88', 'DariaZ', 'Paul_Vânt', 'Cristi.Calc',
-  'Alexia_K', 'Bogdan_Șah', 'Larisa.M', 'Ștefan_cel_Rapid',
+  'Andrew_92', 'QuizQueen', 'Vlad.Bolt', 'MiaR', 'TurboRadu', 'EllaPop', 'CostinX', 'Bianca07',
+  'KingTudor', 'Ana.Maria', 'Sam_TheBrain', 'IrinaN', 'Matt_88', 'DariaZ', 'Paul.Wind', 'CalcChris',
+  'Alexa_K', 'Bobby_Chess', 'Lara.M', 'SpeedySteve',
 ];
 
 function uniformRatings(rating: number, rd: number): Record<RatingTrack, RatingSnap> {

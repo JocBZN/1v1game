@@ -3,11 +3,12 @@ import type { Me } from '../lib/api';
 import { Avatar, Screen } from '../components/ui';
 
 const TIPS = [
-  'Domeniile sunt alese de server. Fii gata de orice!',
-  'La cultură generală, viteza aduce puncte bonus.',
-  'La șah, o mutare greșită pierde puzzle-ul.',
-  'La calcul mental, o greșeală costă puțin. Nu ezita!',
-  'Câștigi duelul cu 2 runde din 3.',
+  'The server picks the topics. Be ready for anything!',
+  'In trivia, answering fast earns bonus points.',
+  'In chess puzzles, one wrong move loses the puzzle.',
+  'In mental math, a mistake costs little. Don’t hesitate!',
+  'Win 2 rounds out of 3 to win the duel.',
+  'Rubik’s Cube: drag a row to turn it, drag outside the cube to spin it.',
 ];
 
 export function SearchingScreen({ me, since, onCancel }: { me: Me; since: number; onCancel: () => void }) {
@@ -27,13 +28,13 @@ export function SearchingScreen({ me, since, onCancel }: { me: Me; since: number
         <div className="radar-ring absolute inset-0 rounded-full border-2 border-me/40" style={{ animationDelay: '1.2s' }} />
         <Avatar name={me.user.nickname} size={88} ring="var(--color-me)" />
       </div>
-      <h2 className="mt-8 text-2xl font-black">Căutăm un adversar…</h2>
+      <h2 className="mt-8 text-2xl font-black">Finding an opponent…</h2>
       <p className="mt-2 text-4xl font-black tabular-nums text-me">
         0:{secs.toString().padStart(2, '0')}
       </p>
       <p className="mt-6 max-w-xs text-sm text-muted">{tip}</p>
       <button onClick={onCancel} className="mt-10 rounded-2xl border border-line px-6 py-3 font-bold text-muted transition hover:text-white">
-        Anulează
+        Cancel
       </button>
     </Screen>
   );

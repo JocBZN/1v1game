@@ -24,7 +24,7 @@ export function TriviaRound({ item, feedback, onAnswer, waiting }: ModeProps<Tri
           <div className="text-center">
             <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#b18cff]/15 px-3 py-1 text-xs font-bold text-[#cdb4ff]">
               {item.data.category}
-              <span className="tracking-tighter" title={`Dificultate ${item.data.difficulty}/3`}>
+              <span className="tracking-tighter" title={`Difficulty ${item.data.difficulty}/3`}>
                 <span className="text-gold">{'★'.repeat(item.data.difficulty)}</span>
                 <span className="text-[#cdb4ff]/30">{'★'.repeat(3 - item.data.difficulty)}</span>
               </span>

@@ -49,9 +49,9 @@ function Game({ me, refreshMe, onSwitchPlayer }: { me: Me; refreshMe: () => void
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
         <div className="text-5xl">🔁</div>
-        <div className="text-xl font-black">Contul e deschis în alt tab</div>
-        <p className="text-sm text-muted">Poți juca dintr-un singur loc odată.</p>
-        <button className="btn-game mt-2 bg-panel-2 px-6 py-3 text-white" onClick={() => location.reload()}>Joacă aici</button>
+        <div className="text-xl font-black">You’re playing in another tab</div>
+        <p className="text-sm text-muted">You can only play from one place at a time.</p>
+        <button className="btn-game mt-2 bg-panel-2 px-6 py-3 text-white" onClick={() => location.reload()}>Play here</button>
       </div>
     );
   }
@@ -123,7 +123,7 @@ export default function App() {
   }, []);
 
   const content = loading ? (
-    <div className="flex h-full items-center justify-center text-muted">Se încarcă…</div>
+    <div className="flex h-full items-center justify-center text-muted">Loading…</div>
   ) : !me ? (
     <NicknameScreen onDone={setMe} />
   ) : (

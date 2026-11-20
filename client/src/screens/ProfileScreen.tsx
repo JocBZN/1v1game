@@ -6,10 +6,10 @@ import { AsyncTag, Avatar, LeagueBadge, Screen } from '../components/ui';
 
 function timeAgo(ts: number): string {
   const s = Math.floor((Date.now() - ts) / 1000);
-  if (s < 60) return 'acum';
-  if (s < 3600) return `acum ${Math.floor(s / 60)} min`;
-  if (s < 86400) return `acum ${Math.floor(s / 3600)} h`;
-  return `acum ${Math.floor(s / 86400)} z`;
+  if (s < 60) return 'just now';
+  if (s < 3600) return `${Math.floor(s / 60)} min ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)} h ago`;
+  return `${Math.floor(s / 86400)} d ago`;
 }
 
 function winRate(w: number, l: number, d: number) {
@@ -34,7 +34,7 @@ export function ProfileScreen({ me, onBack }: { me: Me; onBack: () => void }) {
     <Screen className="pb-6">
       <header className="flex items-center gap-3">
         <button onClick={onBack} className="rounded-xl bg-panel-2 px-3 py-2 text-sm font-bold">←</button>
-        <h1 className="text-2xl font-black">Profil</h1>
+        <h1 className="text-2xl font-black">Profile</h1>
       </header>
 
       <section className="mt-4 rounded-3xl border border-line bg-panel/70 p-5 animate-rise" style={{ boxShadow: `0 0 60px -24px ${league.color}` }}>
@@ -58,16 +58,16 @@ export function ProfileScreen({ me, onBack }: { me: Me; onBack: () => void }) {
               <span className="text-muted">/</span>
               <span className="text-bad">{g.losses}</span>
             </div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-muted">V / Î{g.draws ? ` · ${g.draws}E` : ''}</div>
+            <div className="text-[11px] font-bold uppercase tracking-wider text-muted">W / L{g.draws ? ` · ${g.draws}D` : ''}</div>
           </div>
           <div className="rounded-2xl bg-ink-2 py-3">
             <div className="text-2xl font-black tabular-nums">{wr === null ? '—' : `${wr}%`}</div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-muted">Victorii</div>
+            <div className="text-[11px] font-bold uppercase tracking-wider text-muted">Win rate</div>
           </div>
         </div>
       </section>
 
-      <h2 className="mt-6 mb-2 text-sm font-bold uppercase tracking-widest text-muted">Pe domenii</h2>
+      <h2 className="mt-6 mb-2 text-sm font-bold uppercase tracking-widest text-muted">By topic</h2>
       <div className="grid grid-cols-2 gap-2">
         {DOMAIN_LIST.map((d, i) => {
           const r = data.ratings[d.id];
@@ -79,21 +79,21 @@ export function ProfileScreen({ me, onBack }: { me: Me; onBack: () => void }) {
               </div>
               <div className="mt-2 text-2xl font-black tabular-nums" style={{ color: d.color }}>{r.rating}</div>
               <div className="text-xs text-muted">
-                {r.games ? `${r.wins}V · ${r.losses}Î${r.draws ? ` · ${r.draws}E` : ''} (runde)` : 'nejucat încă'}
+                {r.games ? `${r.wins}W · ${r.losses}L${r.draws ? ` · ${r.draws}D` : ''} (rounds)` : 'not played yet'}
               </div>
             </div>
           );
         })}
       </div>
 
-      <h2 className="mt-6 mb-2 text-sm font-bold uppercase tracking-widest text-muted">Ultimele dueluri</h2>
-      {error && <p className="text-sm text-bad">Nu s-a putut încărca istoricul.</p>}
-      {!p && !error && <p className="text-sm text-muted">Se încarcă…</p>}
-      {p && p.recent.length === 0 && <p className="rounded-2xl border border-line bg-panel/60 p-4 text-center text-sm text-muted">Niciun duel încă. Apasă JOACĂ!</p>}
+      <h2 className="mt-6 mb-2 text-sm font-bold uppercase tracking-widest text-muted">Recent duels</h2>
+      {error && <p className="text-sm text-bad">Couldn’t load your history.</p>}
+      {!p && !error && <p className="text-sm text-muted">Loading…</p>}
+      {p && p.recent.length === 0 && <p className="rounded-2xl border border-line bg-panel/60 p-4 text-center text-sm text-muted">No duels yet. Hit PLAY!</p>}
       <div className="space-y-2">
         {p?.recent.map((d) => {
           const delta = Math.round(d.ratingAfter) - Math.round(d.ratingBefore);
-          const res = d.result === 'W' ? { t: 'V', c: 'bg-good text-ink' } : d.result === 'L' ? { t: 'Î', c: 'bg-bad text-ink' } : { t: 'E', c: 'bg-gold text-ink' };
+          const res = d.result === 'W' ? { t: 'W', c: 'bg-good text-ink' } : d.result === 'L' ? { t: 'L', c: 'bg-bad text-ink' } : { t: 'D', c: 'bg-gold text-ink' };
           return (
             <div key={d.id} className="flex items-center gap-3 rounded-2xl border border-line bg-panel/60 px-3 py-2.5">
               <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-base font-black ${res.c}`}>{res.t}</div>
@@ -110,7 +110,7 @@ export function ProfileScreen({ me, onBack }: { me: Me; onBack: () => void }) {
                   ))}
                   <span className="ml-1">
                     {d.roundsWon}–{d.oppRoundsWon}
-                    {d.forfeit ? ' · abandon' : ''} · {timeAgo(d.createdAt)}
+                    {d.forfeit ? ' · forfeit' : ''} · {timeAgo(d.createdAt)}
                   </span>
                 </div>
               </div>

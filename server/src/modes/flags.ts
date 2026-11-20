@@ -33,7 +33,7 @@ const EASY = new Set(['RO', 'MD', 'FR', 'DE', 'IT', 'ES', 'GB', 'US', 'CA', 'JP'
 
 export const flagsMode: GameMode<FlagsContent> = {
   id: 'flags',
-  name: 'Steaguri',
+  name: 'Flags',
   itemTimeLimit: 6_000,
   feedbackDelay: 1_000,
   timeLimit: FLAGS_PER_ROUND * (6_000 + 1_000) + 1_000,

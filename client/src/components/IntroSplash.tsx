@@ -253,7 +253,7 @@ export function IntroSplash({ onDone }: { onDone: () => void }) {
             ))}
           </div>
           <div className="splash-sub mt-2 text-center text-sm font-extrabold uppercase tracking-[0.35em] text-muted sm:text-base">
-            <span className="text-me">tu</span> <span className="text-fire-2">vs</span> <span className="text-foe">oricine</span>
+            <span className="text-me">you</span> <span className="text-fire-2">vs</span> <span className="text-foe">anyone</span>
           </div>
           <div className="mt-6 flex gap-3">
             {DOMAIN_LIST.map((d, i) => (
@@ -272,7 +272,7 @@ export function IntroSplash({ onDone }: { onDone: () => void }) {
 
         <div className="splash-flash pointer-events-none absolute inset-0 bg-white" />
         <div className="splash-hint absolute inset-x-0 bottom-[max(2rem,env(safe-area-inset-bottom))] text-center text-xs font-bold uppercase tracking-[0.3em] text-muted">
-          atinge ca să intri
+          tap to enter
         </div>
       </div>
     </div>

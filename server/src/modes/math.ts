@@ -92,7 +92,7 @@ export function mathPoints(item: MathItem, correct: boolean): number {
 
 export const mathMode: GameMode<MathContent> = {
   id: 'math',
-  name: 'Calcul mental',
+  name: 'Mental math',
   timeLimit: 60_000,
   feedbackDelay: 0,
 

@@ -24,7 +24,7 @@ export function ResultScreen({ found, result, onAgain, onLeaderboard, onHome }: 
   onLeaderboard: () => void;
   onHome: () => void;
 }) {
-  const title = result.result === 'win' ? 'VICTORIE' : result.result === 'loss' ? 'ÎNFRÂNGERE' : 'EGALITATE';
+  const title = result.result === 'win' ? 'VICTORY' : result.result === 'loss' ? 'DEFEAT' : 'DRAW';
   const grad = result.result === 'win' ? 'from-fire-1 via-fire-2 to-fire-3' : result.result === 'loss' ? 'from-[#ff8fa3] to-bad' : 'from-gold to-[#fff1c1]';
   const emoji = result.result === 'win' ? '🏆' : result.result === 'loss' ? '💀' : '🤝';
   const general = result.ratingChanges?.general;
@@ -37,7 +37,7 @@ export function ResultScreen({ found, result, onAgain, onLeaderboard, onHome }: 
         <div className="text-6xl">{emoji}</div>
         <h1 className={`mt-2 bg-gradient-to-r ${grad} bg-clip-text text-5xl font-black tracking-tight text-transparent`}>{title}</h1>
         {result.forfeit && (
-          <p className="mt-1 text-sm text-muted">{result.forfeit === 'you' ? 'Ai abandonat duelul.' : 'Adversarul a abandonat.'}</p>
+          <p className="mt-1 text-sm text-muted">{result.forfeit === 'you' ? 'You forfeited the duel.' : 'Your opponent forfeited.'}</p>
         )}
       </div>
 
@@ -76,7 +76,7 @@ export function ResultScreen({ found, result, onAgain, onLeaderboard, onHome }: 
       {general && (
         <div className="mt-5 rounded-3xl border border-line bg-panel/80 p-4 animate-rise" style={{ animationDelay: '200ms' }}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-widest text-muted">Rating general</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-muted">Overall rating</span>
             {result.league && (
               <span className="text-sm font-bold" style={{ color: LEAGUE_META[result.league.after].color }}>
                 {LEAGUE_META[result.league.after].emoji} {LEAGUE_META[result.league.after].name}
@@ -89,8 +89,8 @@ export function ResultScreen({ found, result, onAgain, onLeaderboard, onHome }: 
           {leagueUp && (
             <div className="mt-2 rounded-xl bg-white/5 px-3 py-2 text-center text-sm font-bold animate-pop">
               {leagueRank(result.league!.after) > leagueRank(result.league!.before)
-                ? `${LEAGUE_META[result.league!.after].emoji} Ai urcat în liga ${LEAGUE_META[result.league!.after].name}!`
-                : `Ai coborât în liga ${LEAGUE_META[result.league!.after].name}. Revii tu!`}
+                ? `${LEAGUE_META[result.league!.after].emoji} Promoted to ${LEAGUE_META[result.league!.after].name}!`
+                : `Dropped to ${LEAGUE_META[result.league!.after].name}. You’ll be back!`}
             </div>
           )}
           {domainChanges.length > 0 && (
@@ -110,11 +110,11 @@ export function ResultScreen({ found, result, onAgain, onLeaderboard, onHome }: 
 
       <div className="mt-auto grid gap-3 pt-6">
         <button onClick={onAgain} className="btn-game bg-gradient-to-r from-fire-1 via-fire-2 to-fire-3 py-4 text-xl text-ink">
-          ⚔️ Încă un duel
+          ⚔️ Another duel
         </button>
         <div className="grid grid-cols-2 gap-3">
-          <button onClick={onLeaderboard} className="btn-game bg-panel-2 py-3 text-white">🏆 Clasament</button>
-          <button onClick={onHome} className="btn-game bg-panel-2 py-3 text-white">🏠 Acasă</button>
+          <button onClick={onLeaderboard} className="btn-game bg-panel-2 py-3 text-white">🏆 Leaderboard</button>
+          <button onClick={onHome} className="btn-game bg-panel-2 py-3 text-white">🏠 Home</button>
         </div>
       </div>
     </Screen>

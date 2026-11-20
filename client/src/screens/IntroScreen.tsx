@@ -76,7 +76,7 @@ export function VsHeader({ found, roundWins }: { found: Found; roundWins: [numbe
 export function FoundScreen({ found }: { found: Found }) {
   return (
     <Screen className="justify-center">
-      <div className="text-center text-sm font-bold uppercase tracking-[0.3em] text-good animate-pop">Adversar găsit!</div>
+      <div className="text-center text-sm font-bold uppercase tracking-[0.3em] text-good animate-pop">Opponent found!</div>
       <div className="mt-6 animate-rise">
         <VsHeader found={found} roundWins={[0, 0]} />
       </div>
@@ -101,7 +101,7 @@ export function IntroScreen({ found, index, domain, roundWins }: { found: Found;
     <Screen className="justify-center">
       <VsHeader found={found} roundWins={roundWins} />
       <div className="mt-10 text-center">
-        <div className="text-sm font-bold uppercase tracking-[0.3em] text-muted">Runda {index + 1} din 3</div>
+        <div className="text-sm font-bold uppercase tracking-[0.3em] text-muted">Round {index + 1} of 3</div>
       </div>
       <div className="mt-4">
         <Reel key={index} domain={domain} />
@@ -110,7 +110,7 @@ export function IntroScreen({ found, index, domain, roundWins }: { found: Found;
         {reveal && (
           <div className="animate-pop">
             <div className="text-2xl font-black" style={{ color: meta.color }}>
-              Runda {index + 1}: {meta.name}
+              Round {index + 1}: {meta.name}
             </div>
             <div className="mt-1 text-sm text-muted">{meta.tagline}</div>
           </div>

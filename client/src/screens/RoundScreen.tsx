@@ -39,7 +39,7 @@ export function RoundScreen() {
   const Mode = MODE_COMPONENTS[round.domain];
 
   const oppSub = scores.opponentFinished
-    ? 'a terminat'
+    ? 'finished'
     : scores.itemCount && scores.itemCount <= 20
       ? `${Math.min(scores.opponentProgress + 1, scores.itemCount)}/${scores.itemCount}`
       : undefined;
@@ -69,7 +69,7 @@ export function RoundScreen() {
 
       {!state.opponentConnected && (
         <div className="mt-2 rounded-xl bg-gold/15 px-3 py-2 text-center text-xs font-semibold text-gold">
-          Adversarul s-a deconectat… dacă nu revine în 15s, câștigi.
+          Your opponent disconnected… if they’re not back in 15s, you win.
         </div>
       )}
 
@@ -77,19 +77,19 @@ export function RoundScreen() {
         {Mode ? (
           <Mode item={item} feedback={feedback} onAnswer={answer} waiting={waiting} />
         ) : (
-          <div className="m-auto text-muted">Mod necunoscut.</div>
+          <div className="m-auto text-muted">Unknown mode.</div>
         )}
       </div>
 
       <div className="flex justify-center pb-1">
         {confirmQuit ? (
           <div className="flex items-center gap-3 text-xs">
-            <span className="text-muted">Abandonezi duelul?</span>
-            <button className="font-bold text-bad" onClick={forfeit}>Da</button>
-            <button className="font-bold text-muted" onClick={() => setConfirmQuit(false)}>Nu</button>
+            <span className="text-muted">Forfeit the duel?</span>
+            <button className="font-bold text-bad" onClick={forfeit}>Yes</button>
+            <button className="font-bold text-muted" onClick={() => setConfirmQuit(false)}>No</button>
           </div>
         ) : (
-          <button className="text-xs text-muted/60 hover:text-muted" onClick={() => setConfirmQuit(true)}>Abandonează</button>
+          <button className="text-xs text-muted/60 hover:text-muted" onClick={() => setConfirmQuit(true)}>Forfeit</button>
         )}
       </div>
     </div>

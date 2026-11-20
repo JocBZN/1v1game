@@ -1,4 +1,4 @@
-export type RatingTrack = 'general' | 'trivia' | 'chess' | 'math' | 'flags';
+export type RatingTrack = 'general' | 'trivia' | 'chess' | 'math' | 'flags' | 'cube';
 
 export interface TrackStats {
   rating: number;
@@ -25,7 +25,7 @@ const TOKEN_KEY = 'duel.token';
 
 /**
  * The token lives in localStorage (as requested), but each tab may override it in sessionStorage so
- * two tabs of the same browser can play as two different players ("Alt jucător").
+ * two tabs of the same browser can play as two different players ("Switch player").
  */
 export function getToken(): string | null {
   try {

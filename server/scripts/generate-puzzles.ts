@@ -236,8 +236,8 @@ while ((counts.mate1 < TARGET.mate1 || counts.mate2 < TARGET.mate2 || counts.mat
   out.push(p);
   seen.add(fen);
   counts[theme]++;
-  process.stdout.write(`\r${tried} poziții · mat1 ${counts.mate1} · mat2 ${counts.mate2} · material ${counts.material}   `);
+  process.stdout.write(`\r${tried} positions · mate1 ${counts.mate1} · mate2 ${counts.mate2} · material ${counts.material}   `);
 }
 
 fs.writeFileSync(dataFile('chess_puzzles.json'), JSON.stringify(out, null, 1) + '\n');
-console.log(`\n${out.length} puzzle-uri scrise în data/chess_puzzles.json (${((Date.now() - t0) / 1000).toFixed(0)}s)`);
+console.log(`\n${out.length} puzzles written to data/chess_puzzles.json (${((Date.now() - t0) / 1000).toFixed(0)}s)`);

@@ -35,7 +35,7 @@ export function ChoiceRound({
         {item.endsAt && !fb && <SecondsLeft endsAt={item.endsAt} className="text-base normal-case text-white" />}
         {fb && (
           <span className={`text-base ${fb.correct ? 'text-good' : 'text-bad'} animate-pop`}>
-            {fb.timeout ? 'Timp expirat!' : fb.correct ? `+${fb.points}` : 'Greșit'}
+            {fb.timeout ? 'Time’s up!' : fb.correct ? `+${fb.points}` : 'Wrong'}
           </span>
         )}
       </div>

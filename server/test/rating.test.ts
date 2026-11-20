@@ -54,14 +54,15 @@ describe('Glicko-2', () => {
 
 describe('leagues', () => {
   it('maps rating to the right league', () => {
-    expect(leagueFor(1100).name).toBe('Bronz');
-    expect(leagueFor(1299).name).toBe('Bronz');
-    expect(leagueFor(1300).name).toBe('Argint');
-    expect(leagueFor(1499).name).toBe('Argint');
-    expect(leagueFor(1500).name).toBe('Aur');
-    expect(leagueFor(1700).name).toBe('Platină');
-    expect(leagueFor(1900).name).toBe('Diamant');
-    expect(leagueFor(2099).name).toBe('Diamant');
-    expect(leagueFor(2100).name).toBe('Legendă');
+    expect(leagueFor(1100).name).toBe('Bronze');
+    expect(leagueFor(1299).name).toBe('Bronze');
+    expect(leagueFor(1299.6).name).toBe('Silver'); // shown as 1300
+    expect(leagueFor(1300).name).toBe('Silver');
+    expect(leagueFor(1499).name).toBe('Silver');
+    expect(leagueFor(1500).name).toBe('Gold');
+    expect(leagueFor(1700).name).toBe('Platinum');
+    expect(leagueFor(1900).name).toBe('Diamond');
+    expect(leagueFor(2099).name).toBe('Diamond');
+    expect(leagueFor(2100).name).toBe('Legend');
   });
 });

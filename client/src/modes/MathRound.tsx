@@ -47,7 +47,7 @@ export function MathRound({ item, feedback, onAnswer, waiting }: ModeProps<MathI
   return (
     <div className="flex flex-1 flex-col">
       <div className="relative flex flex-1 flex-col items-center justify-center">
-        {streak >= 3 && <div className="mb-2 text-sm font-bold text-gold animate-pop">🔥 {streak} la rând</div>}
+        {streak >= 3 && <div className="mb-2 text-sm font-bold text-gold animate-pop">🔥 {streak} in a row</div>}
         <div key={item?.item} className="text-5xl font-black tabular-nums tracking-tight animate-rise sm:text-6xl">
           {item?.data.prompt ?? '…'}
         </div>
@@ -74,7 +74,7 @@ export function MathRound({ item, feedback, onAnswer, waiting }: ModeProps<MathI
             if (e.key === 'Enter') submit();
           }}
           onBlur={() => setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 0)}
-          aria-label="Răspuns"
+          aria-label="Answer"
         />
       </div>
 
@@ -98,7 +98,7 @@ export function MathRound({ item, feedback, onAnswer, waiting }: ModeProps<MathI
           }}
           className="btn-game col-span-3 h-14 bg-gradient-to-r from-fire-1 to-fire-2 text-xl text-ink"
         >
-          TRIMITE
+          SUBMIT
         </button>
       </div>
     </div>
@@ -109,8 +109,8 @@ export function WaitingNote() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center text-center animate-fade">
       <div className="text-5xl animate-float">⏳</div>
-      <div className="mt-4 text-xl font-black">Ai terminat runda!</div>
-      <div className="mt-1 text-sm text-muted">Așteptăm adversarul…</div>
+      <div className="mt-4 text-xl font-black">Round finished!</div>
+      <div className="mt-1 text-sm text-muted">Waiting for your opponent…</div>
     </div>
   );
 }

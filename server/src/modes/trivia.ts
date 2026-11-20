@@ -4,15 +4,25 @@ import type { Rng } from '../rng';
 import { simulateChoiceBot, validateChoice, type ChoiceItem } from './choice';
 import { sumScore, type GameMode, type RoundContent } from './types';
 
-export const TRIVIA_CATEGORIES = ['istorie', 'geografie', 'stiinta', 'sport', 'film_muzica'] as const;
+export const TRIVIA_CATEGORIES = [
+  'history', 'geography', 'science', 'sport', 'film_music',
+  'football', 'medicine', 'math', 'technology', 'cosmetics', 'tv_shows', 'celebrities',
+] as const;
 export type TriviaCategory = (typeof TRIVIA_CATEGORIES)[number];
 
 export const TRIVIA_CATEGORY_NAMES: Record<TriviaCategory, string> = {
-  istorie: 'Istorie',
-  geografie: 'Geografie',
-  stiinta: 'Știință',
+  history: 'History',
+  geography: 'Geography',
+  science: 'Science',
   sport: 'Sport',
-  film_muzica: 'Film & muzică',
+  film_music: 'Film & Music',
+  football: 'Football',
+  medicine: 'Medicine',
+  math: 'Math',
+  technology: 'Technology',
+  cosmetics: 'Beauty & Cosmetics',
+  tv_shows: 'TV & Shows',
+  celebrities: 'Famous People',
 };
 
 export interface Question {
@@ -48,14 +58,14 @@ export function toItem(q: Question, rng: Rng): TriviaItem {
 
 export const triviaMode: GameMode<TriviaContent> = {
   id: 'trivia',
-  name: 'Cultură generală',
+  name: 'Trivia',
   itemTimeLimit: 10_000,
   feedbackDelay: 1_300,
   timeLimit: TRIVIA_QUESTIONS_PER_ROUND * (10_000 + 1_300) + 1_000,
 
   generateRound(rng) {
     const all = loadQuestions();
-    // One question per subcategory, in random order.
+    // 5 different random categories, one question from each.
     const cats = rng.shuffle(TRIVIA_CATEGORIES).slice(0, TRIVIA_QUESTIONS_PER_ROUND);
     const items = cats.map((cat) => toItem(rng.pick(all.filter((q) => q.cat === cat)), rng));
     return { items };

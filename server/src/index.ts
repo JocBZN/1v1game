@@ -15,5 +15,5 @@ const server = http.createServer(app);
 attachSockets(server);
 
 server.listen(PORT, () => {
-  console.log(`[duel] server pe http://localhost:${PORT}`);
+  console.log(`[duel] server on http://localhost:${PORT}`);
 });

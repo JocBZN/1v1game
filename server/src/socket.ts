@@ -10,7 +10,7 @@ export function attachSockets(server: http.Server) {
 
   /**
    * All open sockets per user. Several tabs of the same account may be connected (e.g. a tab that is
-   * about to switch to another nickname); only the tab that presses "Joacă" keeps playing — the
+   * about to switch to another nickname); only the tab that presses "Play" keeps playing — the
    * others are told the account is in use elsewhere and disconnected.
    */
   const sockets = new Map<number, Set<Socket>>();

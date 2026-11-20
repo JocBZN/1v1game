@@ -18,9 +18,9 @@ export function chessPoints(elapsedMs: number): number {
 }
 
 const THEME_LABEL: Record<Puzzle['theme'], string> = {
-  mate1: 'Mat într-o mutare',
-  mate2: 'Mat în 2 mutări',
-  material: 'Câștigă material',
+  mate1: 'Mate in 1',
+  mate2: 'Mate in 2',
+  material: 'Win material',
 };
 
 let cache: Puzzle[] | null = null;
@@ -31,7 +31,7 @@ export function loadPuzzles(): Puzzle[] {
 
 export const chessMode: GameMode<ChessContent> = {
   id: 'chess',
-  name: 'Puzzle șah',
+  name: 'Chess puzzles',
   timeLimit: 90_000,
   feedbackDelay: 1_100,
 
