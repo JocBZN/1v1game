@@ -109,13 +109,21 @@ button:disabled {
   animation: radar 1.8s ease-out infinite;
 }
 
-/* "Chunky" game button */
-.btn-game {
-  @apply relative select-none rounded-2xl font-extrabold tracking-wide transition-transform active:translate-y-0.5;
-  box-shadow: inset 0 -5px 0 rgb(0 0 0 / 0.25), 0 8px 24px -8px rgb(0 0 0 / 0.6);
-}
-.btn-game:active {
-  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.25), 0 4px 12px -6px rgb(0 0 0 / 0.6);
+/* "Chunky" game button (in the components layer so utilities like rounded-full can override it) */
+@layer components {
+  .btn-game {
+    position: relative;
+    user-select: none;
+    border-radius: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.025em;
+    transition: transform 80ms ease, box-shadow 80ms ease, opacity 150ms;
+    box-shadow: inset 0 -5px 0 rgb(0 0 0 / 0.25), 0 8px 24px -8px rgb(0 0 0 / 0.6);
+  }
+  .btn-game:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.25), 0 4px 12px -6px rgb(0 0 0 / 0.6);
+  }
 }
 
 .safe-bottom {
