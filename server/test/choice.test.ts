@@ -27,10 +27,16 @@ describe('speedPoints (trivia & flags)', () => {
 
 describe('questions.json', () => {
   const qs = loadQuestions();
-  it('has 400+ questions across 12 categories, at least 30 each', () => {
-    expect(qs.length).toBeGreaterThanOrEqual(400);
+  it('has 1200+ questions across 12 categories, at least 90 each', () => {
+    expect(qs.length).toBeGreaterThanOrEqual(1200);
     expect(TRIVIA_CATEGORIES).toHaveLength(12);
-    for (const c of TRIVIA_CATEGORIES) expect(qs.filter((q) => q.cat === c).length, c).toBeGreaterThanOrEqual(30);
+    for (const c of TRIVIA_CATEGORIES) expect(qs.filter((q) => q.cat === c).length, c).toBeGreaterThanOrEqual(90);
+  });
+  it('never lists the right answer among the wrong ones (case-insensitive)', () => {
+    for (const q of qs) {
+      const opts = [q.correct, ...q.wrong].map((o) => o.trim().toLowerCase());
+      expect(new Set(opts).size, q.id).toBe(4);
+    }
   });
   it('is all in English (no Romanian-only question text)', () => {
     for (const q of qs) expect(q.q, q.id).not.toMatch(/\b(Care|Cine|Câte|Ce |În ce)\b/);
@@ -96,7 +102,24 @@ describe('flags mode', () => {
     const cs = loadCountries();
     expect(new Set(cs.map((c) => c.code)).size).toBe(cs.length);
     expect(new Set(cs.map((c) => c.name)).size).toBe(cs.length);
+    expect(cs.length).toBeGreaterThanOrEqual(190);
+    for (const c of cs) {
+      expect(c.code, c.name).toMatch(/^[A-Z]{2}$/);
+      expect(['europe', 'asia', 'africa', 'americas', 'oceania'], c.code).toContain(c.region);
+    }
     expect(flagEmoji('RO')).toBe('🇷🇴');
+  });
+  it('puts at most 3 lesser-known flags in a round, 8 distinct countries', () => {
+    const rare = new Set(loadCountries().filter((c) => c.rare).map((c) => c.code));
+    let sawRare = false;
+    for (let s = 0; s < 200; s++) {
+      const { items } = flagsMode.generateRound(createRng(s));
+      expect(new Set(items.map((i) => i.code)).size).toBe(8);
+      const n = items.filter((i) => rare.has(i.code)).length;
+      expect(n).toBeLessThanOrEqual(3);
+      if (n) sawRare = true;
+    }
+    expect(sawRare).toBe(true);
   });
   it('8 flags, 4 distinct options each, answer hidden', () => {
     const content = flagsMode.generateRound(createRng(3));

@@ -48,8 +48,8 @@ The first-visit intro animation can be replayed with `?intro` (or `?intro=hold` 
 
 ## Topics
 
-- **Trivia**: 5 questions from 5 different random categories, 10 s each. Correct = 500 + up to 500 speed bonus (decreasing linearly). 455 questions in 12 categories: History, Geography, Science, Sport, Film & Music, Football, Medicine, Math, Technology, Beauty & Cosmetics, TV & Shows, Famous People.
-- **Flags**: 8 flags, 6 s each, same scoring. Wrong options come from the same region.
+- **Trivia**: 5 questions from 5 different random categories, 10 s each. Correct = 500 + up to 500 speed bonus (decreasing linearly). 1,266 questions in 12 categories (90–125 each): History, Geography, Science, Sport, Film & Music, Football, Medicine, Math, Technology, Beauty & Cosmetics, TV & Shows, Famous People.
+- **Flags**: 8 flags, 6 s each, same scoring. 194 countries; at most 3 lesser-known flags per round. Wrong options come from the same region.
 - **Mental math**: 60 s of integer-result problems of increasing difficulty. 100/150/200/250 points per tier, −50 for a miss (round score never below 0).
 - **Chess puzzles**: 90 s. 1000 points per solved puzzle + up to 100 speed bonus (tie-breaker only). One wrong move loses the puzzle. Any mating move is accepted.
 - **Rubik's Cube**: a real, server-scrambled 3×3 cube, 5 minutes. Drag a row/column on the cube to turn that layer; drag outside the cube to spin it. While unsolved you score 20 points per sticker that matches its face's centre (max 960); solving it scores 3000 + up to 2000 time bonus.
@@ -65,9 +65,9 @@ The first-visit intro animation can be replayed with `?intro` (or `?intro=hold` 
 
 ```
 server/
-  data/questions.json        455 questions (12 categories, difficulty 1–3)
+  data/questions.json        1,266 questions (12 categories, difficulty 1–3)
   data/chess_puzzles.json    70 puzzles (FEN + UCI solution including the opponent's replies)
-  data/flags.json            99 countries (ISO code → flag emoji)
+  data/flags.json            194 countries (ISO code → flag emoji; `rare` marks lesser-known ones)
   src/modes/                 one GameMode per topic + registry (index.ts)
   src/cube/model.ts          pure 3×3 cube model (also imported by the client)
   src/duel/Duel.ts           duel engine: rounds, timers, live score, reconnects

@@ -7,6 +7,8 @@ export interface Country {
   code: string;
   name: string;
   region: string;
+  /** Lesser-known country: at most RARE_PER_ROUND of these per round. */
+  rare?: boolean;
 }
 
 export interface FlagItem extends ChoiceItem {
@@ -16,6 +18,7 @@ export interface FlagItem extends ChoiceItem {
 export type FlagsContent = RoundContent<FlagItem>;
 
 export const FLAGS_PER_ROUND = 8;
+export const RARE_PER_ROUND = 3;
 
 let cache: Country[] | null = null;
 export function loadCountries(): Country[] {
@@ -40,14 +43,20 @@ export const flagsMode: GameMode<FlagsContent> = {
 
   generateRound(rng) {
     const all = loadCountries();
-    const picks = rng.shuffle(all).slice(0, FLAGS_PER_ROUND);
+    // 0–3 lesser-known flags per round, the rest well-known ones, in random order.
+    const rareCount = rng.int(0, RARE_PER_ROUND);
+    const picks = rng.shuffle([
+      ...rng.shuffle(all.filter((c) => c.rare)).slice(0, rareCount),
+      ...rng.shuffle(all.filter((c) => !c.rare)).slice(0, FLAGS_PER_ROUND - rareCount),
+    ]);
+    const rare = new Set(all.filter((c) => c.rare).map((c) => c.code));
     const items = picks.map((c): FlagItem => {
       // Distractors from the same region when possible — makes it a real test.
       const sameRegion = all.filter((x) => x.region === c.region && x.code !== c.code);
       const pool = sameRegion.length >= 3 ? sameRegion : all.filter((x) => x.code !== c.code);
       const wrong = rng.shuffle(pool).slice(0, 3).map((x) => x.name);
       const options = rng.shuffle([c.name, ...wrong]);
-      return { code: c.code, options, answer: options.indexOf(c.name), difficulty: EASY.has(c.code) ? 1 : 2 };
+      return { code: c.code, options, answer: options.indexOf(c.name), difficulty: EASY.has(c.code) ? 1 : rare.has(c.code) ? 3 : 2 };
     });
     return { items };
   },
