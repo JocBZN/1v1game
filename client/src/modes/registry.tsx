@@ -1,9 +1,13 @@
 import type { ComponentType } from 'react';
 import type { DomainId } from '../lib/domains';
+import { FlagsRound } from './FlagsRound';
 import { MathRound } from './MathRound';
+import { TriviaRound } from './TriviaRound';
 import type { ModeProps } from './types';
 
 /** One React component per domain. Add new domains here (and on the server in `modes/index.ts`). */
 export const MODE_COMPONENTS: Partial<Record<DomainId, ComponentType<ModeProps>>> = {
   math: MathRound,
+  trivia: TriviaRound,
+  flags: FlagsRound,
 };

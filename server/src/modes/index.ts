@@ -1,10 +1,12 @@
 import type { DomainId } from '../domains';
 import type { Rng } from '../rng';
+import { flagsMode } from './flags';
 import { mathMode } from './math';
+import { triviaMode } from './trivia';
 import type { GameMode } from './types';
 
 /** Registry of playable domains. Add new modes here. */
-const REGISTERED: GameMode<any>[] = [mathMode];
+const REGISTERED: GameMode<any>[] = [mathMode, triviaMode, flagsMode];
 
 /** For automated tests only: ROUND_TIME_SCALE=0.2 makes every round 5× shorter. */
 const SCALE = Number(process.env.ROUND_TIME_SCALE ?? 1);
@@ -14,7 +16,12 @@ const MODES: Partial<Record<DomainId, GameMode<any>>> = Object.fromEntries(
     m.id,
     SCALE === 1
       ? m
-      : { ...m, timeLimit: m.timeLimit * SCALE, itemTimeLimit: m.itemTimeLimit && m.itemTimeLimit * SCALE },
+      : {
+          ...m,
+          timeLimit: m.timeLimit * SCALE,
+          itemTimeLimit: m.itemTimeLimit && m.itemTimeLimit * SCALE,
+          feedbackDelay: m.feedbackDelay * SCALE,
+        },
   ]),
 );
 
