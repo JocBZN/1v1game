@@ -13,8 +13,10 @@ export const LEAGUES: League[] = [
   { id: 'legend', name: 'Legendă', min: 2100 },
 ];
 
+/** League for a rating, using the rounded value players actually see (1299.6 shows as 1300 → Argint). */
 export function leagueFor(rating: number): League {
+  const r = Math.round(rating);
   let found = LEAGUES[0];
-  for (const l of LEAGUES) if (rating >= l.min) found = l;
+  for (const l of LEAGUES) if (r >= l.min) found = l;
   return found;
 }

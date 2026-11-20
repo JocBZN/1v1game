@@ -17,12 +17,14 @@ function LiveScore({ name, score, side, async: isAsync, sub }: { name: string; s
     <div className={`flex min-w-0 flex-1 items-center gap-2 ${side === 'foe' ? 'flex-row-reverse text-right' : ''}`}>
       <Avatar name={name} size={36} ring={side === 'me' ? '#22d3ee' : '#f472b6'} />
       <div className="min-w-0">
-        <div className={`flex items-center gap-1 ${side === 'foe' ? 'justify-end' : ''}`}>
-          <span className="truncate text-xs font-bold text-muted">{name}</span>
-          {isAsync && <AsyncTag />}
-        </div>
+        <div className="truncate text-xs font-bold text-muted">{name}</div>
         <div key={bump} className={`text-2xl font-black tabular-nums leading-tight ${color} ${bump ? 'animate-score' : ''}`}>{shown}</div>
-        {sub && <div className="text-[10px] font-semibold text-muted">{sub}</div>}
+        {(sub || isAsync) && (
+          <div className={`flex items-center gap-1 text-[10px] font-semibold text-muted ${side === 'foe' ? 'justify-end' : ''}`}>
+            {isAsync && <AsyncTag />}
+            {sub}
+          </div>
+        )}
       </div>
     </div>
   );

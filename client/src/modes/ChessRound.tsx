@@ -15,8 +15,9 @@ interface PuzzleItem {
 type Status = 'thinking' | 'pending' | 'opponent' | 'solved' | 'failed';
 
 export function ChessRound({ item, feedback, onAnswer, waiting }: ModeProps<PuzzleItem>) {
-  const chessRef = useRef(new Chess());
-  const [fen, setFen] = useState<string>('start');
+  const chessRef = useRef(new Chess(item?.data.fen));
+  // react-chessboard v5 needs a real FEN (it has no 'start' keyword).
+  const [fen, setFen] = useState<string>(() => item?.data.fen ?? chessRef.current.fen());
   const [status, setStatus] = useState<Status>('thinking');
   const [selected, setSelected] = useState<string | null>(null);
   const [lastMove, setLastMove] = useState<[string, string] | null>(null);

@@ -32,7 +32,7 @@ export function ChoiceRound({
         <span>
           {item.data.index + 1} / {item.data.total}
         </span>
-        {item.endsAt && !fb && <SecondsLeft endsAt={item.endsAt} className="text-base text-white" />}
+        {item.endsAt && !fb && <SecondsLeft endsAt={item.endsAt} className="text-base normal-case text-white" />}
         {fb && (
           <span className={`text-base ${fb.correct ? 'text-good' : 'text-bad'} animate-pop`}>
             {fb.timeout ? 'Timp expirat!' : fb.correct ? `+${fb.points}` : 'Greșit'}

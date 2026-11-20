@@ -1,5 +1,5 @@
 import { DOMAINS, type DomainId } from '../lib/domains';
-import { LEAGUE_META } from '../lib/leagues';
+import { LEAGUE_META, leagueRank } from '../lib/leagues';
 import type { DuelResult, Found, RatingChange } from '../state/duel';
 import { AsyncTag, Avatar, Screen, useAnimatedNumber } from '../components/ui';
 
@@ -88,7 +88,9 @@ export function ResultScreen({ found, result, onAgain, onLeaderboard, onHome }: 
           </div>
           {leagueUp && (
             <div className="mt-2 rounded-xl bg-white/5 px-3 py-2 text-center text-sm font-bold animate-pop">
-              {LEAGUE_META[result.league!.after].emoji} Ai ajuns în liga {LEAGUE_META[result.league!.after].name}!
+              {leagueRank(result.league!.after) > leagueRank(result.league!.before)
+                ? `${LEAGUE_META[result.league!.after].emoji} Ai urcat în liga ${LEAGUE_META[result.league!.after].name}!`
+                : `Ai coborât în liga ${LEAGUE_META[result.league!.after].name}. Revii tu!`}
             </div>
           )}
           {domainChanges.length > 0 && (

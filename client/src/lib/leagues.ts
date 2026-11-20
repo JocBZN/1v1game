@@ -19,9 +19,14 @@ export const LEAGUE_THRESHOLDS: { id: League['id']; min: number }[] = [
 ];
 
 export function leagueOf(rating: number): League['id'] {
+  const r = Math.round(rating);
   let id: League['id'] = 'bronze';
-  for (const l of LEAGUE_THRESHOLDS) if (rating >= l.min) id = l.id;
+  for (const l of LEAGUE_THRESHOLDS) if (r >= l.min) id = l.id;
   return id;
+}
+
+export function leagueRank(id: League['id']): number {
+  return LEAGUE_THRESHOLDS.findIndex((l) => l.id === id);
 }
 
 /** Progress (0..1) towards the next league, and that league. */
