@@ -4,6 +4,7 @@ import { db, getRating, getRatings, getUserById, saveDuel, saveRating, type Duel
 import { RATING_TRACKS, type RatingTrack } from './domains';
 import { Duel, type DuelSummary, type RatingSnap, type RoundPlan, type Slot, type SlotInit } from './duel/Duel';
 import { computeRatingUpdates } from './duel/results';
+import { buildBotDuel, buildGhostDuel, recordRound } from './ghost';
 import { leagueFor } from './leagues';
 import { Matchmaker, type QueueEntry } from './matchmaking';
 import { getMode, pickDomains } from './modes';
@@ -125,7 +126,10 @@ export class GameServer {
     const humans = slots.filter((s) => s.kind === 'human').map((s) => s.userId!);
     const duel: Duel = new Duel(id, slots, plans, {
       emit: (userId, event, data) => this.emit(userId, event, data),
-      onRoundRecorded: () => {},
+      onRoundRecorded: (slot, rec) => {
+        const s = slots[slot];
+        if (s.kind === 'human' && s.userId !== null) recordRound(s.userId, s.ratings, rec);
+      },
       onFinish: (summary) => this.finalize(slots, summary),
       onClosed: () => {
         for (const u of humans) if (this.duels.get(u) === duel) this.duels.delete(u);
@@ -146,18 +150,18 @@ export class GameServer {
     this.launch([this.humanSlot(a.userId), this.humanSlot(b.userId)], plans);
   }
 
+  /** Nobody live after 5 s: replay a real player's recorded rounds (ghost), or a bot if there are none. */
   private startGhostDuel(a: QueueEntry) {
     const rng = createRng();
     const me = this.humanSlot(a.userId);
-    const botRating = me.ratings.general.rating;
-    const ratings = {} as Record<RatingTrack, RatingSnap>;
-    for (const t of RATING_TRACKS) ratings[t] = { rating: botRating, rd: 120, vol: 0.06 };
-    const bot: SlotInit = { kind: 'bot', userId: null, name: 'Bot', ratings };
-    const plans: RoundPlan[] = pickDomains(rng).map((domain) => {
-      const mode = getMode(domain);
-      const content = mode.generateRound(rng);
-      return { domain, content, scripts: [null, mode.simulateBot(content, botRating, rng)] };
-    });
-    this.launch([me, bot], plans);
+    const myGeneral = me.ratings.general.rating;
+    let built: ReturnType<typeof buildGhostDuel> = null;
+    try {
+      built = buildGhostDuel(a.userId, myGeneral, rng);
+    } catch (e) {
+      console.error('[ghost] failed, falling back to bot', e);
+    }
+    const { opponent, plans } = built ?? buildBotDuel(myGeneral, rng);
+    this.launch([me, opponent], plans);
   }
 }
