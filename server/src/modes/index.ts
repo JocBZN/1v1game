@@ -1,13 +1,14 @@
 import type { DomainId } from '../domains';
 import type { Rng } from '../rng';
 import { chessMode } from './chess';
+import { cubeMode } from './cube';
 import { flagsMode } from './flags';
 import { mathMode } from './math';
 import { triviaMode } from './trivia';
 import type { GameMode } from './types';
 
 /** Registry of playable domains. Add new modes here. */
-const REGISTERED: GameMode<any>[] = [triviaMode, chessMode, mathMode, flagsMode];
+const REGISTERED: GameMode<any>[] = [triviaMode, chessMode, mathMode, flagsMode, cubeMode];
 
 /** For automated tests only: ROUND_TIME_SCALE=0.2 makes every round 5× shorter. */
 const SCALE = Number(process.env.ROUND_TIME_SCALE ?? 1);

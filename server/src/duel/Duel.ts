@@ -513,7 +513,9 @@ export class Duel {
       ? {
           round: round.index,
           item: pr.index,
-          data: round.mode.publicItem(round.plan.content, pr.index),
+          data: round.mode.publicItemState
+            ? round.mode.publicItemState(round.plan.content, pr.index, pr.itemState)
+            : round.mode.publicItem(round.plan.content, pr.index),
           itemTimeLimit: itemLimit ? Math.max(0, Math.min(itemLimit - (now - pr.itemStart), round.deadline - now)) : null,
           roundRemainingMs: round.deadline - now,
         }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { DOMAINS } from '../lib/domains';
 import { MODE_COMPONENTS } from '../modes/registry';
 import { useDuel } from '../state/duel';
@@ -40,7 +40,7 @@ export function RoundScreen() {
 
   const oppSub = scores.opponentFinished
     ? 'finished'
-    : scores.itemCount && scores.itemCount <= 20
+    : scores.itemCount > 1 && scores.itemCount <= 20
       ? `${Math.min(scores.opponentProgress + 1, scores.itemCount)}/${scores.itemCount}`
       : undefined;
 
@@ -75,7 +75,9 @@ export function RoundScreen() {
 
       <div className="flex min-h-0 flex-1 flex-col pt-3">
         {Mode ? (
-          <Mode item={item} feedback={feedback} onAnswer={answer} waiting={waiting} />
+          <Suspense fallback={<div className="m-auto text-muted">Loading…</div>}>
+            <Mode item={item} feedback={feedback} onAnswer={answer} waiting={waiting} />
+          </Suspense>
         ) : (
           <div className="m-auto text-muted">Unknown mode.</div>
         )}

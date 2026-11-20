@@ -54,6 +54,8 @@ export interface GameMode<C extends RoundContent = RoundContent> {
   generateRound(rng: Rng): C;
   /** What the client may see of item `index` (no answers). */
   publicItem(content: C, index: number): unknown;
+  /** Optional: public view of an item *in progress* (e.g. the current cube), used when a player reconnects. */
+  publicItemState?(content: C, index: number, itemState: Record<string, unknown>): unknown;
   /** Decide an answer for item `index`. Must be pure apart from `ctx.itemState`. */
   validateAnswer(content: C, index: number, answer: unknown, ctx: AnswerContext): AnswerResult;
   /** Feedback when the item timer ran out (revealing the answer is fine at that point). */
