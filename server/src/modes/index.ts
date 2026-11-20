@@ -1,12 +1,13 @@
 import type { DomainId } from '../domains';
 import type { Rng } from '../rng';
+import { chessMode } from './chess';
 import { flagsMode } from './flags';
 import { mathMode } from './math';
 import { triviaMode } from './trivia';
 import type { GameMode } from './types';
 
 /** Registry of playable domains. Add new modes here. */
-const REGISTERED: GameMode<any>[] = [mathMode, triviaMode, flagsMode];
+const REGISTERED: GameMode<any>[] = [triviaMode, chessMode, mathMode, flagsMode];
 
 /** For automated tests only: ROUND_TIME_SCALE=0.2 makes every round 5× shorter. */
 const SCALE = Number(process.env.ROUND_TIME_SCALE ?? 1);
@@ -37,6 +38,9 @@ export function availableDomains(): DomainId[] {
 
 /** Three different random domains (repeats only if fewer than 3 modes are registered). */
 export function pickDomains(rng: Rng, count = 3): DomainId[] {
+  // Dev/test only: FORCE_DOMAINS=chess,trivia,flags fixes the order of domains.
+  const forced = process.env.FORCE_DOMAINS?.split(',').filter((d) => d in MODES) as DomainId[] | undefined;
+  if (forced?.length) return Array.from({ length: count }, (_, i) => forced[i % forced.length]);
   const all = rng.shuffle(availableDomains());
   const out: DomainId[] = [];
   for (let i = 0; i < count; i++) out.push(all[i % all.length]);
