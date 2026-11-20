@@ -8,8 +8,12 @@ export function attachSockets(server: http.Server) {
   const io = new Server(server, { cors: { origin: '*' }, pingInterval: 5000, pingTimeout: 5000 });
   const game = new GameServer(io);
 
-  /** Latest socket per user: a new tab/connection for the same user replaces the old one. */
-  const current = new Map<number, Socket>();
+  /**
+   * All open sockets per user. Several tabs of the same account may be connected (e.g. a tab that is
+   * about to switch to another nickname); only the tab that presses "Joacă" keeps playing — the
+   * others are told the account is in use elsewhere and disconnected.
+   */
+  const sockets = new Map<number, Set<Socket>>();
 
   io.use((socket, next) => {
     const user = authenticate(socket.handshake.auth?.token);
@@ -20,24 +24,30 @@ export function attachSockets(server: http.Server) {
 
   io.on('connection', (socket) => {
     const user: User = socket.data.user;
-    const prev = current.get(user.id);
-    if (prev && prev.id !== socket.id) {
-      prev.emit('session:replaced');
-      prev.disconnect(true);
-    }
-    current.set(user.id, socket);
+    let set = sockets.get(user.id);
+    if (!set) sockets.set(user.id, (set = new Set()));
+    set.add(socket);
     socket.join(`user:${user.id}`);
 
     game.onConnect(user);
 
-    socket.on('queue:join', () => game.joinQueue(user));
+    socket.on('queue:join', () => {
+      for (const other of sockets.get(user.id) ?? []) {
+        if (other.id === socket.id) continue;
+        other.emit('session:replaced');
+        other.disconnect(true);
+      }
+      game.joinQueue(user);
+    });
     socket.on('queue:leave', () => game.leaveQueue(user));
     socket.on('round:answer', (payload) => game.answer(user, payload));
     socket.on('duel:forfeit', () => game.forfeit(user));
 
     socket.on('disconnect', () => {
-      if (current.get(user.id)?.id !== socket.id) return; // replaced by a newer socket
-      current.delete(user.id);
+      const s = sockets.get(user.id);
+      s?.delete(socket);
+      if (s && s.size > 0) return; // another tab of this user is still here
+      sockets.delete(user.id);
       game.onDisconnect(user);
     });
   });
