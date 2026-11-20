@@ -4,9 +4,8 @@ import path from 'node:path';
 import { SERVER_ROOT } from './paths';
 import { RATING_TRACKS, type DomainId, type RatingTrack } from './domains';
 
-export const DEFAULT_RATING = 1500;
-export const DEFAULT_RD = 350;
-export const DEFAULT_VOL = 0.06;
+import { DEFAULT_RATING, DEFAULT_RD, DEFAULT_VOL } from './constants';
+export { DEFAULT_RATING, DEFAULT_RD, DEFAULT_VOL };
 
 const dbPath = process.env.DB_PATH ?? path.join(SERVER_ROOT, 'db', 'duel.sqlite');
 if (dbPath !== ':memory:') fs.mkdirSync(path.dirname(dbPath), { recursive: true });

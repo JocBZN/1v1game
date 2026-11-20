@@ -1,8 +1,10 @@
 import crypto from 'node:crypto';
 import type { Server } from 'socket.io';
-import { getRatings, getUserById, type User } from './db';
+import { db, getRating, getRatings, getUserById, saveDuel, saveRating, type DuelPlayerRecord, type User } from './db';
 import { RATING_TRACKS, type RatingTrack } from './domains';
-import { Duel, type RatingSnap, type RoundPlan, type SlotInit } from './duel/Duel';
+import { Duel, type DuelSummary, type RatingSnap, type RoundPlan, type Slot, type SlotInit } from './duel/Duel';
+import { computeRatingUpdates } from './duel/results';
+import { leagueFor } from './leagues';
 import { Matchmaker, type QueueEntry } from './matchmaking';
 import { getMode, pickDomains } from './modes';
 import { createRng } from './rng';
@@ -68,13 +70,63 @@ export class GameServer {
     return { kind: 'human', userId, name: getUserById(userId)!.nickname, ratings: snapshot(userId) };
   }
 
+  /** Persist ratings + duel; returns the per-slot extra payload for `duel:end`. */
+  private finalize(slots: [SlotInit, SlotInit], summary: DuelSummary): [unknown, unknown] {
+    const extras: [unknown, unknown] = [null, null];
+    const records: DuelPlayerRecord[] = [];
+
+    const tx = db.transaction(() => {
+      for (const slot of [0, 1] as Slot[]) {
+        const s = slots[slot];
+        const result: 'W' | 'L' | 'D' = summary.winner === null ? 'D' : summary.winner === slot ? 'W' : 'L';
+        const changes: Record<string, { before: number; after: number }> = {};
+        let generalAfter = s.ratings.general.rating;
+
+        if (s.kind === 'human' && s.userId !== null) {
+          const updates = computeRatingUpdates(slots, slot, summary);
+          for (const [track, u] of Object.entries(updates) as [RatingTrack, NonNullable<(typeof updates)[RatingTrack]>][]) {
+            const row = getRating(s.userId, track);
+            saveRating({
+              ...row,
+              rating: u.after.rating, rd: u.after.rd, vol: u.after.vol,
+              wins: row.wins + u.wins, losses: row.losses + u.losses, draws: row.draws + u.draws,
+              games: row.games + u.wins + u.losses + u.draws,
+            });
+            changes[track] = { before: Math.round(u.before.rating), after: Math.round(u.after.rating) };
+          }
+          generalAfter = updates.general!.after.rating;
+          extras[slot] = {
+            ratingChanges: changes,
+            league: { before: leagueFor(s.ratings.general.rating).id, after: leagueFor(generalAfter).id },
+          };
+        }
+
+        records.push({
+          slot,
+          userId: s.kind === 'human' ? s.userId : null,
+          kind: s.kind,
+          name: s.name,
+          result,
+          roundsWon: summary.roundWins[slot],
+          totalScore: summary.totals[slot],
+          ratingBefore: s.ratings.general.rating,
+          ratingAfter: generalAfter,
+          changes,
+        });
+      }
+      saveDuel(summary.rounds.map((r) => r.domain), summary.rounds, summary.forfeitSlot !== null, records);
+    });
+    tx();
+    return extras;
+  }
+
   private launch(slots: [SlotInit, SlotInit], plans: RoundPlan[]) {
     const id = crypto.randomUUID();
     const humans = slots.filter((s) => s.kind === 'human').map((s) => s.userId!);
     const duel: Duel = new Duel(id, slots, plans, {
       emit: (userId, event, data) => this.emit(userId, event, data),
       onRoundRecorded: () => {},
-      onFinish: () => [null, null],
+      onFinish: (summary) => this.finalize(slots, summary),
       onClosed: () => {
         for (const u of humans) if (this.duels.get(u) === duel) this.duels.delete(u);
       },
