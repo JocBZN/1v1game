@@ -1,12 +1,13 @@
 import type { League } from './api';
 
-export const LEAGUE_META: Record<League['id'], { name: string; emoji: string; color: string; gradient: string }> = {
-  bronze: { name: 'Bronze', emoji: '🥉', color: '#d08b5b', gradient: 'from-orange-700 to-amber-600' },
-  silver: { name: 'Silver', emoji: '🥈', color: '#c0c7d6', gradient: 'from-slate-400 to-slate-200' },
-  gold: { name: 'Gold', emoji: '🥇', color: '#fbbf24', gradient: 'from-amber-500 to-yellow-300' },
-  platinum: { name: 'Platinum', emoji: '💠', color: '#67e8f9', gradient: 'from-cyan-500 to-teal-300' },
-  diamond: { name: 'Diamond', emoji: '💎', color: '#a78bfa', gradient: 'from-violet-500 to-sky-400' },
-  legend: { name: 'Legend', emoji: '👑', color: '#f472b6', gradient: 'from-pink-500 via-fuchsia-500 to-amber-400' },
+/** League colours are tuned to read on the cream background. */
+export const LEAGUE_META: Record<League['id'], { name: string; emoji: string; color: string }> = {
+  bronze: { name: 'Bronze', emoji: '🥉', color: '#9c5a2e' },
+  silver: { name: 'Silver', emoji: '🥈', color: '#7a7268' },
+  gold: { name: 'Gold', emoji: '🥇', color: '#b56500' },
+  platinum: { name: 'Platinum', emoji: '💠', color: '#4f7f7a' },
+  diamond: { name: 'Diamond', emoji: '💎', color: '#007f8f' },
+  legend: { name: 'Legend', emoji: '👑', color: '#df301c' },
 };
 
 export const LEAGUE_THRESHOLDS: { id: League['id']; min: number }[] = [

@@ -48,10 +48,9 @@ function Game({ me, refreshMe, onSwitchPlayer }: { me: Me; refreshMe: () => void
   if (state.replaced) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
-        <div className="text-5xl">🔁</div>
-        <div className="text-xl font-black">You’re playing in another tab</div>
+        <div className="text-xl font-semibold">You’re playing in another tab</div>
         <p className="text-sm text-muted">You can only play from one place at a time.</p>
-        <button className="btn-game mt-2 bg-panel-2 px-6 py-3 text-white" onClick={() => location.reload()}>Play here</button>
+        <button className="btn btn-primary mt-2 px-6 py-3" onClick={() => location.reload()}>Play here</button>
       </div>
     );
   }

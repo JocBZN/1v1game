@@ -58,6 +58,7 @@ The first-visit intro animation can be replayed with `?intro` (or `?intro=hold` 
 
 - **Duel**: 3 different topics. Win 2 rounds to win the duel (it stops at 2–0). If round wins are level, total points decide; otherwise it's a draw. Forfeiting or being disconnected for more than 15 s is a loss.
 - **Server-authoritative**: the client only ever gets the current item without its answer; timers run on the server and late answers don't score. Every chess move and every cube turn is validated on the server (the cube's scramble is never sent — only its sticker state).
+- **Ghosts** only replay rounds recorded with the current `CONTENT_VERSION` (`server/src/constants.ts`). Bump it when questions, flags, puzzles or texts change so old rounds are never replayed.
 - **Rating**: Glicko-2 (τ = 0.5), starting at 1500 / RD 350. Each duel is one rating period: overall = the duel result; per topic = the result of each round in that topic. Against a ghost/bot only the real player changes; a ghost keeps the rating it had when its rounds were recorded.
 - **Leagues**: Bronze < 1300 ≤ Silver < 1500 ≤ Gold < 1700 ≤ Platinum < 1900 ≤ Diamond < 2100 ≤ Legend.
 

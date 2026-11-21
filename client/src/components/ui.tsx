@@ -50,19 +50,26 @@ export function useAnimatedNumber(value: number, durationMs = 450): number {
   return shown;
 }
 
-const AVATAR_COLORS = ['#2ee6c4', '#ff6b8b', '#b18cff', '#ffc857', '#6fd3ff', '#ff8a3d', '#3ddc97', '#f78fb3'];
+/** Soft tint + strong letter, all from the palette. */
+const AVATAR_COLORS: [string, string][] = [
+  ['#f9d6c9', '#b8240f'],
+  ['#ffe0aa', '#b56500'],
+  ['#c8ecea', '#007f8f'],
+  ['#df301c', '#fff1d1'],
+  ['#ff9100', '#2b1b12'],
+  ['#00b7cd', '#2b1b12'],
+];
 
 export function Avatar({ name, size = 44, ring }: { name: string; size?: number; ring?: string }) {
   let h = 0;
   for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  const color = AVATAR_COLORS[h % AVATAR_COLORS.length];
+  const [bg, fg] = AVATAR_COLORS[h % AVATAR_COLORS.length];
   return (
     <div
-      className="flex shrink-0 items-center justify-center rounded-2xl font-black text-ink"
+      className="flex shrink-0 items-center justify-center rounded-full font-semibold"
       style={{
-        width: size, height: size, fontSize: size * 0.45,
-        background: `linear-gradient(135deg, ${color}, ${color}99)`,
-        boxShadow: ring ? `0 0 0 3px ${ring}` : undefined,
+        width: size, height: size, fontSize: size * 0.42, background: bg, color: fg,
+        boxShadow: ring ? `0 0 0 2px var(--color-bg), 0 0 0 4px ${ring}` : undefined,
       }}
     >
       {name.slice(0, 1).toUpperCase()}
@@ -73,10 +80,7 @@ export function Avatar({ name, size = 44, ring }: { name: string; size?: number;
 export function LeagueBadge({ league, small }: { league: League['id']; small?: boolean }) {
   const m = LEAGUE_META[league];
   return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-full border font-bold ${small ? 'px-2 py-0.5 text-[11px]' : 'px-3 py-1 text-sm'}`}
-      style={{ borderColor: m.color + '66', color: m.color, background: m.color + '14' }}
-    >
+    <span className={`inline-flex items-center gap-1 font-semibold ${small ? 'text-[11px]' : 'text-sm'}`} style={{ color: m.color }}>
       <span>{m.emoji}</span>
       {m.name}
     </span>
@@ -87,27 +91,55 @@ export function TimerBar({ endsAt, totalMs, className = '' }: { endsAt: number; 
   const now = useNow();
   const left = Math.max(0, endsAt - now);
   const pct = totalMs > 0 ? Math.min(1, left / totalMs) : 0;
-  const color = pct > 0.5 ? C.good : pct > 0.2 ? C.gold : C.bad;
+  const color = pct > 0.5 ? C.cyan : pct > 0.2 ? C.orange : C.red;
   return (
-    <div className={`h-2.5 w-full overflow-hidden rounded-full bg-white/10 ${className}`}>
-      <div className="h-full rounded-full" style={{ width: `${pct * 100}%`, background: color, boxShadow: `0 0 12px ${color}` }} />
+    <div className={`h-1.5 w-full overflow-hidden rounded-full bg-sunken ${className}`}>
+      <div className="h-full rounded-full" style={{ width: `${pct * 100}%`, background: color }} />
     </div>
+  );
+}
+
+/** Thin progress bar (0..1). */
+export function Progress({ value, color = C.cyan, className = '' }: { value: number; color?: string; className?: string }) {
+  return (
+    <div className={`h-1.5 w-full overflow-hidden rounded-full bg-sunken ${className}`}>
+      <div className="h-full rounded-full transition-[width] duration-300" style={{ width: `${Math.max(0, Math.min(1, value)) * 100}%`, background: color }} />
+    </div>
+  );
+}
+
+/** Back button + title for secondary screens. */
+export function PageHeader({ title, onBack }: { title: string; onBack: () => void }) {
+  return (
+    <header className="flex items-center gap-2">
+      <button onClick={onBack} className="btn btn-ghost -ml-2 h-10 w-10 text-xl" aria-label="Back">←</button>
+      <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
+    </header>
+  );
+}
+
+/** Emoji in a soft circle (topic icons). */
+export function TopicIcon({ emoji, soft, size = 40 }: { emoji: string; soft: string; size?: number }) {
+  return (
+    <span className="inline-flex shrink-0 items-center justify-center rounded-full" style={{ width: size, height: size, background: soft, fontSize: size * 0.5 }}>
+      {emoji}
+    </span>
   );
 }
 
 export function SecondsLeft({ endsAt, className = '' }: { endsAt: number; className?: string }) {
   const now = useNow(100);
   const s = Math.max(0, Math.ceil((endsAt - now) / 1000));
-  return <span className={`tabular-nums ${s <= 5 ? 'text-bad' : ''} ${className}`}>{s}s</span>;
+  return <span className={`tabular-nums ${s <= 5 ? 'text-red' : ''} ${className}`}>{s}s</span>;
 }
 
 export function Screen({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`mx-auto flex min-h-full w-full max-w-md flex-col px-4 pt-4 safe-bottom ${className}`}>{children}</div>;
+  return <div className={`mx-auto flex min-h-full w-full max-w-md flex-col px-5 pt-5 safe-bottom ${className}`}>{children}</div>;
 }
 
 export function AsyncTag() {
   return (
-    <span className="rounded-md border border-white/15 bg-white/5 px-1.5 py-px text-[9px] font-bold uppercase tracking-widest text-muted" title="Asynchronous opponent">
+    <span className="rounded-full border border-line px-1.5 py-px text-[9px] font-semibold uppercase tracking-wider text-muted" title="Asynchronous opponent">
       async
     </span>
   );

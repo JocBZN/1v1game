@@ -97,28 +97,23 @@ export function ChessRound({ item, feedback, onAnswer, waiting }: ModeProps<Puzz
   }, [selected, fen]);
 
   const squareStyles: Record<string, React.CSSProperties> = {};
-  if (lastMove) for (const s of lastMove) squareStyles[s] = { background: 'rgba(250, 204, 21, 0.38)' };
-  if (selected) squareStyles[selected] = { background: 'rgba(34, 211, 238, 0.5)' };
+  if (lastMove) for (const s of lastMove) squareStyles[s] = { background: alpha(C.orange, 45) };
+  if (selected) squareStyles[selected] = { background: alpha(C.cyan, 55) };
   for (const s of legalTargets) {
-    squareStyles[s] = { ...(squareStyles[s] ?? {}), backgroundImage: 'radial-gradient(circle, rgba(15,23,42,0.45) 22%, transparent 24%)' };
+    squareStyles[s] = { ...(squareStyles[s] ?? {}), backgroundImage: 'radial-gradient(circle, rgba(43,27,18,0.3) 20%, transparent 22%)' };
   }
 
   if (waiting) return <WaitingNote />;
   if (!item) return <div className="m-auto text-muted">…</div>;
 
-  const frame =
-    status === 'solved'
-      ? `0 0 0 4px ${C.good}, 0 0 40px ${alpha(C.good, 55)}`
-      : status === 'failed'
-        ? `0 0 0 4px ${C.bad}, 0 0 40px ${alpha(C.bad, 55)}`
-        : `0 0 0 2px ${C.line}`;
+  const frame = status === 'solved' ? `0 0 0 3px ${C.cyan}` : status === 'failed' ? `0 0 0 3px ${C.red}` : `0 0 0 1px ${C.line}`;
 
   return (
     <div className="flex flex-1 flex-col items-center">
-      <div className="mb-2 flex w-full items-center justify-between text-xs font-bold">
-        <span className="uppercase tracking-widest text-muted">Puzzle {item.data.index + 1}</span>
-        <span className="rounded-full bg-good/15 px-3 py-1 text-good">{item.data.theme}</span>
-        <span className="text-good">✓ {solvedCount}</span>
+      <div className="mb-2 flex w-full items-center justify-between text-xs">
+        <span className="label">Puzzle {item.data.index + 1}</span>
+        <span className="chip bg-cyan-soft text-cyan-strong">{item.data.theme}</span>
+        <span className="font-semibold text-cyan-strong">✓ {solvedCount}</span>
       </div>
 
       <div className="relative w-full max-w-[min(100%,420px)]">
@@ -133,7 +128,7 @@ export function ChessRound({ item, feedback, onAnswer, waiting }: ModeProps<Puzz
               darkSquareStyle: { backgroundColor: C.boardDark },
               lightSquareStyle: { backgroundColor: C.boardLight },
               squareStyles,
-              arrows: hint ? [{ startSquare: hint[0], endSquare: hint[1], color: 'rgba(52, 211, 153, 0.9)' }] : [],
+              arrows: hint ? [{ startSquare: hint[0], endSquare: hint[1], color: 'rgba(0, 127, 143, 0.9)' }] : [],
               canDragPiece: ({ piece }) => status === 'thinking' && piece.pieceType[0] === myColor,
               onPieceDrop: ({ sourceSquare, targetSquare }) => (targetSquare ? tryMove(sourceSquare, targetSquare) : false),
               onSquareClick: ({ square, piece }) => {
@@ -148,22 +143,25 @@ export function ChessRound({ item, feedback, onAnswer, waiting }: ModeProps<Puzz
           />
         </div>
         {toast && (
-          <div key={toast.seq} className={`pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 text-center text-3xl font-black drop-shadow-lg float-up ${toast.good ? 'text-good' : 'text-bad'}`}>
-            {toast.text}
+          <div key={toast.seq} className="pointer-events-none absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-center float-up"
+          >
+            <span className={`rounded-full px-4 py-2 text-lg font-semibold ${toast.good ? 'bg-cyan text-text' : 'bg-red text-cream'}`}>
+              {toast.text}
+            </span>
           </div>
         )}
       </div>
 
-      <div className="mt-3 text-center text-sm font-semibold text-muted">
+      <div className="mt-3 text-center text-sm text-muted">
         {status === 'thinking' && (
           <>
-            {myColor === 'w' ? 'White' : 'Black'} to move <span className="inline-block h-3 w-3 rounded-full align-middle" style={{ background: myColor === 'w' ? '#fff' : '#111', boxShadow: '0 0 0 1px #888' }} />
+            {myColor === 'w' ? 'White' : 'Black'} to move <span className="inline-block h-3 w-3 rounded-full align-middle" style={{ background: myColor === 'w' ? '#fff' : '#2b1b12', boxShadow: '0 0 0 1px #d8bb83' }} />
           </>
         )}
         {status === 'pending' && 'Checking…'}
         {status === 'opponent' && 'Correct! Opponent replies…'}
-        {status === 'solved' && <span className="text-good">Correct! Next puzzle coming up.</span>}
-        {status === 'failed' && <span className="text-bad">Puzzle lost. The arrow shows the right move.</span>}
+        {status === 'solved' && <span className="font-medium text-cyan-strong">Correct. Next puzzle coming up.</span>}
+        {status === 'failed' && <span className="font-medium text-red">Puzzle lost. The arrow shows the right move.</span>}
       </div>
     </div>
   );

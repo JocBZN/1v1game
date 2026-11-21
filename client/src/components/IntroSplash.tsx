@@ -30,8 +30,8 @@ const CONFETTI = 2350;
 const EXIT = 3900;
 const EXIT_MS = 550;
 
-const SPARK_COLORS = ['#ffffff', '#fff3c4', '#ffd166', '#ff8a3d', '#ff4d6d'];
-const CONFETTI_COLORS = ['#ffd166', '#ff8a3d', '#ff4d6d', '#2ee6c4', '#b18cff', '#5cc8ff', '#3ddc97'];
+const SPARK_COLORS = ['#ffffff', '#fff1d1', '#fff1d1', '#ff9100', '#ffc46b'];
+const CONFETTI_COLORS = ['#fff1d1', '#ff9100', '#00b7cd', '#2b1b12', '#ffe0aa'];
 
 interface Particle {
   x: number; y: number; vx: number; vy: number;
@@ -145,24 +145,19 @@ function Sword({ className, style }: { className?: string; style?: React.CSSProp
     <svg viewBox="0 0 40 200" className={className} style={style} aria-hidden>
       <defs>
         <linearGradient id="blade" x1="0" x2="1">
-          <stop offset="0" stopColor="#8f97b8" />
-          <stop offset="0.45" stopColor="#ffffff" />
-          <stop offset="0.55" stopColor="#e8ecff" />
-          <stop offset="1" stopColor="#7a80a3" />
-        </linearGradient>
-        <linearGradient id="gold" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stopColor="#ffe08a" />
-          <stop offset="1" stopColor="#ff8a3d" />
+          <stop offset="0" stopColor="#ffe6b0" />
+          <stop offset="0.5" stopColor="#fff8e8" />
+          <stop offset="0.5" stopColor="#f3ddb0" />
+          <stop offset="1" stopColor="#e9cf9c" />
         </linearGradient>
       </defs>
       <polygon points="20,0 28,16 28,138 12,138 12,16" fill="url(#blade)" />
-      <line x1="20" y1="18" x2="20" y2="132" stroke="#9aa2c6" strokeWidth="1.5" />
-      <rect x="1" y="136" width="38" height="9" rx="4" fill="url(#gold)" />
-      <rect x="15.5" y="145" width="9" height="36" rx="3" fill="#5a2e3a" />
+      <rect x="1" y="136" width="38" height="9" rx="4" fill="#ff9100" />
+      <rect x="15.5" y="145" width="9" height="36" rx="3" fill="#2b1b12" />
       {[151, 159, 167, 175].map((y) => (
-        <rect key={y} x="15" y={y} width="10" height="3" rx="1.5" fill="#ff6b8b" opacity="0.7" />
+        <rect key={y} x="15" y={y} width="10" height="3" rx="1.5" fill="#00b7cd" />
       ))}
-      <circle cx="20" cy="188" r="8" fill="url(#gold)" />
+      <circle cx="20" cy="188" r="8" fill="#ff9100" />
     </svg>
   );
 }
@@ -218,24 +213,22 @@ export function IntroSplash({ onDone }: { onDone: () => void }) {
 
   if (reduced) {
     return (
-      <div className={`fixed inset-0 z-[100] flex items-center justify-center bg-ink transition-opacity duration-300 ${exiting ? 'opacity-0' : 'opacity-100'}`}>
-        <div className="text-7xl font-black tracking-tight">
-          <span className="bg-gradient-to-r from-fire-1 via-fire-2 to-fire-3 bg-clip-text text-transparent">DUEL</span>
-        </div>
+      <div className={`fixed inset-0 z-[100] flex items-center justify-center bg-red transition-opacity duration-300 ${exiting ? 'opacity-0' : 'opacity-100'}`}>
+        <div className="text-7xl font-extrabold tracking-tighter text-cream">DUEL</div>
       </div>
     );
   }
 
   return (
-    <div className={`splash fixed inset-0 z-[100] overflow-hidden bg-ink ${exiting ? 'splash-exit' : ''}`} onPointerDown={exit} role="presentation">
+    <div className={`splash fixed inset-0 z-[100] overflow-hidden bg-red ${exiting ? 'splash-exit' : ''}`} onPointerDown={exit} role="presentation">
       <div className="splash-shake absolute inset-0">
         {/* spinning light rays */}
         <div className="splash-rays absolute left-1/2 top-[42%] h-[220vmax] w-[220vmax] -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,transparent_0,rgb(15_11_23/0.2)_30%,var(--color-ink)_75%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,transparent_0,transparent_35%,rgb(184_36_15/0.85)_80%)]" />
 
         {/* shockwaves */}
-        <div className="splash-ring absolute left-1/2 top-[42%] h-40 w-40 rounded-full border-[6px] border-fire-1" />
-        <div className="splash-ring absolute left-1/2 top-[42%] h-40 w-40 rounded-full border-[3px] border-me" style={{ animationDelay: `${CLASH + 120}ms` }} />
+        <div className="splash-ring absolute left-1/2 top-[42%] h-40 w-40 rounded-full border-[6px] border-orange" />
+        <div className="splash-ring absolute left-1/2 top-[42%] h-40 w-40 rounded-full border-[3px] border-cyan" style={{ animationDelay: `${CLASH + 120}ms` }} />
 
         {/* swords */}
         <div className="absolute left-1/2 top-[42%] h-0 w-0">
@@ -245,21 +238,21 @@ export function IntroSplash({ onDone }: { onDone: () => void }) {
 
         {/* title */}
         <div className="absolute inset-x-0 top-[50%] flex flex-col items-center">
-          <div className="flex select-none text-[clamp(84px,26vw,190px)] font-black leading-none tracking-tight">
+          <div className="flex select-none text-[clamp(84px,26vw,190px)] font-extrabold leading-none tracking-tighter">
             {'DUEL'.split('').map((ch, i) => (
               <span key={i} className="splash-letter inline-block" style={{ animationDelay: `${LETTER_START + i * LETTER_GAP}ms, ${LETTER_START + 700}ms` }}>
                 {ch}
               </span>
             ))}
           </div>
-          <div className="splash-sub mt-2 text-center text-sm font-extrabold uppercase tracking-[0.35em] text-muted sm:text-base">
-            <span className="text-me">you</span> <span className="text-fire-2">vs</span> <span className="text-foe">anyone</span>
+          <div className="splash-sub mt-3 text-center text-sm font-semibold uppercase tracking-[0.35em] text-cream sm:text-base">
+            you <span className="text-orange-soft/70">vs</span> anyone
           </div>
           <div className="mt-6 flex gap-3">
             {DOMAIN_LIST.map((d, i) => (
               <div
                 key={d.id}
-                className={`splash-icon flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${d.gradient} text-2xl shadow-lg`}
+                className="splash-icon flex h-12 w-12 items-center justify-center rounded-full bg-cream text-2xl"
                 style={{ animationDelay: `${ICONS + i * 90}ms`, ['--from-x' as string]: `${(i - 1.5) * 60}vw`, ['--from-y' as string]: i % 2 ? '60vh' : '-60vh' }}
               >
                 {d.emoji}
@@ -270,8 +263,8 @@ export function IntroSplash({ onDone }: { onDone: () => void }) {
 
         <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 h-full w-full" />
 
-        <div className="splash-flash pointer-events-none absolute inset-0 bg-white" />
-        <div className="splash-hint absolute inset-x-0 bottom-[max(2rem,env(safe-area-inset-bottom))] text-center text-xs font-bold uppercase tracking-[0.3em] text-muted">
+        <div className="splash-flash pointer-events-none absolute inset-0 bg-cream" />
+        <div className="splash-hint absolute inset-x-0 bottom-[max(2rem,env(safe-area-inset-bottom))] text-center text-xs font-semibold uppercase tracking-[0.3em] text-cream">
           tap to enter
         </div>
       </div>

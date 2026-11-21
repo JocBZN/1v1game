@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { DOMAINS, DOMAIN_LIST, type DomainId } from '../lib/domains';
 import type { Found } from '../state/duel';
-import { AsyncTag, Avatar, LeagueBadge, Screen } from '../components/ui';
+import { AsyncTag, Avatar, LeagueBadge, Screen, TopicIcon } from '../components/ui';
 
-const CELL = 112;
+const CELL = 104;
 const SPINS = 5;
 const SPIN_MS = 2300;
 
@@ -23,7 +23,10 @@ function Reel({ domain }: { domain: DomainId }) {
   }, [target]);
 
   return (
-    <div className="relative w-full overflow-hidden rounded-3xl border-2 border-line bg-ink-2" style={{ height: CELL }}>
+    <div
+      className="relative w-full overflow-hidden rounded-3xl border bg-surface transition-colors duration-300"
+      style={{ height: CELL, borderColor: landed ? DOMAINS[domain].color : 'var(--color-line)' }}
+    >
       <div
         style={{
           transform: `translateY(${-offset}px)`,
@@ -32,16 +35,13 @@ function Reel({ domain }: { domain: DomainId }) {
       >
         {strip.map((d, i) => (
           <div key={i} className="flex items-center justify-center gap-4 px-6" style={{ height: CELL }}>
-            <div className={`flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${d.gradient} text-4xl`}>{d.emoji}</div>
-            <div className="text-2xl font-black">{d.name}</div>
+            <TopicIcon emoji={d.emoji} soft={d.soft} size={56} />
+            <div className="text-2xl font-semibold tracking-tight">{d.name}</div>
           </div>
         ))}
       </div>
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-ink-2 to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-ink-2 to-transparent" />
-      {landed && (
-        <div className="pointer-events-none absolute inset-0 rounded-3xl animate-pop" style={{ boxShadow: `inset 0 0 0 3px ${DOMAINS[domain].color}, 0 0 40px ${DOMAINS[domain].color}` }} />
-      )}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-5 bg-gradient-to-b from-surface to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-5 bg-gradient-to-t from-surface to-transparent" />
     </div>
   );
 }
@@ -50,23 +50,21 @@ export function VsHeader({ found, roundWins }: { found: Found; roundWins: [numbe
   return (
     <div className="flex items-center justify-between gap-2">
       <div className="flex min-w-0 flex-1 flex-col items-center gap-2">
-        <Avatar name={found.you.name} size={64} ring="var(--color-me)" />
-        <div className="max-w-full truncate font-extrabold">{found.you.name}</div>
+        <Avatar name={found.you.name} size={56} ring="var(--color-cyan)" />
+        <div className="max-w-full truncate font-semibold">{found.you.name}</div>
         <LeagueBadge league={found.you.league} small />
       </div>
       <div className="flex flex-col items-center">
-        <div className="text-xs font-bold uppercase tracking-widest text-muted">vs</div>
-        <div className="text-3xl font-black tabular-nums">
+        <div className="label">vs</div>
+        <div className="text-3xl font-bold tabular-nums">
           <span className="text-me">{roundWins[0]}</span>
-          <span className="mx-1 text-muted">:</span>
+          <span className="mx-1 text-line-strong">:</span>
           <span className="text-foe">{roundWins[1]}</span>
         </div>
       </div>
       <div className="flex min-w-0 flex-1 flex-col items-center gap-2">
-        <Avatar name={found.opponent.name} size={64} ring="var(--color-foe)" />
-        <div className="flex max-w-full items-center gap-1">
-          <span className="truncate font-extrabold">{found.opponent.name}</span>
-        </div>
+        <Avatar name={found.opponent.name} size={56} ring="var(--color-red)" />
+        <div className="max-w-full truncate font-semibold">{found.opponent.name}</div>
         <LeagueBadge league={found.opponent.league} small />
       </div>
     </div>
@@ -76,7 +74,7 @@ export function VsHeader({ found, roundWins }: { found: Found; roundWins: [numbe
 export function FoundScreen({ found }: { found: Found }) {
   return (
     <Screen className="justify-center">
-      <div className="text-center text-sm font-bold uppercase tracking-[0.3em] text-good animate-pop">Opponent found!</div>
+      <div className="label text-center text-cyan-strong animate-pop">Opponent found</div>
       <div className="mt-6 animate-rise">
         <VsHeader found={found} roundWins={[0, 0]} />
       </div>
@@ -100,19 +98,17 @@ export function IntroScreen({ found, index, domain, roundWins }: { found: Found;
   return (
     <Screen className="justify-center">
       <VsHeader found={found} roundWins={roundWins} />
-      <div className="mt-10 text-center">
-        <div className="text-sm font-bold uppercase tracking-[0.3em] text-muted">Round {index + 1} of 3</div>
-      </div>
-      <div className="mt-4">
+      <div className="label mt-10 text-center">Round {index + 1} of 3</div>
+      <div className="mt-3">
         <Reel key={index} domain={domain} />
       </div>
-      <div className="mt-6 h-16 text-center">
+      <div className="mt-5 h-14 text-center">
         {reveal && (
           <div className="animate-pop">
-            <div className="text-2xl font-black" style={{ color: meta.color }}>
-              Round {index + 1}: {meta.name}
+            <div className="text-lg font-semibold" style={{ color: meta.color }}>
+              {meta.name}
             </div>
-            <div className="mt-1 text-sm text-muted">{meta.tagline}</div>
+            <div className="mt-0.5 text-sm text-muted">{meta.tagline}</div>
           </div>
         )}
       </div>

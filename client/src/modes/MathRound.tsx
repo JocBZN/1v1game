@@ -47,19 +47,19 @@ export function MathRound({ item, feedback, onAnswer, waiting }: ModeProps<MathI
   return (
     <div className="flex flex-1 flex-col">
       <div className="relative flex flex-1 flex-col items-center justify-center">
-        {streak >= 3 && <div className="mb-2 text-sm font-bold text-gold animate-pop">🔥 {streak} in a row</div>}
-        <div key={item?.item} className="text-5xl font-black tabular-nums tracking-tight animate-rise sm:text-6xl">
+        {streak >= 3 && <div className="chip mb-3 bg-orange-soft text-orange-strong animate-pop">{streak} in a row</div>}
+        <div key={item?.item} className="text-5xl font-bold tabular-nums tracking-tight animate-rise sm:text-6xl">
           {item?.data.prompt ?? '…'}
         </div>
         <div
-          className={`mt-6 flex h-16 min-w-48 items-center justify-center rounded-2xl border-2 px-6 text-4xl font-black tabular-nums transition-colors ${
-            flash && !flash.ok ? 'border-bad' : 'border-line'
-          } bg-ink-2`}
+          className={`mt-6 flex h-16 min-w-48 items-center justify-center rounded-2xl border bg-surface px-6 text-4xl font-semibold tabular-nums transition-colors ${
+            flash && !flash.ok ? 'border-red' : 'border-line'
+          }`}
         >
           {value || <span className="text-muted/40">?</span>}
         </div>
         {flash && (
-          <div key={flash.seq} className={`float-up absolute bottom-2 text-2xl font-black ${flash.ok ? 'text-good' : 'text-bad'}`}>
+          <div key={flash.seq} className={`float-up absolute bottom-2 text-xl font-semibold ${flash.ok ? 'text-cyan-strong' : 'text-red'}`}>
             {flash.text}
           </div>
         )}
@@ -86,7 +86,7 @@ export function MathRound({ item, feedback, onAnswer, waiting }: ModeProps<MathI
               e.preventDefault();
               press(k);
             }}
-            className="btn-game h-14 bg-panel-2 text-2xl text-white"
+            className={`btn btn-secondary h-14 text-2xl font-medium ${k === '−' || k === '⌫' ? 'text-muted' : ''}`}
           >
             {k}
           </button>
@@ -96,9 +96,9 @@ export function MathRound({ item, feedback, onAnswer, waiting }: ModeProps<MathI
             e.preventDefault();
             submit();
           }}
-          className="btn-game col-span-3 h-14 bg-gradient-to-r from-fire-1 to-fire-2 text-xl text-ink"
+          className="btn btn-primary col-span-3 h-14 text-lg"
         >
-          SUBMIT
+          Submit
         </button>
       </div>
     </div>
@@ -108,8 +108,8 @@ export function MathRound({ item, feedback, onAnswer, waiting }: ModeProps<MathI
 export function WaitingNote() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center text-center animate-fade">
-      <div className="text-5xl animate-float">⏳</div>
-      <div className="mt-4 text-xl font-black">Round finished!</div>
+      <div className="h-10 w-10 animate-spin rounded-full border-2 border-line border-t-cyan" />
+      <div className="mt-5 text-lg font-semibold">Round finished</div>
       <div className="mt-1 text-sm text-muted">Waiting for your opponent…</div>
     </div>
   );

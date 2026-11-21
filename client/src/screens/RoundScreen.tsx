@@ -15,12 +15,12 @@ function LiveScore({ name, score, side, async: isAsync, sub }: { name: string; s
   const color = side === 'me' ? 'text-me' : 'text-foe';
   return (
     <div className={`flex min-w-0 flex-1 items-center gap-2 ${side === 'foe' ? 'flex-row-reverse text-right' : ''}`}>
-      <Avatar name={name} size={36} ring={side === 'me' ? 'var(--color-me)' : 'var(--color-foe)'} />
+      <Avatar name={name} size={32} ring={side === 'me' ? 'var(--color-cyan)' : 'var(--color-red)'} />
       <div className="min-w-0">
-        <div className="truncate text-xs font-bold text-muted">{name}</div>
-        <div key={bump} className={`text-2xl font-black tabular-nums leading-tight ${color} ${bump ? 'animate-score' : ''}`}>{shown}</div>
+        <div className="truncate text-xs font-medium text-muted">{name}</div>
+        <div key={bump} className={`text-2xl font-bold tabular-nums leading-tight tracking-tight ${color} ${bump ? 'animate-score' : ''}`}>{shown}</div>
         {(sub || isAsync) && (
-          <div className={`flex items-center gap-1 text-[10px] font-semibold text-muted ${side === 'foe' ? 'justify-end' : ''}`}>
+          <div className={`flex items-center gap-1 text-[10px] font-medium text-muted ${side === 'foe' ? 'justify-end' : ''}`}>
             {isAsync && <AsyncTag />}
             {sub}
           </div>
@@ -47,28 +47,28 @@ export function RoundScreen() {
   return (
     <div className="mx-auto flex h-full w-full max-w-md flex-col px-4 pt-3 safe-bottom">
       {/* Live scoreboard */}
-      <div className="rounded-2xl border border-line bg-panel/80 p-3 shadow-xl">
+      <div className="card rounded-2xl p-3">
         <div className="flex items-center gap-2">
           <LiveScore name={found.you.name} score={scores.you} side="me" />
           <div className="flex flex-col items-center px-1">
-            <div className="text-[10px] font-bold uppercase tracking-widest text-muted">R{round.index + 1}</div>
-            <div className="text-sm font-black tabular-nums">
+            <div className="label text-[10px]">R{round.index + 1}</div>
+            <div className="text-sm font-semibold tabular-nums">
               <span className="text-me">{state.roundWins[0]}</span>
-              <span className="text-muted">:</span>
+              <span className="text-line-strong">:</span>
               <span className="text-foe">{state.roundWins[1]}</span>
             </div>
           </div>
           <LiveScore name={found.opponent.name} score={scores.opponent} side="foe" async={found.opponent.async} sub={oppSub} />
         </div>
         <div className="mt-3 flex items-center gap-2">
-          <span className="text-base">{meta.emoji}</span>
+          <span className="text-sm">{meta.emoji}</span>
           <TimerBar endsAt={round.endsAt} totalMs={round.timeLimit} />
-          <SecondsLeft endsAt={round.endsAt} className="w-9 text-right text-xs font-bold" />
+          <SecondsLeft endsAt={round.endsAt} className="w-9 text-right text-xs font-semibold" />
         </div>
       </div>
 
       {!state.opponentConnected && (
-        <div className="mt-2 rounded-xl bg-gold/15 px-3 py-2 text-center text-xs font-semibold text-gold">
+        <div className="mt-2 rounded-xl bg-orange-soft px-3 py-2 text-center text-xs font-medium text-orange-strong">
           Your opponent disconnected… if they’re not back in 15s, you win.
         </div>
       )}
@@ -87,11 +87,11 @@ export function RoundScreen() {
         {confirmQuit ? (
           <div className="flex items-center gap-3 text-xs">
             <span className="text-muted">Forfeit the duel?</span>
-            <button className="font-bold text-bad" onClick={forfeit}>Yes</button>
-            <button className="font-bold text-muted" onClick={() => setConfirmQuit(false)}>No</button>
+            <button className="font-semibold text-red" onClick={forfeit}>Yes</button>
+            <button className="font-semibold text-muted" onClick={() => setConfirmQuit(false)}>No</button>
           </div>
         ) : (
-          <button className="text-xs text-muted/60 hover:text-muted" onClick={() => setConfirmQuit(true)}>Forfeit</button>
+          <button className="text-xs text-muted/70 hover:text-text" onClick={() => setConfirmQuit(true)}>Forfeit</button>
         )}
       </div>
     </div>

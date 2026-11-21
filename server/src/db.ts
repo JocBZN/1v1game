@@ -4,7 +4,7 @@ import path from 'node:path';
 import { SERVER_ROOT } from './paths';
 import { RATING_TRACKS, type DomainId, type RatingTrack } from './domains';
 
-import { DEFAULT_RATING, DEFAULT_RD, DEFAULT_VOL } from './constants';
+import { CONTENT_VERSION, DEFAULT_RATING, DEFAULT_RD, DEFAULT_VOL } from './constants';
 export { DEFAULT_RATING, DEFAULT_RD, DEFAULT_VOL };
 
 const dbPath = process.env.DB_PATH ?? path.join(SERVER_ROOT, 'db', 'duel.sqlite');
@@ -79,6 +79,11 @@ CREATE TABLE IF NOT EXISTS round_recordings (
 CREATE INDEX IF NOT EXISTS idx_rec_domain ON round_recordings(domain, general_rating);
 CREATE INDEX IF NOT EXISTS idx_rec_user ON round_recordings(user_id, domain);
 `);
+
+// Migration: content version of each recording (rows from before this column count as version 1).
+if (!(db.prepare('PRAGMA table_info(round_recordings)').all() as { name: string }[]).some((c) => c.name === 'content_version')) {
+  db.exec('ALTER TABLE round_recordings ADD COLUMN content_version INTEGER NOT NULL DEFAULT 1');
+}
 
 // ---------- users ----------
 
@@ -281,19 +286,19 @@ export interface RecordingRow {
 }
 
 const stmtInsertRecording = db.prepare(`
-  INSERT INTO round_recordings (user_id, domain, content_key, content, events, score, duration_ms, rating, rd, general_rating, general_rd, created_at)
-  VALUES (@user_id, @domain, @content_key, @content, @events, @score, @duration_ms, @rating, @rd, @general_rating, @general_rd, @created_at)
+  INSERT INTO round_recordings (user_id, domain, content_key, content, events, score, duration_ms, rating, rd, general_rating, general_rd, created_at, content_version)
+  VALUES (@user_id, @domain, @content_key, @content, @events, @score, @duration_ms, @rating, @rd, @general_rating, @general_rd, @created_at, ${CONTENT_VERSION})
 `);
 
 export function saveRecording(r: Omit<RecordingRow, 'id'>) {
   stmtInsertRecording.run(r);
 }
 
-/** Ghost candidates: other users with recordings, ordered by distance of their snapshot rating to `rating`. */
+/** Ghost candidates: other users with current-version recordings (the caller sorts them by rating). */
 const stmtGhostCandidates = db.prepare(`
   SELECT rr.user_id, u.nickname, MAX(rr.id) AS last_id
   FROM round_recordings rr JOIN users u ON u.id = rr.user_id
-  WHERE rr.user_id <> ?
+  WHERE rr.user_id <> ? AND rr.content_version = ${CONTENT_VERSION}
   GROUP BY rr.user_id
 `);
 
@@ -307,7 +312,7 @@ export const getRecordingById = (id: number) => stmtRecordingById.get(id) as Rec
 /** Recordings of `ghostUserId` in `domain` whose content `viewerId` has not already played. */
 const stmtGhostRecordings = db.prepare(`
   SELECT * FROM round_recordings
-  WHERE user_id = ? AND domain = ?
+  WHERE user_id = ? AND domain = ? AND content_version = ${CONTENT_VERSION}
     AND content_key NOT IN (SELECT content_key FROM round_recordings WHERE user_id = ?)
   ORDER BY id DESC
   LIMIT 20

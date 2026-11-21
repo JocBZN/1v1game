@@ -18,18 +18,18 @@ export function TriviaRound({ item, feedback, onAnswer, waiting }: ModeProps<Tri
       item={item}
       feedback={feedback}
       onAnswer={onAnswer}
-      accent="#b18cff"
       header={
         item && (
           <div className="text-center">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#b18cff]/15 px-3 py-1 text-xs font-bold text-[#cdb4ff]">
+            <div className="chip mb-4 bg-orange-soft text-orange-strong">
               {item.data.category}
-              <span className="tracking-tighter" title={`Difficulty ${item.data.difficulty}/3`}>
-                <span className="text-gold">{'★'.repeat(item.data.difficulty)}</span>
-                <span className="text-[#cdb4ff]/30">{'★'.repeat(3 - item.data.difficulty)}</span>
+              <span className="flex gap-0.5" title={`Difficulty ${item.data.difficulty}/3`}>
+                {[1, 2, 3].map((n) => (
+                  <span key={n} className={`h-1.5 w-1.5 rounded-full ${n <= item.data.difficulty ? 'bg-orange-strong' : 'bg-orange-strong/25'}`} />
+                ))}
               </span>
             </div>
-            <h2 className="text-2xl font-extrabold leading-snug">{item.data.q}</h2>
+            <h2 className="text-2xl font-semibold leading-snug tracking-tight">{item.data.q}</h2>
           </div>
         )
       }

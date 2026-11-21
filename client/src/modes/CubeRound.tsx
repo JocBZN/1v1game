@@ -3,6 +3,7 @@ import * as THREE from 'three';
 // Same pure model the server uses to validate moves, so the local view can never drift from the server.
 import { applyMove, isSolved, progress as localProgress, type Axis, type CubeMove, type Sticker, type Vec3 } from '../../../server/src/cube/model';
 import type { ModeProps } from './types';
+import { Progress } from '../components/ui';
 
 interface CubeItemData {
   stickers: Sticker[];
@@ -50,7 +51,7 @@ class CubeView {
   animating = false;
   raycaster = new THREE.Raycaster();
   private bodyGeo = new THREE.BoxGeometry(0.96, 0.96, 0.96);
-  private bodyMat = new THREE.MeshStandardMaterial({ color: 0x15121d, roughness: 0.55, metalness: 0.1 });
+  private bodyMat = new THREE.MeshStandardMaterial({ color: 0x2b1b12, roughness: 0.55, metalness: 0.1 });
   private stickerGeo = roundedRect(0.84, 0.12);
   private stickerMats = STICKER_COLORS.map((c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.3, metalness: 0.05 }));
   private ro: ResizeObserver;
@@ -64,7 +65,7 @@ class CubeView {
     host.appendChild(this.renderer.domElement);
 
     this.camera.position.set(0, 0, 11);
-    this.scene.add(new THREE.HemisphereLight(0xffffff, 0x3b3054, 2.2));
+    this.scene.add(new THREE.HemisphereLight(0xffffff, 0xc9b089, 2.2));
     const key = new THREE.DirectionalLight(0xffffff, 1.6);
     key.position.set(4, 6, 8);
     this.scene.add(key);
@@ -301,21 +302,19 @@ export function CubeRound({ item, feedback, onAnswer }: ModeProps<CubeItemData>)
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="mb-2 flex items-center gap-3 text-xs font-bold">
-        <span className="uppercase tracking-widest text-muted">Solved</span>
-        <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/10">
-          <div className="h-full rounded-full bg-gradient-to-r from-[#ff8fa3] to-[#ff4d6d] transition-[width] duration-300" style={{ width: `${solved ? 100 : pct}%` }} />
-        </div>
-        <span className="w-10 text-right tabular-nums">{solved ? 100 : pct}%</span>
+      <div className="mb-2 flex items-center gap-3 text-xs font-medium">
+        <span className="label">Solved</span>
+        <Progress value={(solved ? 100 : pct) / 100} className="flex-1" />
+        <span className="w-10 text-right font-semibold tabular-nums">{solved ? 100 : pct}%</span>
         <span className="tabular-nums text-muted">{moves} moves</span>
       </div>
 
-      <div className="relative min-h-[280px] flex-1 overflow-hidden rounded-2xl border border-line bg-[radial-gradient(circle_at_50%_40%,#2a2140,transparent_70%)]">
+      <div className="card relative min-h-[280px] flex-1 overflow-hidden rounded-2xl">
         <div ref={hostRef} className="absolute inset-0" />
         {solved && (
           <div className="pointer-events-none absolute inset-x-0 top-6 text-center animate-pop">
-            <div className="text-4xl font-black text-good drop-shadow-lg">SOLVED! 🎉</div>
-            <div className="mt-1 text-sm font-semibold text-muted">in {moves} moves · waiting for your opponent…</div>
+            <div className="text-3xl font-bold tracking-tight text-cyan-strong">Solved</div>
+            <div className="mt-1 text-sm text-muted">in {moves} moves · waiting for your opponent…</div>
           </div>
         )}
       </div>

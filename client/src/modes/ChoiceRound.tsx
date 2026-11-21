@@ -9,14 +9,13 @@ const LETTERS = ['A', 'B', 'C', 'D'];
  * arrives from the server after answering.
  */
 export function ChoiceRound({
-  item, feedback, onAnswer, header, layout = 'list', accent,
+  item, feedback, onAnswer, header, layout = 'list',
 }: {
   item: CurrentItem<{ options: string[]; index: number; total: number }> | null;
   feedback: Feedback | null;
   onAnswer: (answer: unknown) => void;
   header: ReactNode;
   layout?: 'list' | 'grid';
-  accent: string;
 }) {
   const [chosen, setChosen] = useState<number | null>(null);
   useEffect(() => setChosen(null), [item?.item, item?.round]);
@@ -28,38 +27,44 @@ export function ChoiceRound({
 
   return (
     <div key={`${item.round}-${item.item}`} className="flex flex-1 flex-col animate-rise">
-      <div className="mb-2 flex items-center justify-between text-xs font-bold uppercase tracking-widest text-muted">
-        <span>
+      <div className="mb-2 flex items-center justify-between text-xs">
+        <span className="label">
           {item.data.index + 1} / {item.data.total}
         </span>
-        {item.endsAt && !fb && <SecondsLeft endsAt={item.endsAt} className="text-base normal-case text-white" />}
+        {item.endsAt && !fb && <SecondsLeft endsAt={item.endsAt} className="text-sm font-semibold" />}
         {fb && (
-          <span className={`text-base ${fb.correct ? 'text-good' : 'text-bad'} animate-pop`}>
-            {fb.timeout ? 'Time’s up!' : fb.correct ? `+${fb.points}` : 'Wrong'}
+          <span className={`text-sm font-semibold ${fb.correct ? 'text-cyan-strong' : 'text-red'} animate-pop`}>
+            {fb.timeout ? 'Time’s up' : fb.correct ? `+${fb.points}` : 'Wrong'}
           </span>
         )}
       </div>
-      {item.endsAt && item.limitMs ? (
-        fb ? <div className="h-2.5" /> : <TimerBar endsAt={item.endsAt} totalMs={item.limitMs} />
-      ) : null}
+      {item.endsAt && item.limitMs ? (fb ? <div className="h-1.5" /> : <TimerBar endsAt={item.endsAt} totalMs={item.limitMs} />) : null}
 
       <div className="flex flex-1 flex-col justify-center py-4">{header}</div>
 
-      <div className={layout === 'grid' ? 'grid grid-cols-2 gap-3 pb-2' : 'grid gap-2.5 pb-2'}>
+      <div className={layout === 'grid' ? 'grid grid-cols-2 gap-2.5 pb-2' : 'grid gap-2 pb-2'}>
         {item.data.options.map((opt, i) => {
           const isCorrect = correctIndex === i;
           const isChosen = chosen === i || (fb?.chosen as number | null) === i;
-          let cls = 'bg-panel-2 border-line text-white';
+          let cls = 'border-line bg-surface hover:border-line-strong hover:bg-sunken';
+          let badge = 'bg-sunken text-muted';
           let anim = '';
           if (fb) {
             if (isCorrect) {
-              cls = 'bg-good/20 border-good text-white';
+              cls = 'border-cyan bg-cyan-soft';
+              badge = 'bg-cyan text-text';
               anim = isChosen ? 'animate-pop' : '';
             } else if (isChosen) {
-              cls = 'bg-bad/20 border-bad text-white';
+              cls = 'border-red bg-red-soft';
+              badge = 'bg-red text-cream';
               anim = 'animate-shake';
-            } else cls = 'bg-panel-2/50 border-line text-white/40';
-          } else if (isChosen) cls = 'border-white/60 bg-panel-2 text-white';
+            } else {
+              cls = 'border-line bg-surface opacity-45';
+            }
+          } else if (isChosen) {
+            cls = 'border-text bg-surface';
+            badge = 'bg-text text-cream';
+          }
           return (
             <button
               key={i}
@@ -69,18 +74,16 @@ export function ChoiceRound({
                 setChosen(i);
                 onAnswer(i);
               }}
-              className={`btn-game flex min-h-14 items-center gap-3 border-2 px-3 py-3 text-left text-base leading-tight ${cls} ${anim} ${layout === 'grid' ? 'justify-center text-center' : ''}`}
-              style={!fb && !isChosen ? { borderColor: undefined } : undefined}
+              className={`flex min-h-14 items-center gap-3 rounded-2xl border px-3 py-3 text-left text-[15px] leading-tight transition-colors disabled:cursor-default ${cls} ${anim} ${
+                layout === 'grid' ? 'justify-center text-center' : ''
+              }`}
             >
               {layout === 'list' && (
-                <span
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-sm font-black text-ink"
-                  style={{ background: fb ? (isCorrect ? 'var(--color-good)' : isChosen ? 'var(--color-bad)' : 'var(--color-line)') : accent }}
-                >
-                  {fb && isCorrect ? '✓' : fb && isChosen ? '✗' : LETTERS[i]}
+                <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${badge}`}>
+                  {fb && isCorrect ? '✓' : fb && isChosen ? '✕' : LETTERS[i]}
                 </span>
               )}
-              <span className="font-bold">{opt}</span>
+              <span className="font-medium">{opt}</span>
             </button>
           );
         })}

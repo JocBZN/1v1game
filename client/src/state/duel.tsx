@@ -249,6 +249,12 @@ export function DuelProvider({ children }: { children: ReactNode }) {
       on<DuelResult>('duel:end', (data) => dispatch({ type: 'duel:end', data })),
       on<{ connected: boolean }>('duel:opponent-status', (d) => dispatch({ type: 'opponent', connected: d.connected })),
       on<any>('duel:resume', (data) => dispatch({ type: 'resume', data })),
+      // The server has no duel for us: drop a stale duel screen, or re-join the queue if we were searching.
+      on('duel:none', () => {
+        const phase = stateRef.current.phase;
+        if (phase === 'searching') s.emit('queue:join');
+        else if (phase === 'found' || phase === 'intro' || phase === 'playing' || phase === 'roundEnd') dispatch({ type: 'reset' });
+      }),
     ];
     if (s.connected) dispatch({ type: 'connected', value: true });
     return () => offs.forEach((off) => off());

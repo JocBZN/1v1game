@@ -2,33 +2,35 @@ import { useEffect, useRef, useState } from 'react';
 import { api, type LeaderboardEntry, type LeaderboardResponse, type Me, type RatingTrack } from '../lib/api';
 import { DOMAINS, DOMAIN_LIST } from '../lib/domains';
 import { LEAGUE_META } from '../lib/leagues';
-import { Avatar, Screen } from '../components/ui';
+import { Avatar, PageHeader, Screen } from '../components/ui';
 
-const TABS: { id: RatingTrack; label: string; emoji: string }[] = [
-  { id: 'general', label: 'General', emoji: '🏆' },
-  ...DOMAIN_LIST.map((d) => ({ id: d.id as RatingTrack, label: d.short, emoji: d.emoji })),
+const TABS: { id: RatingTrack; label: string }[] = [
+  { id: 'general', label: 'Overall' },
+  ...DOMAIN_LIST.map((d) => ({ id: d.id as RatingTrack, label: d.short })),
 ];
 
-const MEDALS = ['🥇', '🥈', '🥉'];
+const PODIUM = ['#b56500', '#7a7268', '#9c5a2e'];
 
 function Row({ e, mine, delay }: { e: LeaderboardEntry; mine: boolean; delay: number }) {
   const league = LEAGUE_META[e.league];
   return (
     <div
-      className={`flex items-center gap-3 rounded-2xl border px-3 py-2.5 animate-rise ${mine ? 'border-me bg-me/10 shadow-[0_0_24px_-8px_var(--color-me)]' : 'border-line bg-panel/60'}`}
+      className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 animate-rise ${mine ? 'border border-cyan bg-cyan-soft/60' : ''}`}
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className="w-8 text-center text-lg font-black tabular-nums text-muted">{e.rank <= 3 ? MEDALS[e.rank - 1] : e.rank}</div>
-      <Avatar name={e.nickname} size={34} />
+      <div className="w-7 text-center text-sm font-semibold tabular-nums" style={{ color: e.rank <= 3 ? PODIUM[e.rank - 1] : 'var(--color-muted)' }}>
+        {e.rank}
+      </div>
+      <Avatar name={e.nickname} size={32} />
       <div className="min-w-0 flex-1">
-        <div className="truncate font-bold">
-          {e.nickname} {mine && <span className="text-xs font-bold text-me">(tu)</span>}
+        <div className="truncate font-medium">
+          {e.nickname} {mine && <span className="text-xs font-semibold text-cyan-strong">you</span>}
         </div>
         <div className="text-[11px] text-muted">
           {league.emoji} {league.name} · {e.wins}W {e.losses}L{e.draws ? ` ${e.draws}D` : ''}
         </div>
       </div>
-      <div className="text-xl font-black tabular-nums" style={{ color: league.color }}>{e.rating}</div>
+      <div className="text-lg font-semibold tabular-nums">{e.rating}</div>
     </div>
   );
 }
@@ -53,55 +55,49 @@ export function LeaderboardScreen({ me, onBack }: { me: Me; onBack: () => void }
 
   return (
     <Screen>
-      <header className="flex items-center gap-3">
-        <button onClick={onBack} className="rounded-xl bg-panel-2 px-3 py-2 text-sm font-bold">←</button>
-        <h1 className="text-2xl font-black">Leaderboard</h1>
-      </header>
+      <PageHeader title="Leaderboard" onBack={onBack} />
 
-      <div className="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
+      <div className="-mx-5 mt-4 flex gap-1.5 overflow-x-auto px-5 pb-1 [scrollbar-width:none]">
         {TABS.map((t) => (
           <button
             key={t.id}
             onClick={() => setTrack(t.id)}
-            className={`shrink-0 rounded-full border px-4 py-2 text-sm font-bold transition ${
-              track === t.id ? 'border-transparent bg-white text-ink' : 'border-line bg-panel/60 text-muted'
+            className={`chip shrink-0 px-3.5 py-1.5 text-sm transition-colors ${
+              track === t.id ? 'bg-text text-cream' : 'border border-line text-muted hover:text-text'
             }`}
           >
-            {t.emoji} {t.label}
+            {t.label}
           </button>
         ))}
       </div>
-      {track !== 'general' && <p className="mt-2 text-xs text-muted">{DOMAINS[track].name} rating — changes after every round played in this topic.</p>}
+      {track !== 'general' && <p className="mt-2 text-xs text-muted">{DOMAINS[track].name} rating — changes after every round in this topic.</p>}
 
-      <div className="mt-3 flex-1 space-y-2 pb-24">
-        {error && <p className="py-10 text-center text-bad">Couldn’t load the leaderboard.</p>}
+      <div className="card mt-3 mb-24 p-1.5">
+        {error && <p className="py-10 text-center text-red">Couldn’t load the leaderboard.</p>}
         {!data && !error && <p className="py-10 text-center text-muted">Loading…</p>}
-        {data && data.rows.length === 0 && (
-          <div className="py-12 text-center">
-            <div className="text-5xl">🏁</div>
-            <p className="mt-3 text-muted">Nobody has played here yet. Be the first!</p>
-          </div>
-        )}
+        {data && data.rows.length === 0 && <p className="py-12 text-center text-muted">Nobody has played here yet. Be the first.</p>}
         {data?.rows.map((e, i) => (
           <div key={e.userId} ref={e.userId === me.user.id ? myRowRef : undefined}>
-            <Row e={e} mine={e.userId === me.user.id} delay={Math.min(i, 15) * 25} />
+            <Row e={e} mine={e.userId === me.user.id} delay={Math.min(i, 15) * 20} />
           </div>
         ))}
       </div>
 
       {data && (
-        <div className="fixed inset-x-0 bottom-0 bg-gradient-to-t from-ink via-ink/95 to-transparent px-4 pt-6 safe-bottom">
+        <div className="fixed inset-x-0 bottom-0 bg-gradient-to-t from-bg via-bg/95 to-transparent px-5 pt-6 safe-bottom">
           <div className="mx-auto max-w-md">
             {data.me ? (
               inTop ? (
-                <button onClick={() => myRowRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })} className="w-full rounded-2xl border border-me/50 bg-panel py-3 text-sm font-bold text-me">
+                <button onClick={() => myRowRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })} className="btn btn-secondary w-full py-3 text-sm">
                   You’re #{data.me.rank} · show me
                 </button>
               ) : (
-                <Row e={data.me} mine delay={0} />
+                <div className="card p-1">
+                  <Row e={data.me} mine delay={0} />
+                </div>
               )
             ) : (
-              <div className="rounded-2xl border border-line bg-panel py-3 text-center text-sm text-muted">Play a duel to appear on the leaderboard.</div>
+              <div className="card py-3 text-center text-sm text-muted">Play a duel to appear on the leaderboard.</div>
             )}
           </div>
         </div>

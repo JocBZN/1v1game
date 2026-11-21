@@ -29,7 +29,8 @@ export function attachSockets(server: http.Server) {
     set.add(socket);
     socket.join(`user:${user.id}`);
 
-    game.onConnect(user);
+    // No duel on the server → tell this tab, so it drops any stale duel screen (e.g. after a restart).
+    if (!game.onConnect(user)) socket.emit('duel:none');
 
     socket.on('queue:join', () => {
       for (const other of sockets.get(user.id) ?? []) {

@@ -35,9 +35,11 @@ export class GameServer {
     this.io.to(`user:${userId}`).emit(event, data);
   }
 
-  onConnect(user: User) {
+  /** Returns false when the user has no duel in progress (the client may hold a stale one, e.g. after a server restart). */
+  onConnect(user: User): boolean {
     const duel = this.duels.get(user.id);
     if (duel) duel.reconnected(user.id);
+    return !!duel;
   }
 
   onDisconnect(user: User) {
@@ -64,7 +66,9 @@ export class GameServer {
   }
 
   forfeit(user: User) {
-    this.duels.get(user.id)?.forfeit(user.id);
+    const duel = this.duels.get(user.id);
+    if (duel) duel.forfeit(user.id);
+    else this.emit(user.id, 'duel:none');
   }
 
   private humanSlot(userId: number): SlotInit {
