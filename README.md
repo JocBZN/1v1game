@@ -43,8 +43,10 @@ The first-visit intro animation can be replayed with `?intro` (or `?intro=hold` 
 
 ## Deploying (Railway)
 
-One container serves everything: the API, Socket.io and the built client. `Dockerfile` and
-`railway.json` are ready; Railway builds the image and checks `/health`.
+One container serves everything: the API, Socket.io and the built client. The `Dockerfile` builds it;
+the Railway setup (Dockerfile build, `/health` check, one replica, the `/data` volume) is declared in
+`.railway/railway.ts`. Preview changes with `railway config plan`, apply them with `railway config apply`.
+Variables are deliberately *not* managed there, so values set in the dashboard are never overwritten.
 
 1. Create a project on Railway and deploy this folder (`railway up` from the CLI, or connect a GitHub repo).
 2. Add a **volume** mounted at `/data` (the SQLite database lives at `/data/duel.sqlite`). Without it,

@@ -15,7 +15,8 @@
     "validate:puzzles": "npm run validate:puzzles -w server"
   },
   "devDependencies": {
-    "concurrently": "^10.0.7"
+    "concurrently": "^10.0.7",
+    "railway": "^3.17.0"
   },
   "allowScripts": {
     "esbuild@0.28.2": true,
