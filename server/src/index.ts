@@ -7,6 +7,7 @@ import { mountAdmin } from './admin';
 import { createApi } from './api';
 import { db } from './db';
 import { SERVER_ROOT } from './paths';
+import { contentSecurityPolicy, mountSecurity } from './security';
 import { makeIndexRenderer, mountSeo } from './seo';
 import { attachSockets } from './socket';
 
@@ -18,7 +19,9 @@ const app = express();
 // Behind the host's proxy: use X-Forwarded-For for the client IP (rate limits).
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
-app.use(cors());
+mountSecurity(app);
+// Same-origin app: no cross-origin API access needed in production.
+if (process.env.NODE_ENV !== 'production') app.use(cors());
 app.get('/health', (_req, res) => res.json({ ok: true }));
 app.use('/api', createApi());
 mountAdmin(app);
@@ -27,8 +30,10 @@ mountSeo(app);
 if (fs.existsSync(path.join(CLIENT_DIST, 'index.html'))) {
   const renderIndex = makeIndexRenderer(CLIENT_DIST);
   const sendIndex = (_req: express.Request, res: express.Response) => {
+    const { html, inlineScriptHash } = renderIndex();
     res.setHeader('Cache-Control', 'no-cache');
-    res.type('html').send(renderIndex());
+    res.setHeader('Content-Security-Policy', contentSecurityPolicy([inlineScriptHash]));
+    res.type('html').send(html);
   };
   app.get('/', sendIndex);
   // Hashed assets can be cached forever; the rest (icons, manifest, service worker) briefly.

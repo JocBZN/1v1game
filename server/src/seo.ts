@@ -5,6 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type express from 'express';
+import { scriptHash } from './security';
 
 export const SITE = {
   name: 'Duel',
@@ -267,16 +268,21 @@ export function homeJsonLd(): string {
   return JSON.stringify(ld).replace(/</g, '\\u003c');
 }
 
-/** client/dist/index.html with the public URL, structured data and runtime config filled in. */
-export function makeIndexRenderer(distDir: string): () => string {
-  let cached: string | null = null;
+/**
+ * client/dist/index.html with the public URL, structured data and runtime config filled in, plus the
+ * sha256 of the inline config script so the Content-Security-Policy can allow exactly that script.
+ */
+export function makeIndexRenderer(distDir: string): () => { html: string; inlineScriptHash: string } {
+  let cached: { html: string; inlineScriptHash: string } | null = null;
   return () => {
     if (cached) return cached;
     const tpl = fs.readFileSync(path.join(distDir, 'index.html'), 'utf8');
-    cached = tpl
+    const configScript = `window.__DUEL__=${JSON.stringify(clientConfig()).replace(/</g, '\\u003c')}`;
+    const html = tpl
       .replaceAll('__PUBLIC_URL__', publicUrl())
       .replace('<!--HOME_JSONLD-->', `<script type="application/ld+json">${homeJsonLd()}</script>`)
-      .replace('<!--DUEL_CONFIG-->', `<script>window.__DUEL__=${JSON.stringify(clientConfig()).replace(/</g, '\\u003c')}</script>`);
+      .replace('<!--DUEL_CONFIG-->', `<script>${configScript}</script>`);
+    cached = { html, inlineScriptHash: scriptHash(configScript) };
     return cached;
   };
 }
