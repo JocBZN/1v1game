@@ -56,6 +56,12 @@ Variables are deliberately *not* managed there, so values set in the dashboard a
 
 Keep **one replica**: matchmaking and live duels are in memory.
 
+**Live:** https://1v1game.net (DNS at Spaceship: `@` CNAME → Railway, flattened by Spaceship; `www` CNAME →
+Railway; `_railway-verify*` TXT records). Every other address (`www.`, `http://`, the `*.up.railway.app`
+one) is redirected to `https://1v1game.net` by `server/src/security.ts`, which also sends HSTS, a strict
+Content-Security-Policy and other hardening headers. If you add a new third-party script, allow its
+origin there.
+
 | Variable | Needed | Purpose |
 | --- | --- | --- |
 | `ADMIN_TOKEN` | yes | password for the stats dashboard at `/admin` (any username) |
