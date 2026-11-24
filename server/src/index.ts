@@ -9,6 +9,7 @@ import { db } from './db';
 import { SERVER_ROOT } from './paths';
 import { contentSecurityPolicy, mountSecurity } from './security';
 import { makeIndexRenderer, mountSeo } from './seo';
+import { mountQuizPages, quizPaths } from './seo-quiz';
 import { attachSockets } from './socket';
 
 const PORT = Number(process.env.PORT ?? 3001);
@@ -25,7 +26,8 @@ if (process.env.NODE_ENV !== 'production') app.use(cors());
 app.get('/health', (_req, res) => res.json({ ok: true }));
 app.use('/api', createApi());
 mountAdmin(app);
-mountSeo(app);
+mountQuizPages(app);
+mountSeo(app, quizPaths);
 
 if (fs.existsSync(path.join(CLIENT_DIST, 'index.html'))) {
   const renderIndex = makeIndexRenderer(CLIENT_DIST);

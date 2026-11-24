@@ -9,7 +9,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "validate:puzzles": "tsx scripts/validate-puzzles.ts",
-    "generate:puzzles": "tsx scripts/generate-puzzles.ts"
+    "generate:puzzles": "tsx scripts/generate-puzzles.ts",
+    "indexnow": "tsx scripts/indexnow.ts"
   },
   "dependencies": {
     "better-sqlite3": "12.11.1",

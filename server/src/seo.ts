@@ -6,14 +6,17 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type express from 'express';
 import { scriptHash } from './security';
+import { FLAG_REGIONS } from './seo-quiz-content';
 
 export const SITE = {
   name: 'Duel',
-  title: 'Duel – 1v1 Trivia, Chess Puzzles & Brain Games Online',
+  title: 'Online Quiz Game 1v1 – Trivia Battles vs Real People | 1v1game',
   description:
-    'Challenge a real opponent in 30 seconds: trivia, chess puzzles, mental math, flags and a real Rubik’s Cube. Best of 3 rounds, ranked leagues, free in your browser.',
+    'Free online quiz game against real people: live 1v1 trivia battles with 1,200+ questions, a flag quiz, chess puzzles, mental math and a 3D Rubik’s Cube. No sign-up.',
   themeColor: '#fff1d1',
 };
+
+const DEPLOYED_AT = new Date().toISOString().slice(0, 10);
 
 /** Public base URL, without trailing slash. */
 export function publicUrl(): string {
@@ -54,7 +57,7 @@ export const TOPIC_PAGES: TopicPage[] = [
     slug: 'trivia',
     emoji: '🧠',
     name: 'Trivia',
-    title: '1v1 Trivia Quiz Online – Live Trivia Duels | Duel',
+    title: '1v1 Trivia Quiz Online – Live Trivia Duels',
     description:
       'Play a live 1v1 trivia quiz against real people. 1,200+ questions on history, football, science, movies, TV, medicine, tech and more. Fast answers score more.',
     h1: '1v1 trivia duels, live',
@@ -76,7 +79,7 @@ export const TOPIC_PAGES: TopicPage[] = [
     slug: 'chess-puzzles',
     emoji: '♞',
     name: 'Chess puzzles',
-    title: 'Chess Puzzles Duel Online – Mate in 1, Mate in 2 vs Real Players | Duel',
+    title: 'Chess Puzzles Duel Online – Mate in 1, Mate in 2 vs Real Players',
     description:
       'Race a real opponent on chess puzzles: mate in 1, mate in 2 and winning material. 90 seconds, one wrong move loses the puzzle. Free, in the browser.',
     h1: 'Chess puzzle races against real players',
@@ -97,7 +100,7 @@ export const TOPIC_PAGES: TopicPage[] = [
     slug: 'mental-math',
     emoji: '🧮',
     name: 'Mental math',
-    title: 'Mental Math Game Online – 1v1 Speed Arithmetic Duels | Duel',
+    title: 'Mental Math Game Online – 1v1 Speed Arithmetic Duels',
     description:
       'Speed arithmetic against a real opponent: 60 seconds of mental math that gets harder as you go. Addition, subtraction, multiplication, division. Free online.',
     h1: 'Mental math, head to head',
@@ -113,7 +116,7 @@ export const TOPIC_PAGES: TopicPage[] = [
     slug: 'flag-quiz',
     emoji: '🚩',
     name: 'Flags',
-    title: 'Flag Quiz Online – Guess the Country, 1v1 | Duel',
+    title: 'Flag Quiz Online – Guess the Country, 1v1',
     description:
       'Guess the flags of 194 countries against a real opponent. 8 flags, 6 seconds each, wrong answers from the same region. Free flag quiz game in your browser.',
     h1: 'Flag quiz duels',
@@ -126,7 +129,7 @@ export const TOPIC_PAGES: TopicPage[] = [
     slug: 'rubiks-cube',
     emoji: '🧊',
     name: 'Rubik’s Cube',
-    title: 'Rubik’s Cube Online – Solve a 3D Cube vs a Real Player | Duel',
+    title: 'Rubik’s Cube Online – Solve a 3D Cube vs a Real Player',
     description:
       'Solve a real 3D Rubik’s Cube online against an opponent. Drag a row to turn it, drag outside to spin the cube. 5 minutes, scored on progress and speed.',
     h1: 'A real Rubik’s Cube, online, 1v1',
@@ -179,7 +182,19 @@ h2{font-size:20px;margin:36px 0 8px;letter-spacing:-.01em}.lead{font-size:18px;c
 .topics{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:12px}
 .topics a{background:#fff8e8;border:1px solid #ecd6a8;border-radius:16px;padding:14px;text-decoration:none;color:#2b1b12;font-weight:600}
 .topics a:hover{border-color:#d8bb83}footer{color:#8a6e52;font-size:14px;padding:48px 20px 32px}
-details{border-top:1px solid #ecd6a8;padding:12px 0}details:first-child{border-top:0}summary{font-weight:600;cursor:pointer}`;
+details{border-top:1px solid #ecd6a8;padding:12px 0}details:first-child{border-top:0}summary{font-weight:600;cursor:pointer}
+header{flex-wrap:wrap;gap:8px}nav.top{display:flex;gap:16px;align-items:center;font-size:14px;font-weight:600}nav.top a{color:#5c4734;text-decoration:none}nav.top a.play{color:#df301c}
+footer nav.foot{display:flex;flex-wrap:wrap;gap:4px 12px;margin-bottom:10px}footer nav.foot a{color:#8a6e52}footer nav.foot strong{color:#5c4734;margin-right:4px}
+.crumbs{font-size:13px;color:#8a6e52;margin-top:28px}.crumbs a{color:#8a6e52}
+ol.qs{padding-left:0;list-style:none;counter-reset:q}ol.qs>li{counter-increment:q;background:#fff8e8;border:1px solid #ecd6a8;border-radius:16px;padding:14px 16px;margin:10px 0}
+ol.qs>li h3{font-size:16px;margin:0 0 8px;line-height:1.4}ol.qs>li h3::before{content:counter(q) ". ";color:#8a6e52}
+ol.opts{list-style:upper-alpha;margin:0 0 6px;padding-left:22px;color:#5c4734}ol.opts li{margin:2px 0}
+.diff{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b56500;margin-left:6px}
+ol.qs details{border:0;padding:4px 0 0}ol.qs summary{color:#007f8f;font-size:14px}.ans{font-weight:700;color:#007f8f}
+.flags{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:12px}
+.flags div{background:#fff8e8;border:1px solid #ecd6a8;border-radius:14px;padding:10px;display:flex;align-items:center;gap:10px;font-weight:600;font-size:14px}
+.flag{font-family:'Twemoji Country Flags',sans-serif;font-size:32px;line-height:1}
+@font-face{font-family:'Twemoji Country Flags';src:url(/fonts/TwemojiCountryFlags.woff2) format('woff2');unicode-range:U+1F1E6-1F1FF,U+1F3F4,U+E0062-E0063,U+E0065,U+E0067,U+E006C,U+E006E,U+E0073-E0074,U+E0077,U+E007F;font-display:swap}`;
 
 function pageHtml(p: TopicPage): string {
   const base = publicUrl();
@@ -200,24 +215,62 @@ function pageHtml(p: TopicPage): string {
       mainEntity: p.faq.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })),
     },
   ];
+  const quizHub =
+    p.slug === 'trivia'
+      ? `<h2>Practice quizzes with answers</h2><p>Warm up with free quizzes by topic: <a href="/quiz">all quizzes</a>, <a href="/quiz/general-knowledge">general knowledge</a>, <a href="/quiz/history">history</a>, <a href="/quiz/geography">geography</a>, <a href="/quiz/science">science</a>, <a href="/quiz/football">football</a> and more.</p>`
+      : p.slug === 'flag-quiz'
+        ? `<h2>Flags by continent</h2><nav class="topics">${FLAG_REGIONS.map((r) => `<a href="/flag-quiz/${r.id}">Flags of ${esc(r.name)}</a>`).join('')}</nav>`
+        : '';
+  const body = `<h1>${esc(p.emoji)} ${esc(p.h1)}</h1>
+<p class="lead">${esc(p.intro)}</p>
+<a class="cta" href="/">Play now — it’s free</a>
+<h2>How it works</h2>
+<ul>${p.how.map((h) => `<li>${esc(h)}</li>`).join('')}</ul>
+${quizHub}
+<h2>Questions</h2>
+<div class="card">${p.faq.map(([q, a]) => `<details open><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>
+<h2>More ways to duel</h2>
+<nav class="topics">${others.map((o) => `<a href="/${o.slug}">${esc(o.emoji)} ${esc(o.name)}</a>`).join('')}</nav>`;
+  return shell({ path: `/${p.slug}`, title: p.title, description: p.description, bodyHtml: body, jsonLd: ld });
+}
+
+/** Shared HTML template for all crawlable pages: meta, social cards, nav, footer with internal links. */
+export function shell(o: {
+  path: string;
+  title: string;
+  description: string;
+  bodyHtml: string;
+  jsonLd?: object[];
+  extraCss?: string;
+  brand?: boolean;
+}): string {
+  const base = publicUrl();
+  const url = `${base}${o.path}`;
+  const title = o.brand === false || o.title.length > 58 ? o.title : `${o.title} | 1v1game`;
+  const ld = o.jsonLd?.length ? `<script type="application/ld+json">${JSON.stringify(o.jsonLd).replace(/</g, '\\u003c')}</script>` : '';
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(p.title)}</title>
-<meta name="description" content="${esc(p.description)}">
+<title>${esc(title)}</title>
+<meta name="description" content="${esc(o.description)}">
 <link rel="canonical" href="${url}">
+<link rel="alternate" hreflang="en" href="${url}"><link rel="alternate" hreflang="x-default" href="${url}">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="theme-color" content="${SITE.themeColor}">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="${SITE.name}">
-<meta property="og:title" content="${esc(p.title)}">
-<meta property="og:description" content="${esc(p.description)}">
+<meta property="og:site_name" content="1v1game · Duel">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="${esc(o.title)}">
+<meta property="og:description" content="${esc(o.description)}">
 <meta property="og:url" content="${url}">
 <meta property="og:image" content="${base}/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${esc(o.title)}">
+<meta name="twitter:description" content="${esc(o.description)}">
 <meta name="twitter:image" content="${base}/og.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
@@ -225,31 +278,43 @@ function pageHtml(p: TopicPage): string {
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-<style>${PAGE_CSS}</style>
-<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>
+<style>${PAGE_CSS}${o.extraCss ?? ''}</style>
+${ld}
 </head>
 <body>
-<header><a class="logo" href="/"><span class="dots"><i style="background:#00b7cd"></i><i style="background:#ff9100"></i><i style="background:#df301c"></i></span>Duel</a><a href="/" class="logo" style="font-size:15px;font-weight:600;color:#df301c">Play free →</a></header>
+<header><a class="logo" href="/"><span class="dots"><i style="background:#00b7cd"></i><i style="background:#ff9100"></i><i style="background:#df301c"></i></span>Duel</a>
+<nav class="top"><a href="/quiz">Quizzes</a><a href="/flag-quiz">Flags</a><a href="/how-to-play">How to play</a><a href="/" class="play">Play free →</a></nav></header>
 <main>
-<h1>${esc(p.emoji)} ${esc(p.h1)}</h1>
-<p class="lead">${esc(p.intro)}</p>
-<a class="cta" href="/">Play now — it’s free</a>
-<h2>How it works</h2>
-<ul>${p.how.map((h) => `<li>${esc(h)}</li>`).join('')}</ul>
-<h2>Questions</h2>
-<div class="card">${p.faq.map(([q, a]) => `<details open><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>
-<h2>More ways to duel</h2>
-<nav class="topics">${others.map((o) => `<a href="/${o.slug}">${esc(o.emoji)} ${esc(o.name)}</a>`).join('')}</nav>
+${o.bodyHtml}
 </main>
-<footer>© ${new Date().getFullYear()} Duel · 1v1 brain games in your browser · <a href="/privacy">Privacy</a></footer>
+<footer>
+<nav class="foot"><strong>Quizzes</strong> ${FOOTER_QUIZ_LINKS}</nav>
+<nav class="foot"><strong>Games</strong> <a href="/trivia">Trivia duel</a> <a href="/chess-puzzles">Chess puzzles</a> <a href="/mental-math">Mental math</a> <a href="/flag-quiz">Flag quiz</a> <a href="/rubiks-cube">Rubik’s Cube</a></nav>
+<p>© ${new Date().getFullYear()} Duel on 1v1game.net · 1v1 brain games in your browser · <a href="/privacy">Privacy</a></p>
+</footer>
 </body>
 </html>`;
 }
 
+const FOOTER_QUIZ_LINKS = [
+  ['general-knowledge', 'General knowledge'], ['history', 'History'], ['geography', 'Geography'], ['science', 'Science'],
+  ['sports', 'Sports'], ['football', 'Football'], ['movies-music', 'Movies & music'], ['tv-shows', 'TV shows'],
+  ['medical', 'Medical'], ['math', 'Math'], ['technology', 'Technology'], ['beauty', 'Beauty'], ['celebrities', 'Celebrities'],
+]
+  .map(([s, n]) => `<a href="/quiz/${s}">${n}</a>`)
+  .join(' ');
+
 export function homeJsonLd(): string {
   const base = publicUrl();
   const ld = [
-    { '@context': 'https://schema.org', '@type': 'WebSite', name: SITE.name, url: `${base}/`, description: SITE.description },
+    { '@context': 'https://schema.org', '@type': 'WebSite', name: '1v1game', alternateName: ['Duel', '1v1game.net'], url: `${base}/`, description: SITE.description },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: '1v1game',
+      url: `${base}/`,
+      logo: `${base}/icon-512.png`,
+    },
     {
       '@context': 'https://schema.org',
       '@type': 'VideoGame',
@@ -305,8 +370,26 @@ ${section('Children', 'Duel is a general-audience game and does not knowingly co
 </main><footer>© ${new Date().getFullYear()} Duel</footer></body></html>`;
 }
 
-export function mountSeo(app: express.Express) {
+/**
+ * IndexNow key (public by design: search engines fetch /<key>.txt to confirm we own the site).
+ * Lets us notify Bing, Yandex, Seznam, Naver… the moment pages change (see server/scripts/indexnow.ts).
+ */
+export const INDEXNOW_KEY = process.env.INDEXNOW_KEY || '7c1e9f4a2b6d48e0a3f5c8d1e2b7a940';
+
+/** Every crawlable page, for the sitemap and IndexNow. */
+export function sitePaths(extra: string[] = []): { path: string; priority: string; changefreq: string }[] {
+  return [
+    { path: '/', priority: '1.0', changefreq: 'daily' },
+    { path: '/quiz', priority: '0.9', changefreq: 'weekly' },
+    ...extra.filter((p) => p !== '/quiz').map((p) => ({ path: p, priority: p.startsWith('/quiz/') ? '0.8' : '0.7', changefreq: 'weekly' })),
+    ...ALL_PAGES.map((p) => ({ path: `/${p.slug}`, priority: '0.8', changefreq: 'monthly' })),
+    { path: '/privacy', priority: '0.2', changefreq: 'yearly' },
+  ];
+}
+
+export function mountSeo(app: express.Express, extraPaths: () => string[] = () => []) {
   app.get('/privacy', (_req, res) => res.type('html').send(privacyHtml()));
+  app.get(`/${INDEXNOW_KEY}.txt`, (_req, res) => res.type('text/plain').send(INDEXNOW_KEY));
 
   // Digital Asset Links: lets the Google Play (TWA) version open full screen without a URL bar.
   // Set TWA_PACKAGE (e.g. app.duel.twa) and TWA_SHA256 (signing key fingerprint, comma-separated) on Railway.
@@ -326,11 +409,11 @@ export function mountSeo(app: express.Express) {
 
   app.get('/sitemap.xml', (_req, res) => {
     const base = publicUrl();
-    const today = new Date().toISOString().slice(0, 10);
-    const urls = [{ loc: `${base}/`, pr: '1.0' }, ...ALL_PAGES.map((p) => ({ loc: `${base}/${p.slug}`, pr: '0.8' })), { loc: `${base}/privacy`, pr: '0.2' }];
+    // lastmod = when this version was deployed (content only changes with a deploy).
+    const urls = sitePaths(extraPaths());
     res.type('application/xml').send(
       `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
-        .map((u) => `  <url><loc>${u.loc}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>${u.pr}</priority></url>`)
+        .map((u) => `  <url><loc>${base}${u.path}</loc><lastmod>${DEPLOYED_AT}</lastmod><changefreq>${u.changefreq}</changefreq><priority>${u.priority}</priority></url>`)
         .join('\n')}\n</urlset>\n`,
     );
   });
