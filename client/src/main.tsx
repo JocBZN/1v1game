@@ -3,10 +3,14 @@ import { createRoot } from 'react-dom/client';
 import { polyfillCountryFlagEmojis } from 'country-flag-emoji-polyfill';
 import flagFontUrl from 'country-flag-emoji-polyfill/dist/TwemojiCountryFlags.woff2?url';
 import App from './App';
+import { initAnalytics } from './lib/analytics';
+import { initPwa } from './lib/pwa';
 import './index.css';
 
 // Windows doesn't render flag emoji; load a bundled (self-hosted) flag font only when needed.
 polyfillCountryFlagEmojis('Twemoji Country Flags', flagFontUrl);
+initAnalytics();
+initPwa();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

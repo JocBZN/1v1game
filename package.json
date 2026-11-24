@@ -11,6 +11,7 @@
     "test": "npm test -w server",
     "typecheck": "npm run typecheck -w server && npm run typecheck -w client",
     "build": "npm run build -w client",
+    "start": "npm start -w server",
     "validate:puzzles": "npm run validate:puzzles -w server"
   },
   "devDependencies": {

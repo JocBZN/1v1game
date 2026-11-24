@@ -16,7 +16,7 @@ export interface League {
 }
 
 export interface Me {
-  user: { id: number; nickname: string };
+  user: { id: number; nickname: string; guest: boolean };
   ratings: Record<RatingTrack, TrackStats>;
   league: League;
 }
@@ -53,6 +53,16 @@ export function forgetTabIdentity() {
   }
 }
 
+/** Log out on this device. */
+export function clearToken() {
+  try {
+    sessionStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export class ApiError extends Error {
   constructor(public status: number, public code: string) {
     super(code);
@@ -75,8 +85,11 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 export const api = {
-  register: (nickname: string) =>
-    request<Me & { token: string }>('/register', { method: 'POST', body: JSON.stringify({ nickname }) }),
+  guest: () => request<Me & { token: string }>('/guest', { method: 'POST', body: '{}' }),
+  register: (nickname: string, password: string) =>
+    request<Me & { token: string; upgraded: boolean }>('/register', { method: 'POST', body: JSON.stringify({ nickname, password }) }),
+  login: (nickname: string, password: string) =>
+    request<Me & { token: string }>('/login', { method: 'POST', body: JSON.stringify({ nickname, password }) }),
   me: () => request<Me>('/me'),
   leaderboard: (track: RatingTrack) => request<LeaderboardResponse>(`/leaderboard/${track}`),
   profile: (id: number | 'me') => request<ProfileResponse>(`/profile/${id}`),
@@ -98,6 +111,7 @@ export interface LeaderboardResponse {
   track: RatingTrack;
   rows: LeaderboardEntry[];
   me: LeaderboardEntry | null;
+  guest: boolean;
 }
 
 export interface RecentDuel {

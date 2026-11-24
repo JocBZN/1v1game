@@ -2,6 +2,8 @@ import { DOMAINS, type DomainId } from '../lib/domains';
 import { LEAGUE_META, leagueRank } from '../lib/leagues';
 import type { DuelResult, Found, RatingChange } from '../state/duel';
 import { AsyncTag, Avatar, Screen, TopicIcon, useAnimatedNumber } from '../components/ui';
+import { SignupPrompt } from '../components/SignupPrompt';
+import type { Me } from '../lib/api';
 
 function Delta({ change, big }: { change: RatingChange; big?: boolean }) {
   const d = Math.round(change.after) - Math.round(change.before);
@@ -17,12 +19,14 @@ function Delta({ change, big }: { change: RatingChange; big?: boolean }) {
   );
 }
 
-export function ResultScreen({ found, result, onAgain, onLeaderboard, onHome }: {
+export function ResultScreen({ me, found, result, onAgain, onLeaderboard, onHome, onSignup }: {
+  me: Me;
   found: Found | null;
   result: DuelResult;
   onAgain: () => void;
   onLeaderboard: () => void;
   onHome: () => void;
+  onSignup: () => void;
 }) {
   const title = result.result === 'win' ? 'Victory' : result.result === 'loss' ? 'Defeat' : 'Draw';
   const color = result.result === 'win' ? 'text-cyan-strong' : result.result === 'loss' ? 'text-red' : 'text-orange-strong';
@@ -101,6 +105,18 @@ export function ResultScreen({ found, result, onAgain, onLeaderboard, onHome }: 
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {me.user.guest && general && (
+        <div className="mt-3">
+          <SignupPrompt
+            compact
+            where="result"
+            title={`Keep your ${Math.round(general.after)} rating`}
+            text="You’re a guest: create a free account to save it and get on the leaderboard."
+            onSignup={onSignup}
+          />
         </div>
       )}
 

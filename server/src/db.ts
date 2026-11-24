@@ -80,10 +80,17 @@ CREATE INDEX IF NOT EXISTS idx_rec_domain ON round_recordings(domain, general_ra
 CREATE INDEX IF NOT EXISTS idx_rec_user ON round_recordings(user_id, domain);
 `);
 
-// Migration: content version of each recording (rows from before this column count as version 1).
-if (!(db.prepare('PRAGMA table_info(round_recordings)').all() as { name: string }[]).some((c) => c.name === 'content_version')) {
-  db.exec('ALTER TABLE round_recordings ADD COLUMN content_version INTEGER NOT NULL DEFAULT 1');
+// ---------- migrations (add columns to databases created by older versions) ----------
+function addColumn(table: string, column: string, ddl: string) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  if (!cols.some((c) => c.name === column)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${ddl}`);
 }
+// Content version of each recording (rows from before this column count as version 1).
+addColumn('round_recordings', 'content_version', 'INTEGER NOT NULL DEFAULT 1');
+// Guests play without an account; registered players have a password. Older nickname-only
+// accounts (no password, not guests) keep working and can set a password by registering.
+addColumn('users', 'is_guest', 'INTEGER NOT NULL DEFAULT 0');
+addColumn('users', 'pass_hash', 'TEXT');
 
 // ---------- users ----------
 
@@ -92,20 +99,32 @@ export interface User {
   nickname: string;
   token: string;
   created_at: number;
+  is_guest: number;
+  pass_hash: string | null;
 }
 
-const stmtInsertUser = db.prepare('INSERT INTO users (nickname, token, created_at) VALUES (?, ?, ?)');
+const stmtInsertUser = db.prepare('INSERT INTO users (nickname, token, created_at, is_guest, pass_hash) VALUES (?, ?, ?, ?, ?)');
 const stmtInsertRating = db.prepare(
   'INSERT OR IGNORE INTO ratings (user_id, track, rating, rd, vol) VALUES (?, ?, ?, ?, ?)',
 );
 
-export const createUser = db.transaction((nickname: string, token: string): User => {
-  const now = Date.now();
-  const info = stmtInsertUser.run(nickname, token, now);
-  const id = Number(info.lastInsertRowid);
-  for (const t of RATING_TRACKS) stmtInsertRating.run(id, t, DEFAULT_RATING, DEFAULT_RD, DEFAULT_VOL);
-  return { id, nickname, token, created_at: now };
-});
+export const createUser = db.transaction(
+  (nickname: string, token: string, opts: { guest?: boolean; passHash?: string | null } = {}): User => {
+    const now = Date.now();
+    const isGuest = opts.guest ? 1 : 0;
+    const passHash = opts.passHash ?? null;
+    const info = stmtInsertUser.run(nickname, token, now, isGuest, passHash);
+    const id = Number(info.lastInsertRowid);
+    for (const t of RATING_TRACKS) stmtInsertRating.run(id, t, DEFAULT_RATING, DEFAULT_RD, DEFAULT_VOL);
+    return { id, nickname, token, created_at: now, is_guest: isGuest, pass_hash: passHash };
+  },
+);
+
+const stmtUpgradeUser = db.prepare('UPDATE users SET nickname = ?, pass_hash = ?, is_guest = 0 WHERE id = ?');
+/** Guest (or legacy nickname-only account) → registered account; keeps id, token, ratings and history. */
+export function upgradeUser(id: number, nickname: string, passHash: string) {
+  stmtUpgradeUser.run(nickname, passHash, id);
+}
 
 const stmtUserByToken = db.prepare('SELECT * FROM users WHERE token = ?');
 const stmtUserById = db.prepare('SELECT * FROM users WHERE id = ?');
@@ -179,13 +198,13 @@ export interface LeaderboardRow {
 const stmtTop = db.prepare(`
   SELECT r.user_id, u.nickname, r.rating, r.wins, r.losses, r.draws, r.games
   FROM ratings r JOIN users u ON u.id = r.user_id
-  WHERE r.track = ? AND r.games > 0
+  WHERE r.track = ? AND r.games > 0 AND u.is_guest = 0
   ORDER BY r.rating DESC, r.games DESC, u.id ASC
   LIMIT ?
 `);
 const stmtRank = db.prepare(`
-  SELECT COUNT(*) + 1 AS rank FROM ratings
-  WHERE track = ? AND games > 0 AND rating > ?
+  SELECT COUNT(*) + 1 AS rank FROM ratings r JOIN users u ON u.id = r.user_id
+  WHERE r.track = ? AND r.games > 0 AND r.rating > ? AND u.is_guest = 0
 `);
 
 export function getLeaderboard(track: RatingTrack, limit = 100): LeaderboardRow[] {

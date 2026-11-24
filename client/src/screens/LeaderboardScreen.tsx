@@ -3,6 +3,7 @@ import { api, type LeaderboardEntry, type LeaderboardResponse, type Me, type Rat
 import { DOMAINS, DOMAIN_LIST } from '../lib/domains';
 import { LEAGUE_META } from '../lib/leagues';
 import { Avatar, PageHeader, Screen } from '../components/ui';
+import { SignupPrompt } from '../components/SignupPrompt';
 
 const TABS: { id: RatingTrack; label: string }[] = [
   { id: 'general', label: 'Overall' },
@@ -35,7 +36,7 @@ function Row({ e, mine, delay }: { e: LeaderboardEntry; mine: boolean; delay: nu
   );
 }
 
-export function LeaderboardScreen({ me, onBack }: { me: Me; onBack: () => void }) {
+export function LeaderboardScreen({ me, onBack, onSignup, onLogin }: { me: Me; onBack: () => void; onSignup: () => void; onLogin: () => void }) {
   const [track, setTrack] = useState<RatingTrack>('general');
   const [data, setData] = useState<LeaderboardResponse | null>(null);
   const [error, setError] = useState(false);
@@ -56,6 +57,19 @@ export function LeaderboardScreen({ me, onBack }: { me: Me; onBack: () => void }
   return (
     <Screen>
       <PageHeader title="Leaderboard" onBack={onBack} />
+
+      {me.user.guest && (
+        <div className="mt-3">
+          <SignupPrompt
+            compact
+            where="leaderboard"
+            title="Guests aren’t ranked"
+            text={`Create a free account to appear here${me.ratings.general.games > 0 ? ` with your ${me.ratings.general.rating} rating` : ''}.`}
+            onSignup={onSignup}
+            onLogin={onLogin}
+          />
+        </div>
+      )}
 
       <div className="-mx-5 mt-4 flex gap-1.5 overflow-x-auto px-5 pb-1 [scrollbar-width:none]">
         {TABS.map((t) => (
@@ -86,7 +100,11 @@ export function LeaderboardScreen({ me, onBack }: { me: Me; onBack: () => void }
       {data && (
         <div className="fixed inset-x-0 bottom-0 bg-gradient-to-t from-bg via-bg/95 to-transparent px-5 pt-6 safe-bottom">
           <div className="mx-auto max-w-md">
-            {data.me ? (
+            {data.guest ? (
+              <button onClick={onSignup} className="btn btn-primary w-full py-3.5">
+                Create an account to get ranked
+              </button>
+            ) : data.me ? (
               inTop ? (
                 <button onClick={() => myRowRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })} className="btn btn-secondary w-full py-3 text-sm">
                   You’re #{data.me.rank} · show me

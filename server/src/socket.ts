@@ -4,6 +4,10 @@ import { authenticate } from './auth';
 import type { User } from './db';
 import { GameServer } from './game';
 
+let online = () => 0;
+/** Players with at least one open tab right now. */
+export const onlineCount = () => online();
+
 export function attachSockets(server: http.Server) {
   const io = new Server(server, { cors: { origin: '*' }, pingInterval: 5000, pingTimeout: 5000 });
   const game = new GameServer(io);
@@ -14,6 +18,7 @@ export function attachSockets(server: http.Server) {
    * others are told the account is in use elsewhere and disconnected.
    */
   const sockets = new Map<number, Set<Socket>>();
+  online = () => sockets.size;
 
   io.use((socket, next) => {
     const user = authenticate(socket.handshake.auth?.token);

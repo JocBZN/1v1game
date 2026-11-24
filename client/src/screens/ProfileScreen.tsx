@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api, type Me, type ProfileResponse } from '../lib/api';
 import { DOMAINS, DOMAIN_LIST, type DomainId } from '../lib/domains';
 import { AsyncTag, Avatar, LeagueBadge, PageHeader, Screen, TopicIcon } from '../components/ui';
+import { SignupPrompt } from '../components/SignupPrompt';
 
 function timeAgo(ts: number): string {
   const s = Math.floor((Date.now() - ts) / 1000);
@@ -25,7 +26,14 @@ function Stat({ value, label }: { value: React.ReactNode; label: string }) {
   );
 }
 
-export function ProfileScreen({ me, onBack }: { me: Me; onBack: () => void }) {
+export function ProfileScreen({ me, onBack, onSignup, onLogin, onLogout }: {
+  me: Me;
+  onBack: () => void;
+  onSignup: () => void;
+  onLogin: () => void;
+  onLogout: () => void;
+}) {
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const [p, setP] = useState<ProfileResponse | null>(null);
   const [error, setError] = useState(false);
 
@@ -66,6 +74,18 @@ export function ProfileScreen({ me, onBack }: { me: Me; onBack: () => void }) {
           <Stat value={wr === null ? '—' : `${wr}%`} label="Win rate" />
         </div>
       </section>
+
+      {me.user.guest && (
+        <div className="mt-3">
+          <SignupPrompt
+            where="profile"
+            title="Your progress isn’t saved yet"
+            text="As a guest, your rating and history live only in this browser. Create a free account to keep them and play on any device."
+            onSignup={onSignup}
+            onLogin={onLogin}
+          />
+        </div>
+      )}
 
       <h2 className="label mt-7 mb-2">By topic</h2>
       <div className="card divide-y divide-line">
@@ -121,6 +141,20 @@ export function ProfileScreen({ me, onBack }: { me: Me; onBack: () => void }) {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {!me.user.guest && (
+        <div className="mt-8 flex justify-center">
+          {confirmLogout ? (
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-muted">Log out on this device?</span>
+              <button className="font-semibold text-red" onClick={onLogout}>Log out</button>
+              <button className="font-semibold text-muted" onClick={() => setConfirmLogout(false)}>Cancel</button>
+            </div>
+          ) : (
+            <button className="btn btn-ghost text-sm" onClick={() => setConfirmLogout(true)}>Log out</button>
+          )}
         </div>
       )}
     </Screen>

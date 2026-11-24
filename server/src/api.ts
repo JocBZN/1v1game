@@ -1,5 +1,5 @@
 import express, { type Request, type Response, type NextFunction } from 'express';
-import { authenticate, register } from './auth';
+import { authenticate, createGuest, login, register } from './auth';
 import { getLeaderboard, getRank, getRatings, getRecentDuels, getUserById, type User } from './db';
 import { RATING_TRACKS, isRatingTrack, type RatingTrack } from './domains';
 import { leagueFor } from './leagues';
@@ -31,9 +31,26 @@ export function publicRatings(userId: number) {
 function me(user: User) {
   const ratings = publicRatings(user.id);
   return {
-    user: { id: user.id, nickname: user.nickname },
+    user: { id: user.id, nickname: user.nickname, guest: !!user.is_guest },
     ratings,
     league: leagueFor(ratings.general.rating),
+  };
+}
+
+/** Simple fixed-window limiter per client IP (in memory: fine for a single server). */
+export function rateLimit(max: number, windowMs: number) {
+  const hits = new Map<string, { n: number; resetAt: number }>();
+  return (req: Request, res: Response, next: NextFunction) => {
+    const now = Date.now();
+    const ip = req.ip ?? 'unknown';
+    let h = hits.get(ip);
+    if (!h || now >= h.resetAt) {
+      if (hits.size > 10_000) for (const [k, v] of hits) if (now >= v.resetAt) hits.delete(k);
+      h = { n: 0, resetAt: now + windowMs };
+      hits.set(ip, h);
+    }
+    if (++h.n > max) return res.status(429).json({ error: 'rate_limited' });
+    next();
   };
 }
 
@@ -41,9 +58,23 @@ export function createApi() {
   const api = express.Router();
   api.use(express.json({ limit: '10kb' }));
 
-  api.post('/register', (req, res) => {
-    const r = register(req.body?.nickname);
+  // Instant guest account (play first, sign up later).
+  api.post('/guest', rateLimit(30, 10 * 60_000), (_req, res) => {
+    const user = createGuest();
+    res.json({ token: user.token, ...me(user) });
+  });
+
+  // Create an account; a guest caller is upgraded in place (keeps rating and history).
+  api.post('/register', rateLimit(10, 10 * 60_000), (req, res) => {
+    const current = authenticate(bearer(req));
+    const r = register(req.body?.nickname, req.body?.password, current);
     if (!r.ok) return res.status(400).json({ error: r.error });
+    res.json({ token: r.user.token, upgraded: r.upgraded, ...me(r.user) });
+  });
+
+  api.post('/login', rateLimit(20, 10 * 60_000), (req, res) => {
+    const r = login(req.body?.nickname, req.body?.password);
+    if (!r.ok) return res.status(401).json({ error: r.error });
     res.json({ token: r.user.token, ...me(r.user) });
   });
 
@@ -66,7 +97,8 @@ export function createApi() {
       league: leagueFor(r.rating).id,
     }));
     const mine = getRatings(req.user!.id)[track];
-    const myEntry = mine.games > 0
+    // Guests are never ranked: they see the board and an invitation to sign up.
+    const myEntry = mine.games > 0 && !req.user!.is_guest
       ? {
           rank: getRank(track, mine.rating),
           userId: req.user!.id,
@@ -76,7 +108,7 @@ export function createApi() {
           league: leagueFor(mine.rating).id,
         }
       : null;
-    res.json({ track, rows, me: myEntry });
+    res.json({ track, rows, me: myEntry, guest: !!req.user!.is_guest });
   });
 
   api.get('/profile/:id', requireAuth, (req: AuthedRequest, res) => {

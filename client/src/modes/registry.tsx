@@ -1,9 +1,8 @@
 import { lazy, type ComponentType } from 'react';
 import type { DomainId } from '../lib/domains';
-import { ChessRound } from './ChessRound';
-
-// three.js is big: load the cube only when a cube round actually starts.
+// three.js and the chessboard are big: load them only when such a round actually starts.
 const CubeRound = lazy(() => import('./CubeRound').then((m) => ({ default: m.CubeRound })));
+const ChessRound = lazy(() => import('./ChessRound').then((m) => ({ default: m.ChessRound })));
 import { FlagsRound } from './FlagsRound';
 import { MathRound } from './MathRound';
 import { TriviaRound } from './TriviaRound';

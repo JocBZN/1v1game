@@ -26,14 +26,48 @@ and delete the file.
 > `better-sqlite3` is pinned to 12.11.1, which ships a prebuilt binary for Node 26 on Windows, so no
 > Python or Visual Studio is needed.
 
+### Guests and accounts
+
+Visitors play instantly as a **guest** (`Guest-12345`). **Sign up** (nickname + password) upgrades that
+same account, keeping its rating and history; **Log in** works from any device. Guests are never on the
+leaderboard and are invited to sign up on Home, the leaderboard, the profile and after every duel.
+Passwords are stored as scrypt hashes.
+
 ### Two tabs, two players
 
 The token lives in `localStorage`, so tabs of the same browser share a player by default. For the
-two-tab test, press **"Switch player"** (top of Home) in the second tab and pick another nickname; that
-identity stays in that tab only (`sessionStorage`). Several tabs of one account can be open; only the
-tab that presses PLAY takes over. An incognito window works too.
+two-tab test, log in with a second account in the second tab (that tab keeps its own identity in
+`sessionStorage`), or use an incognito window. Only the tab that presses Play takes over.
 
 The first-visit intro animation can be replayed with `?intro` (or `?intro=hold` to keep it on screen).
+
+## Deploying (Railway)
+
+One container serves everything: the API, Socket.io and the built client. `Dockerfile` and
+`railway.json` are ready; Railway builds the image and checks `/health`.
+
+1. Create a project on Railway and deploy this folder (`railway up` from the CLI, or connect a GitHub repo).
+2. Add a **volume** mounted at `/data` (the SQLite database lives at `/data/duel.sqlite`). Without it,
+   every deploy wipes all players.
+3. Generate a public domain (Settings → Networking), or attach your own domain.
+4. Set the variables below, then redeploy.
+
+Keep **one replica**: matchmaking and live duels are in memory.
+
+| Variable | Needed | Purpose |
+| --- | --- | --- |
+| `ADMIN_TOKEN` | yes | password for the stats dashboard at `/admin` (any username) |
+| `PUBLIC_URL` | with a custom domain | e.g. `https://duel.example.com` (defaults to the Railway domain) |
+| `GA4_ID` | optional | Google Analytics 4 measurement ID (`G-…`), loaded after cookie consent |
+| `CLARITY_ID` | optional | Microsoft Clarity project ID (heatmaps, session replays), after consent |
+| `UMAMI_WEBSITE_ID`, `UMAMI_SRC` | optional | Umami (cookieless page views/events, no banner needed) |
+| `CONTACT_EMAIL` | recommended | shown on `/privacy` for data-deletion requests |
+| `TWA_PACKAGE`, `TWA_SHA256` | for Google Play | publishes `/.well-known/assetlinks.json` |
+
+**SEO**: `/robots.txt`, `/sitemap.xml`, crawlable pages per topic (`/trivia`, `/chess-puzzles`,
+`/mental-math`, `/flag-quiz`, `/rubiks-cube`, `/how-to-play`), structured data, Open Graph image.
+After going live, add the site to Google Search Console and Bing Webmaster Tools and submit the sitemap.
+**ASO**: store texts and assets are in [docs/store-listing.md](docs/store-listing.md).
 
 ## Scripts
 
@@ -43,6 +77,7 @@ The first-visit intro animation can be replayed with `?intro` (or `?intro=hold` 
 | `npm test` | unit tests (Vitest): per-topic scoring, Glicko-2, best-of-3 logic, puzzle validation, cube model |
 | `npm run typecheck` | TypeScript for both packages |
 | `npm run build` | production build of the client |
+| `npm start` | production server (serves the built client too) |
 | `npm run validate:puzzles` | checks every chess puzzle with chess.js and **removes** failing ones (`--dry` only reports) |
 | `npm run generate:puzzles -w server` | regenerates `chess_puzzles.json` (deterministic), then run the validation |
 
