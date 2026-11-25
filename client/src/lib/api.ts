@@ -1,4 +1,4 @@
-export type RatingTrack = 'general' | 'trivia' | 'chess' | 'flags' | 'cube' | 'split' | 'color' | 'golf' | 'timeline';
+export type RatingTrack = 'general' | 'trivia' | 'chess' | 'flags' | 'cube' | 'split' | 'color' | 'golf' | 'timeline' | 'opinion' | 'year' | 'price' | 'followers';
 
 export interface TrackStats {
   rating: number;

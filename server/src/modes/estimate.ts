@@ -52,7 +52,9 @@ export function makeEstimateMode(opts: {
     timeLimit: opts.perRound * (opts.itemMs + GRACE + FEEDBACK_MS) + 1_000,
 
     generateRound(rng) {
-      return { items: rng.shuffle(opts.questions()).slice(0, opts.perRound) };
+      const seen = new Set<string>();
+      const items = rng.shuffle(opts.questions()).filter((q) => !seen.has(q.q) && seen.add(q.q)).slice(0, opts.perRound);
+      return { items };
     },
 
     publicItem(content, index) {
@@ -84,3 +86,22 @@ export function makeEstimateMode(opts: {
     },
   };
 }
+
+import { followerQuestions, opinionQuestions, priceQuestions, yearQuestions } from './estimate-data';
+
+export const opinionMode = makeEstimateMode({
+  id: 'opinion', name: 'Opinion', questions: opinionQuestions,
+  input: { kind: 'log', min: 1, max: 1e20 }, perRound: 4, itemMs: 20_000, zeroAt: 30, thinkMs: 13_000,
+});
+export const yearMode = makeEstimateMode({
+  id: 'year', name: 'Release year', questions: yearQuestions,
+  input: { kind: 'year', min: 1980, max: 2026 }, perRound: 5, itemMs: 12_000, thinkMs: 7_000,
+});
+export const priceMode = makeEstimateMode({
+  id: 'price', name: 'The right price', questions: priceQuestions,
+  input: { kind: 'log', min: 0.1, max: 1e10, prefix: '$' }, perRound: 5, itemMs: 15_000, zeroAt: 5, thinkMs: 9_000,
+});
+export const followersMode = makeEstimateMode({
+  id: 'followers', name: 'Followers', questions: followerQuestions,
+  input: { kind: 'log', min: 1_000, max: 1e11 }, perRound: 5, itemMs: 15_000, zeroAt: 10, thinkMs: 9_000,
+});

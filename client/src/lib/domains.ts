@@ -1,6 +1,6 @@
-import { Box, Brain, Castle, Flag, History, LandPlot, Palette, Scissors, type LucideIcon } from 'lucide-react';
+import { Box, Brain, CalendarRange, Castle, Flag, History, LandPlot, Lightbulb, Palette, Scissors, Tag, Users, type LucideIcon } from 'lucide-react';
 
-export type DomainId = 'trivia' | 'chess' | 'flags' | 'cube' | 'split' | 'color' | 'golf' | 'timeline';
+export type DomainId = 'trivia' | 'chess' | 'flags' | 'cube' | 'split' | 'color' | 'golf' | 'timeline' | 'opinion' | 'year' | 'price' | 'followers';
 
 export interface DomainMeta {
   id: DomainId;
@@ -30,8 +30,12 @@ export const DOMAINS: Record<DomainId, DomainMeta> = {
   color: { id: 'color', name: 'Guess the color', short: 'Color', icon: Palette, ...CYAN, tagline: '4 colors · 15 seconds each' },
   golf: { id: 'golf', name: 'One-shot golf', short: 'Golf', icon: LandPlot, ...SLATE, tagline: '3 holes · up to 3 shots each' },
   timeline: { id: 'timeline', name: 'Timeline', short: 'Timeline', icon: History, ...RED, tagline: '3 rounds · put 4 events in order' },
+  opinion: { id: 'opinion', name: 'Opinion', short: 'Opinion', icon: Lightbulb, ...ORANGE, tagline: '4 wild questions · closest guess wins' },
+  year: { id: 'year', name: 'Release year', short: 'Year', icon: CalendarRange, ...CYAN, tagline: '5 films, games and songs · guess the year' },
+  price: { id: 'price', name: 'The right price', short: 'Price', icon: Tag, ...SLATE, tagline: '5 things · guess the price' },
+  followers: { id: 'followers', name: 'Followers', short: 'Followers', icon: Users, ...RED, tagline: '5 stars and games · guess the numbers' },
 };
 
 export const DOMAIN_LIST: DomainMeta[] = [
-  DOMAINS.trivia, DOMAINS.chess, DOMAINS.flags, DOMAINS.cube, DOMAINS.split, DOMAINS.color, DOMAINS.golf, DOMAINS.timeline,
+  DOMAINS.trivia, DOMAINS.chess, DOMAINS.flags, DOMAINS.cube, DOMAINS.split, DOMAINS.color, DOMAINS.golf, DOMAINS.timeline, DOMAINS.opinion, DOMAINS.year, DOMAINS.price, DOMAINS.followers,
 ];

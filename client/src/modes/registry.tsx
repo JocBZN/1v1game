@@ -4,6 +4,7 @@ import type { DomainId } from '../lib/domains';
 const CubeRound = lazy(() => import('./CubeRound').then((m) => ({ default: m.CubeRound })));
 const ChessRound = lazy(() => import('./ChessRound').then((m) => ({ default: m.ChessRound })));
 import { ColorRound } from './ColorRound';
+import { EstimateRound } from './EstimateRound';
 import { FlagsRound } from './FlagsRound';
 import { GolfRound } from './GolfRound';
 import { SplitRound } from './SplitRound';
@@ -21,4 +22,8 @@ export const MODE_COMPONENTS: Partial<Record<DomainId, ComponentType<ModeProps>>
   color: ColorRound,
   golf: GolfRound,
   timeline: TimelineRound,
+  opinion: EstimateRound,
+  year: EstimateRound,
+  price: EstimateRound,
+  followers: EstimateRound,
 };
