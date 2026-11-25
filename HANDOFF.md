@@ -26,14 +26,23 @@
 6. **Deploy:** commit `7be11ab`, deploy din GitHub reușit. Verificat live: toate paginile noi răspund 200, H1-ul e pe `/`, hreflang e prezent, robots e corect, embed-ul poate fi pus în iframe.
 7. **IndexNow:** trimis pentru 204 URL-uri (`npm run indexnow -w server`). Scriptul citește acum ambele sitemap-uri.
 8. Pe Railway, proiectul creat din greșeală la deploy („overflowing-magic”) a fost redenumit **1v1game**. **Trebuie șters** (vezi mai jos).
+9. **Search Console (25 nov):**
+   - `sitemap-i18n.xml` a fost trimis. Imediat după trimitere statusul era „Nu s-a putut prelua”; e normal, la fel a fost și primul sitemap, care a trecut apoi pe „Succes”.
+   - Request indexing făcut pe 10 URL-uri: `/`, `/es/`, `/ro/`, `/pt/`, `/fr/`, `/de/`, `/it/`, `/quiz-of-the-day/`, `/general-knowledge-questions/`, `/quiz/world-capitals/`.
+   - Homepage-ul era deja indexat. Paginile noi apăreau „Descoperită – nu este indexată” sau „Google nu cunoaște adresa”. E normal: indexarea ia de la câteva zile la 2–3 săptămâni pentru un domeniu nou.
+10. **Bing:** contul Microsoft nu e logat în Chrome, așa că `sitemap-i18n.xml` NU a fost adăugat manual. Bing a primit oricum toate cele 204 URL-uri prin IndexNow și găsește sitemap-ul în `robots.txt`.
 
 ## Ce mai e de făcut, în ordine
 1. **Șterge proiectul Railway „1v1game”** (id `276f51bb-d789-42bf-a550-833449ac8eef`). Are serviciile `server` și `client` (client = CRASHED), fără domeniu și fără volum. E un duplicat creat automat și consumă credit. Site-ul live e în proiectul **duel**; acela NU se șterge. Se face din dashboard: proiect → Settings → Danger → Delete. Ștergerea o confirmă utilizatorul.
-2. **Google Search Console** (`sc-domain:1v1game.net`, deja verificat):
-   - Sitemaps → trimite `https://1v1game.net/sitemap-i18n.xml`.
-   - URL Inspection → `https://1v1game.net/` → Test live URL → în HTML trebuie să apară H1-ul „Online quiz game: 1v1 trivia duels” → Request indexing.
-   - Request indexing și pe `/es/`, `/pt/`, `/fr/`, `/de/`, `/ro/` (Google acceptă câteva pe zi).
-3. **Bing Webmaster Tools:** adaugă `https://1v1game.net/sitemap-i18n.xml`. `sitemap.xml` e deja trimis.
+2. **Google Search Console, în fiecare zi câteva minute** (limita e de ~10 cereri pe zi). Request indexing, în ordinea asta:
+   - `/pl/`, `/tr/`, `/quiz/space/`, `/quiz/music/`, `/quiz/art-literature/`, `/quiz-widget/`;
+   - hub-urile pe limbi: `/es/quiz/`, `/ro/quiz/` etc.;
+   - paginile cu steaguri: `/flag-quiz/north-america/`, `/es/quiz-banderas/` etc.;
+   - categoriile pe limbi.
+
+   Lista completă e în `https://1v1game.net/sitemap-i18n.xml`. Verifică în Sitemaps că `sitemap-i18n.xml` a trecut pe „Succes”. Urmărește raportul Indexare → Pagini: numărul de pagini indexate ar trebui să crească în 1–3 săptămâni.
+3. **Bing Webmaster Tools:** loghează-te cu contul Microsoft și adaugă `https://1v1game.net/sitemap-i18n.xml` (`sitemap.xml` e deja trimis).
+3b. **Ce mai aduce pagini indexate mai repede:** backlinkuri. Postările din `seo/LAUNCH.md`, listarea pe AlternativeTo, itch.io, CrazyGames/Poki și directoare de quiz-uri, plus widget-ul pus pe bloguri. Fără linkuri externe, Google indexează un domeniu nou încet.
 4. **Peste 2–4 săptămâni:** GSC → Performance, filtrat după țară și query. Extinzi paginile care prind afișări.
 5. **Features** (detalii în `seo/FEATURE-SPEC.md`):
    - **vs Friend asincron:** link `/c/<cod>`, `noindex`, imagine OG dinamică, share pe WhatsApp/Messenger/Discord. După lansare: `FEATURES.friend = true` în `seo/data/i18n.mjs`, apoi push (build-ul regenerează tot).
