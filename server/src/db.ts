@@ -120,6 +120,16 @@ export const createUser = db.transaction(
   },
 );
 
+const stmtPruneGuests = db.prepare(`
+  DELETE FROM users
+  WHERE is_guest = 1 AND created_at < ?
+    AND NOT EXISTS (SELECT 1 FROM duel_players dp WHERE dp.user_id = users.id)
+    AND NOT EXISTS (SELECT 1 FROM round_recordings rr WHERE rr.user_id = users.id)`);
+/** Deletes guest accounts created before `before` that never played (ratings cascade). Returns the count. */
+export function pruneIdleGuests(before: number): number {
+  return stmtPruneGuests.run(before).changes;
+}
+
 const stmtUpgradeUser = db.prepare('UPDATE users SET nickname = ?, pass_hash = ?, is_guest = 0 WHERE id = ?');
 /** Guest (or legacy nickname-only account) → registered account; keeps id, token, ratings and history. */
 export function upgradeUser(id: number, nickname: string, passHash: string) {

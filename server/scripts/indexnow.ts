@@ -7,8 +7,15 @@ import { INDEXNOW_KEY } from '../src/seo';
 const base = (process.argv[2] ?? process.env.PUBLIC_URL ?? 'https://1v1game.net').replace(/\/+$/, '');
 const host = new URL(base).host;
 
-const sitemap = await (await fetch(`${base}/sitemap.xml`)).text();
-const urlList = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]).filter((u) => new URL(u).host === host);
+// Both sitemaps: the game's English pages and the generated multilingual pages (seo/).
+const urlList: string[] = [];
+for (const name of ['sitemap.xml', 'sitemap-i18n.xml']) {
+  const r = await fetch(`${base}/${name}`);
+  if (!r.ok) continue;
+  for (const m of (await r.text()).matchAll(/<loc>([^<]+)<\/loc>/g)) {
+    if (new URL(m[1]).host === host && !urlList.includes(m[1])) urlList.push(m[1]);
+  }
+}
 if (!urlList.length) throw new Error('no URLs found in the sitemap');
 
 const keyCheck = await fetch(`${base}/${INDEXNOW_KEY}.txt`);

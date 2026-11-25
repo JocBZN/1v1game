@@ -81,6 +81,12 @@ html, body, #root {
   height: 100%;
 }
 
+/* The app is one screen tall and scrolls inside itself; the homepage text (#about in index.html)
+   follows below it in the page. */
+#root {
+  overflow-y: auto;
+}
+
 body {
   margin: 0;
   background: var(--color-bg);

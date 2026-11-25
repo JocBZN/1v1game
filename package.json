@@ -10,7 +10,8 @@
     "dev": "concurrently -k -n server,client -c cyan,magenta \"npm run dev -w server\" \"npm run dev -w client\"",
     "test": "npm test -w server",
     "typecheck": "npm run typecheck -w server && npm run typecheck -w client",
-    "build": "npm run build -w client",
+    "build": "npm run build:seo && npm run build -w client",
+    "build:seo": "node seo/scripts/build.mjs && node seo/scripts/check.mjs",
     "start": "npm start -w server",
     "validate:puzzles": "npm run validate:puzzles -w server"
   },

@@ -6,3 +6,6 @@ server/db
 .git
 .claude
 *.log
+seo/public
+seo/snippets
+seo/studio

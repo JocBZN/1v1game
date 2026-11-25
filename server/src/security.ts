@@ -50,7 +50,7 @@ function analyticsOrigins() {
   return { script, connect, img };
 }
 
-export function contentSecurityPolicy(inlineScriptHashes: string[] = []): string {
+export function contentSecurityPolicy(inlineScriptHashes: string[] = [], opts: { framable?: boolean } = {}): string {
   const a = analyticsOrigins();
   const self = "'self'";
   return [
@@ -66,7 +66,7 @@ export function contentSecurityPolicy(inlineScriptHashes: string[] = []): string
     "object-src 'none'",
     `base-uri ${self}`,
     `form-action ${self}`,
-    "frame-ancestors 'none'",
+    opts.framable ? 'frame-ancestors *' : "frame-ancestors 'none'",
     ...(canonical()?.protocol === 'https:' ? ['upgrade-insecure-requests'] : []),
   ].join('; ');
 }

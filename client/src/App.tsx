@@ -51,6 +51,12 @@ function Game({ me, refreshMe, onAuthDone, onLogout }: {
   const { state } = duel;
   const [route, go] = useRoute();
 
+  // The homepage text below the app (index.html, #about) is hidden while a duel is on screen.
+  useEffect(() => {
+    document.body.classList.toggle('in-duel', state.phase !== 'idle');
+    return () => document.body.classList.remove('in-duel');
+  }, [state.phase]);
+
   // Refresh ratings when a duel ends.
   useEffect(() => {
     if (state.phase === 'result') refreshMe();
@@ -192,8 +198,11 @@ export default function App() {
 
   const content = failed ? (
     <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
-      <div className="text-lg font-semibold">Can’t reach the server</div>
+      <div className="text-lg font-semibold">Can’t reach the game server right now</div>
       <button className="btn btn-secondary px-6 py-2.5" onClick={() => void boot()}>Try again</button>
+      <p className="text-sm text-muted">
+        Meanwhile, warm up with the <a className="underline" href="/quiz">free quizzes with answers</a>.
+      </p>
     </div>
   ) : !me ? (
     <div className="flex h-full items-center justify-center text-muted">Loading…</div>

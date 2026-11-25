@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Duel – 1v1 Brain Games",
   "short_name": "Duel",
-  "description": "Challenge a real opponent: trivia, chess puzzles, mental math, flags and a real Rubik’s Cube. Best of 3 rounds, ranked leagues.",
+  "description": "1v1 brain games: trivia, chess puzzles, mental math, flags and a real Rubik’s Cube. Best of 3 rounds, ranked leagues.",
   "lang": "en",
   "dir": "ltr",
   "start_url": "/?source=pwa",

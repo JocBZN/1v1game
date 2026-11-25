@@ -20,12 +20,12 @@ export const QUIZ_PAGES: QuizPageCopy[] = [
   {
     cat: 'history', slug: 'history', name: 'History',
     title: 'History Quiz: {n} History Trivia Questions & Answers',
-    description: 'Free history quiz with {n} trivia questions and answers: ancient Rome and Egypt, the World Wars, revolutions, empires and Romanian history. Then duel a real player.',
+    description: 'Free history quiz with {n} trivia questions and answers: ancient Rome and Egypt, the World Wars, revolutions, empires and Romanian history. Then play a 1v1 duel.',
     h1: 'History quiz: trivia questions and answers',
     intro: 'From the pharaohs and the Roman Empire to the fall of the Berlin Wall, these history trivia questions cover the people, battles and dates every history buff should know. Each question has four options; open the answer when you are ready. Want a real challenge? Play a live history round against another player and climb the rankings.',
     faq: [
       ['How hard are these history questions?', 'They mix easy, medium and hard questions, from the year World War II ended to who led the Expedition of the Thousand.'],
-      ['Can I play a history quiz against someone?', 'Yes. Duel matches you with a real opponent in seconds: three rounds on random topics, and history is one of the trivia categories.'],
+      ['Can I play a history quiz against someone?', 'Yes. Duel finds you an opponent in seconds: three rounds on random topics, and history is one of the trivia categories.'],
     ],
     related: ['geography', 'celebrities', 'general-knowledge'],
   },
@@ -44,7 +44,7 @@ export const QUIZ_PAGES: QuizPageCopy[] = [
   {
     cat: 'science', slug: 'science', name: 'Science',
     title: 'Science Quiz: {n} Science Trivia Questions & Answers',
-    description: 'Free science quiz with {n} questions and answers on physics, chemistry, biology, space and famous scientists. Learn something new, then duel a real player.',
+    description: 'Free science quiz with {n} questions and answers on physics, chemistry, biology, space and famous scientists. Learn something new, then play a 1v1 duel.',
     h1: 'Science quiz: physics, chemistry, biology and space',
     intro: 'Chemical symbols, planets and moons, the speed of sound, famous scientists and how the human body works: this science quiz has questions for curious minds of every level. It is a fun way to revise for exams or to win your next trivia night.',
     faq: [
@@ -56,12 +56,12 @@ export const QUIZ_PAGES: QuizPageCopy[] = [
   {
     cat: 'sport', slug: 'sports', name: 'Sports',
     title: 'Sports Quiz: {n} Sports Trivia Questions & Answers',
-    description: 'Sports quiz with {n} trivia questions and answers on the Olympics, tennis, basketball, F1, golf and athletics. Free online, then challenge a real opponent.',
+    description: 'Sports quiz with {n} trivia questions and answers on the Olympics, tennis, basketball, F1, golf and athletics. Free online, then play a 1v1 duel.',
     h1: 'Sports quiz: Olympics, tennis, basketball, F1 and more',
     intro: 'Grand Slams, Olympic records, Formula 1, the NBA, golf scoring and the rules of rugby: this sports trivia quiz is for fans who know more than just the scores. If football is your thing, there is a dedicated football quiz too.',
     faq: [
       ['Is football included?', 'Football has its own quiz with Champions League, World Cup and Premier League questions.'],
-      ['Can I play sports trivia with friends?', 'Duel is a 1v1 game: you are matched against a real opponent and see their score live.'],
+      ['Can I play sports trivia with friends?', 'Duel is a 1v1 game: you are matched against an opponent and see their score live.'],
     ],
     related: ['football', 'general-knowledge', 'celebrities'],
   },
@@ -85,7 +85,7 @@ export const QUIZ_PAGES: QuizPageCopy[] = [
     intro: 'World Cup winners, Champions League finals, Ballon d’Or winners, club nicknames and the laws of the game: this football quiz is built for real fans. From Pelé and Maradona to Messi, Ronaldo and Haaland, how many can you get right?',
     faq: [
       ['Is this soccer trivia up to date?', 'It includes recent seasons such as the 2024–25 Premier League and the 2025 Champions League final.'],
-      ['Can I play football trivia against someone?', 'Yes. Football questions come up in Duel’s live 1v1 trivia rounds.'],
+      ['Can I play football trivia against someone?', 'Yes. Football questions come up in Duel’s 1v1 trivia rounds.'],
     ],
     related: ['sports', 'celebrities', 'general-knowledge'],
   },
@@ -106,7 +106,7 @@ export const QUIZ_PAGES: QuizPageCopy[] = [
     title: 'Math Quiz: {n} Math Trivia Questions with Answers',
     description: 'Math quiz with {n} questions and answers: arithmetic, geometry, primes, fractions, Roman numerals and famous mathematicians. Plus a 1v1 mental math game.',
     h1: 'Math quiz: numbers, geometry and famous mathematicians',
-    intro: 'Primes, fractions, angles, Roman numerals, logarithms and the stories behind Gauss and Archimedes: this math quiz is part mental arithmetic, part maths trivia. When you are warmed up, try the timed mental math duel against a real player.',
+    intro: 'Primes, fractions, angles, Roman numerals, logarithms and the stories behind Gauss and Archimedes: this math quiz is part mental arithmetic, part maths trivia. When you are warmed up, try the timed 1v1 mental math duel.',
     faq: [
       ['Is there a mental math game?', 'Yes. Duel has a 60-second mental math round where problems get harder as you go.'],
       ['What level are the questions?', 'From primary-school arithmetic to questions about Gödel and the Poincaré conjecture.'],
@@ -133,7 +133,7 @@ export const QUIZ_PAGES: QuizPageCopy[] = [
     intro: 'Retinol or niacinamide? What does SPF really measure? Which notes of a perfume do you smell first? This beauty and makeup quiz covers skincare ingredients, sun protection, makeup techniques, nail and hair care, fragrances and the stories behind famous brands.',
     faq: [
       ['Is this a skincare quiz too?', 'Yes. Many questions are about skincare ingredients, SPF and how skin works.'],
-      ['Can I play it against a friend?', 'Beauty & Cosmetics is one of Duel’s live trivia categories.'],
+      ['Can I play it against a friend?', 'Beauty & Cosmetics is one of Duel’s trivia categories.'],
     ],
     related: ['celebrities', 'tv-shows', 'general-knowledge'],
   },
@@ -177,9 +177,9 @@ export const GENERAL_KNOWLEDGE = {
 
 export const QUIZ_HUB = {
   title: 'Free Online Quiz Games: 1,200+ Trivia Questions & Answers',
-  description: 'Free online quizzes and trivia questions with answers: general knowledge, history, geography, science, sports, football, movies, TV, flags and more. Play 1v1 live.',
+  description: 'Free online quizzes and trivia questions with answers: general knowledge, history, geography, science, sports, football, movies, TV, flags and more. Then duel 1v1.',
   h1: 'Free online quizzes and trivia questions',
-  intro: 'Pick a quiz below to practise with real questions and answers, or press Play to challenge a real opponent: three rounds, random topics, best of three wins. Duel combines trivia with flag quizzes, chess puzzles, mental math and a real Rubik’s Cube.',
+  intro: 'Pick a quiz below to practise with real questions and answers, or press Play for an instant 1v1 duel: three rounds, random topics, best of three wins. Duel combines trivia with flag quizzes, chess puzzles, mental math and a real Rubik’s Cube.',
 };
 
 export const FLAG_REGIONS = [

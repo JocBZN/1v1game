@@ -12,6 +12,7 @@ import { flagEmoji, loadCountries } from './modes/flags';
 import { practiceQuestions, TRIVIA_CATEGORIES, type Question } from './modes/trivia';
 import { publicUrl, shell } from './seo';
 import { FLAG_REGIONS, GENERAL_KNOWLEDGE, QUIZ_HUB, QUIZ_PAGES } from './seo-quiz-content';
+import { hasPack } from './seo-pack';
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const DIFF = ['', 'Easy', 'Medium', 'Hard'];
@@ -81,7 +82,7 @@ const relatedName = (slug: string) =>
   slug === 'flags' ? 'Flag quiz' : slug === GENERAL_KNOWLEDGE.slug ? 'General knowledge quiz' : `${QUIZ_PAGES.find((p) => p.slug === slug)?.name ?? slug} quiz`;
 
 const playCta = (what: string) =>
-  `<p><a class="cta" href="/">Play ${esc(what)} live, 1v1 — free</a></p><p>Duel matches you with a real opponent in seconds. Three rounds on random topics; win two to win the duel and climb from Bronze to Legend.</p>`;
+  `<p><a class="cta" href="/">Play ${esc(what)} 1v1 — free</a></p><p>Duel finds you an opponent in seconds. Three rounds on random topics; win two to win the duel and climb from Bronze to Legend.</p>`;
 
 // ---------------------------------------------------------------- pages
 
@@ -148,6 +149,16 @@ function hubPage(): string {
     `<a href="/chess-puzzles">♞ Chess puzzles</a>`,
     `<a href="/mental-math">🧮 Mental math</a>`,
     `<a href="/rubiks-cube">🧊 Rubik’s Cube</a>`,
+    ...(hasPack()
+      ? [
+          `<a href="/quiz/world-capitals/">🏛️ World capitals</a>`,
+          `<a href="/quiz/space/">🪐 Space</a>`,
+          `<a href="/quiz/music/">🎵 Music</a>`,
+          `<a href="/quiz/art-literature/">🎨 Art &amp; literature</a>`,
+          `<a href="/quiz-of-the-day/">📅 Quiz of the day</a>`,
+          `<a href="/general-knowledge-questions/">❓ General knowledge Q&amp;A</a>`,
+        ]
+      : []),
   ];
   const crumbs: [string, string][] = [['Home', '/'], ['Quizzes', '/quiz']];
   const body = `${crumbsHtml(crumbs)}
@@ -158,7 +169,7 @@ function hubPage(): string {
 <nav class="topics">${cards.join('')}</nav>
 <h2>Why play quizzes on Duel?</h2>
 <ul>
-<li><strong>Real opponents:</strong> live 1v1 quiz battles, matched by skill in seconds.</li>
+<li><strong>Instant opponents:</strong> a live player matched by rating, or a recorded duel of a real player when nobody is online.</li>
 <li><strong>${total} free practice questions</strong> with answers on these pages, and more than 1,200 in the game.</li>
 <li><strong>More than trivia:</strong> flags of 194 countries, chess puzzles, mental math and a 3D Rubik’s Cube.</li>
 <li><strong>Ranked:</strong> Glicko-2 ratings, leagues from Bronze to Legend and a global leaderboard.</li>
@@ -205,7 +216,7 @@ function flagRegionPage(id: string): string | null {
   return shell({
     path,
     title: `Flags of ${name}: All ${n} ${region.adjective} Flags with Names`,
-    description: `All ${n} flags of ${region.name} with country names, in one list. Learn every ${region.adjective} flag, then play a free 1v1 flag quiz against a real opponent.`,
+    description: `All ${n} flags of ${region.name} with country names, in one list. Learn every ${region.adjective} flag, then play a free 1v1 flag quiz in your browser.`,
     bodyHtml: body,
     jsonLd: [
       {

@@ -10,6 +10,8 @@ import { SERVER_ROOT } from './paths';
 import { contentSecurityPolicy, mountSecurity } from './security';
 import { makeIndexRenderer, mountSeo } from './seo';
 import { mountQuizPages, quizPaths } from './seo-quiz';
+import { mountSeoPack } from './seo-pack';
+import { pruneIdleGuests } from './db';
 import { attachSockets } from './socket';
 
 const PORT = Number(process.env.PORT ?? 3001);
@@ -26,6 +28,8 @@ if (process.env.NODE_ENV !== 'production') app.use(cors());
 app.get('/health', (_req, res) => res.json({ ok: true }));
 app.use('/api', createApi());
 mountAdmin(app);
+// Generated multilingual pages first: they own /es/, /quiz/space/, /flag-quiz/north-america/ …
+mountSeoPack(app);
 mountQuizPages(app);
 mountSeo(app, quizPaths);
 
@@ -63,6 +67,16 @@ attachSockets(server);
 server.listen(PORT, () => {
   console.log(`[duel] server on http://localhost:${PORT}`);
 });
+
+// Every visit without a token (crawlers included, now that robots.txt allows /api/guest) creates a
+// guest. Guests that never played anything are removed after two days.
+const GUEST_TTL_MS = 2 * 24 * 3600 * 1000;
+const prune = () => {
+  const n = pruneIdleGuests(Date.now() - GUEST_TTL_MS);
+  if (n) console.log(`[duel] removed ${n} idle guest accounts`);
+};
+prune();
+setInterval(prune, 6 * 3600 * 1000).unref();
 
 // Hosts stop the old instance with SIGTERM on every deploy: close cleanly so SQLite is checkpointed.
 for (const sig of ['SIGTERM', 'SIGINT'] as const) {

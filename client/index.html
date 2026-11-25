@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Online Quiz Game 1v1 – Trivia Battles vs Real People | 1v1game</title>
-    <meta name="description" content="Free online quiz game against real people: live 1v1 trivia battles with 1,200+ questions, a flag quiz, chess puzzles, mental math and a 3D Rubik’s Cube. No sign-up." />
+    <title>1v1 Trivia Quiz Online – General Knowledge Quiz Duels | 1v1game</title>
+    <meta name="description" content="Free 1v1 trivia quiz in your browser: general knowledge duels with 1,200+ questions, plus a flag quiz, chess puzzles and mental math. No download, no sign-up." />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
     <link rel="canonical" href="__PUBLIC_URL__/" />
     <meta name="theme-color" content="#fff1d1" />
@@ -17,7 +17,7 @@
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="1v1game · Duel" />
-    <meta property="og:title" content="Online quiz game 1v1 – trivia battles against real people" />
+    <meta property="og:title" content="1v1 trivia quiz – general knowledge duels in your browser" />
     <meta property="og:description" content="Trivia, chess puzzles, mental math, flags and a real Rubik’s Cube. Three rounds, one winner. Free in your browser." />
     <meta property="og:url" content="__PUBLIC_URL__/" />
     <meta property="og:image" content="__PUBLIC_URL__/og.png" />
@@ -25,7 +25,7 @@
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Duel – you vs anyone" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Duel – 1v1 brain games against real people" />
+    <meta name="twitter:title" content="Duel – 1v1 brain games in your browser" />
     <meta name="twitter:description" content="Trivia, chess puzzles, mental math, flags and a real Rubik’s Cube. Free in your browser." />
     <meta name="twitter:image" content="__PUBLIC_URL__/og.png" />
 
@@ -40,33 +40,42 @@
     <!--HOME_JSONLD-->
     <!--DUEL_CONFIG-->
     <style>
-      /* Pre-app landing (also what crawlers and link previews read). Replaced as soon as the app starts. */
-      .seo { max-width: 28rem; margin: 0 auto; padding: 3rem 1.25rem; font-family: Inter, system-ui, sans-serif; color: #2b1b12; background: #fff1d1; }
-      .seo h1 { font-size: 2.6rem; line-height: 1.05; letter-spacing: -0.04em; margin: 1rem 0 0.75rem; }
+      /* Homepage text and links. It sits OUTSIDE #root, so it never depends on the app or an API call:
+         crawlers and visitors always get the H1 and the links (below the game once the app is running). */
+      .seo { border-top: 1px solid #ecd6a8; background: #fff1d1; font-family: Inter, system-ui, sans-serif; color: #2b1b12; }
+      .seo > div { max-width: 40rem; margin: 0 auto; padding: 2.5rem 1.25rem 3rem; }
+      .seo h1 { font-size: clamp(2rem, 7vw, 2.6rem); line-height: 1.05; letter-spacing: -0.04em; margin: 1rem 0 0.75rem; }
+      .seo h2 { font-size: 1.1rem; margin: 1.75rem 0 0.4rem; }
       .seo p { color: #5c4734; line-height: 1.55; }
       .seo ul { padding-left: 1.1rem; line-height: 1.8; }
       .seo a { color: #007f8f; }
+      .seo nav a { display: inline-block; margin-right: 0.75rem; line-height: 1.9; }
       .seo .dots i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
+      body.in-duel .seo { display: none; }
     </style>
   </head>
   <body style="background: #fff1d1">
-    <div id="root">
-      <main class="seo">
+    <div id="root"></div>
+    <section class="seo" id="about">
+      <div>
         <div class="dots"><i style="background: #00b7cd"></i><i style="background: #ff9100"></i><i style="background: #df301c"></i></div>
-        <h1>Online quiz game: 1v1 trivia battles against real people</h1>
-        <p>Press Play and get a real opponent in seconds. Three rounds on random topics, best of three wins. Climb from Bronze to Legend.</p>
+        <h1>Online quiz game: 1v1 trivia duels</h1>
+        <p>Press Play and your duel starts instantly: a live opponent of similar rating, or a recorded duel of a real player when nobody is online. Three rounds on random topics, best of three wins. Climb from Bronze to Legend.</p>
         <ul>
-          <li><a href="/trivia">Trivia quiz battles</a> – 1,200+ questions in 12 categories</li>
+          <li><a href="/trivia">Trivia quiz duels</a> – 1,200+ questions in 12 categories</li>
           <li><a href="/flag-quiz">Flag quiz</a> – guess the flags of 194 countries</li>
           <li><a href="/chess-puzzles">Chess puzzles</a> – mate in 1, mate in 2, tactics</li>
           <li><a href="/mental-math">Mental math game</a> – speed arithmetic</li>
           <li><a href="/rubiks-cube">Rubik’s Cube online</a> – a real 3D cube, 5 minutes</li>
         </ul>
-        <p>Practice first: <a href="/quiz">free quizzes with answers</a> – <a href="/quiz/general-knowledge">general knowledge</a>, <a href="/quiz/history">history</a>, <a href="/quiz/geography">geography</a>, <a href="/quiz/science">science</a>, <a href="/quiz/football">football</a>, <a href="/quiz/movies-music">movies &amp; music</a>, <a href="/quiz/tv-shows">TV shows</a> and more.</p>
+        <h2>Free quizzes with answers</h2>
+        <p>Practice first: <a href="/quiz">all quizzes</a> – <a href="/quiz/general-knowledge">general knowledge</a>, <a href="/quiz/history">history</a>, <a href="/quiz/geography">geography</a>, <a href="/quiz/world-capitals/">world capitals</a>, <a href="/quiz/science">science</a>, <a href="/quiz/space/">space</a>, <a href="/quiz/football">football</a>, <a href="/quiz/movies-music">movies &amp; music</a>, <a href="/quiz/music/">music</a>, <a href="/quiz/art-literature/">art &amp; literature</a>, <a href="/quiz/tv-shows">TV shows</a> and more.</p>
+        <nav aria-label="More quizzes"><a href="/quiz-of-the-day/">Quiz of the day</a><a href="/general-knowledge-questions/">General knowledge questions and answers</a><a href="/quiz-widget/">Quiz widget for your site</a></nav>
         <p>Free, no download, no email. <a href="/how-to-play">How it works</a>.</p>
+        <nav aria-label="Languages"><a href="/es/" hreflang="es" lang="es">Español</a><a href="/pt/" hreflang="pt" lang="pt">Português</a><a href="/fr/" hreflang="fr" lang="fr">Français</a><a href="/de/" hreflang="de" lang="de">Deutsch</a><a href="/it/" hreflang="it" lang="it">Italiano</a><a href="/ro/" hreflang="ro" lang="ro">Română</a><a href="/pl/" hreflang="pl" lang="pl">Polski</a><a href="/tr/" hreflang="tr" lang="tr">Türkçe</a></nav>
         <noscript><p>Duel needs JavaScript to play.</p></noscript>
-      </main>
-    </div>
+      </div>
+    </section>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

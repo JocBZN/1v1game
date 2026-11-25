@@ -7,12 +7,13 @@ import path from 'node:path';
 import type express from 'express';
 import { scriptHash } from './security';
 import { FLAG_REGIONS } from './seo-quiz-content';
+import { hasPack, hreflangTags } from './seo-pack';
 
 export const SITE = {
   name: 'Duel',
-  title: 'Online Quiz Game 1v1 – Trivia Battles vs Real People | 1v1game',
+  title: '1v1 Trivia Quiz Online – General Knowledge Quiz Duels | 1v1game',
   description:
-    'Free online quiz game against real people: live 1v1 trivia battles with 1,200+ questions, a flag quiz, chess puzzles, mental math and a 3D Rubik’s Cube. No sign-up.',
+    'Free 1v1 trivia quiz in your browser: general knowledge duels with 1,200+ questions, plus a flag quiz, chess puzzles and mental math. No download, no sign-up.',
   themeColor: '#fff1d1',
 };
 
@@ -57,10 +58,10 @@ export const TOPIC_PAGES: TopicPage[] = [
     slug: 'trivia',
     emoji: '🧠',
     name: 'Trivia',
-    title: '1v1 Trivia Quiz Online – Live Trivia Duels',
+    title: '1v1 Trivia Quiz Online – Instant Trivia Duels',
     description:
-      'Play a live 1v1 trivia quiz against real people. 1,200+ questions on history, football, science, movies, TV, medicine, tech and more. Fast answers score more.',
-    h1: '1v1 trivia duels, live',
+      'Play a 1v1 trivia quiz online with an instant opponent. 1,200+ questions on history, football, science, movies, TV, medicine, tech and more. Fast answers score more.',
+    h1: '1v1 trivia duels',
     intro:
       'Answer five questions from five different categories before your opponent does. Duel has over 1,200 hand-checked questions on history, geography, science, sport, football, film & music, TV shows, medicine, maths, technology, beauty and famous people.',
     how: [
@@ -71,7 +72,7 @@ export const TOPIC_PAGES: TopicPage[] = [
     ],
     faq: [
       ['Is the trivia quiz free?', 'Yes. Duel is free and runs in your browser, on phone or desktop. Pick a nickname and play — no email, no password.'],
-      ['Do I play against real people?', 'Yes. If nobody is online within 5 seconds you play a “ghost”: a replay of a real player’s round with their original timing.'],
+      ['Do I play against real people?', 'Whenever someone is online, yes: Play matches you with a real player of similar rating. If nobody is free within 5 seconds you play a “ghost” (a replay of a real player’s round with their original timing) or a computer opponent.'],
       ['How many questions are there?', 'More than 1,200 questions in 12 categories, with at least 90 per category.'],
     ],
   },
@@ -79,10 +80,10 @@ export const TOPIC_PAGES: TopicPage[] = [
     slug: 'chess-puzzles',
     emoji: '♞',
     name: 'Chess puzzles',
-    title: 'Chess Puzzles Duel Online – Mate in 1, Mate in 2 vs Real Players',
+    title: 'Chess Puzzles Duel Online – Mate in 1, Mate in 2 Races',
     description:
-      'Race a real opponent on chess puzzles: mate in 1, mate in 2 and winning material. 90 seconds, one wrong move loses the puzzle. Free, in the browser.',
-    h1: 'Chess puzzle races against real players',
+      'Race an opponent on chess puzzles: mate in 1, mate in 2 and winning material. 90 seconds, one wrong move loses the puzzle. Free, in the browser.',
+    h1: 'Chess puzzle races, 1v1',
     intro:
       'Solve as many chess puzzles as you can in 90 seconds while your opponent does the same. Every move is checked on the server, so the board is always fair.',
     how: [
@@ -102,7 +103,7 @@ export const TOPIC_PAGES: TopicPage[] = [
     name: 'Mental math',
     title: 'Mental Math Game Online – 1v1 Speed Arithmetic Duels',
     description:
-      'Speed arithmetic against a real opponent: 60 seconds of mental math that gets harder as you go. Addition, subtraction, multiplication, division. Free online.',
+      'Speed arithmetic, 1v1: 60 seconds of mental math that gets harder as you go. Addition, subtraction, multiplication, division. Free online.',
     h1: 'Mental math, head to head',
     intro: 'Sixty seconds, as many problems as you can solve. The problems get harder the more you get right, and a mistake only costs a little.',
     how: [
@@ -118,7 +119,7 @@ export const TOPIC_PAGES: TopicPage[] = [
     name: 'Flags',
     title: 'Flag Quiz Online – Guess the Country, 1v1',
     description:
-      'Guess the flags of 194 countries against a real opponent. 8 flags, 6 seconds each, wrong answers from the same region. Free flag quiz game in your browser.',
+      'Guess the flags of 194 countries in a 1v1 duel. 8 flags, 6 seconds each, wrong answers from the same region. Free flag quiz game in your browser.',
     h1: 'Flag quiz duels',
     intro:
       'Eight flags, six seconds each. The wrong options always come from the same region, so you really need to know your flags — from Europe to Oceania.',
@@ -129,7 +130,7 @@ export const TOPIC_PAGES: TopicPage[] = [
     slug: 'rubiks-cube',
     emoji: '🧊',
     name: 'Rubik’s Cube',
-    title: 'Rubik’s Cube Online – Solve a 3D Cube vs a Real Player',
+    title: 'Rubik’s Cube Online – Solve a Real 3D Cube, 1v1',
     description:
       'Solve a real 3D Rubik’s Cube online against an opponent. Drag a row to turn it, drag outside to spin the cube. 5 minutes, scored on progress and speed.',
     h1: 'A real Rubik’s Cube, online, 1v1',
@@ -153,7 +154,7 @@ const HOW_TO_PLAY: TopicPage = {
     'Duel rules: 3 rounds on random topics, best of 3 wins. Glicko-2 ratings per topic, leagues from Bronze to Legend, ghosts when nobody is online.',
   h1: 'How Duel works',
   intro:
-    'Press Play and you are matched with someone of a similar rating. The server picks three different topics; win two rounds to win the duel. Your overall rating and your rating in each topic change after every duel.',
+    'Press Play and you are matched with a real player of similar rating. If nobody is online within a few seconds, you play a ghost (a recorded duel of a real player) or a computer opponent, so you never wait. The server picks three different topics; win two rounds to win the duel. Your overall rating and your rating in each topic change after every duel.',
   how: [
     'Topics: trivia, chess puzzles, mental math, flags and Rubik’s Cube.',
     'Leagues: Bronze, Silver (1300), Gold (1500), Platinum (1700), Diamond (1900), Legend (2100).',
@@ -162,7 +163,7 @@ const HOW_TO_PLAY: TopicPage = {
   ],
   faq: [
     ['Is Duel free?', 'Yes, completely free. It runs in the browser and can be installed on your phone’s home screen.'],
-    ['What is a ghost?', 'When nobody is online, you play a replay of a real player’s round, with their real timing and score.'],
+    ['What is a ghost?', 'When nobody is online, you play a replay of a real player’s round, with their real timing and score. If there is no recording for a topic yet, a computer opponent plays it.'],
   ],
 };
 
@@ -217,9 +218,9 @@ function pageHtml(p: TopicPage): string {
   ];
   const quizHub =
     p.slug === 'trivia'
-      ? `<h2>Practice quizzes with answers</h2><p>Warm up with free quizzes by topic: <a href="/quiz">all quizzes</a>, <a href="/quiz/general-knowledge">general knowledge</a>, <a href="/quiz/history">history</a>, <a href="/quiz/geography">geography</a>, <a href="/quiz/science">science</a>, <a href="/quiz/football">football</a> and more.</p>`
+      ? `<h2>Practice quizzes with answers</h2><p>Warm up with free quizzes by topic: <a href="/quiz">all quizzes</a>, <a href="/quiz/general-knowledge">general knowledge</a>, <a href="/quiz/history">history</a>, <a href="/quiz/geography">geography</a>, <a href="/quiz/science">science</a>, <a href="/quiz/football">football</a>, <a href="/quiz/world-capitals/">world capitals</a>, <a href="/quiz/space/">space</a> and more, or the <a href="/quiz-of-the-day/">quiz of the day</a>.</p>`
       : p.slug === 'flag-quiz'
-        ? `<h2>Flags by continent</h2><nav class="topics">${FLAG_REGIONS.map((r) => `<a href="/flag-quiz/${r.id}">Flags of ${esc(r.name)}</a>`).join('')}</nav>`
+        ? `<h2>Flags by continent</h2><nav class="topics">${FLAG_REGIONS.map((r) => `<a href="/flag-quiz/${r.id}">Flags of ${esc(r.name)}</a>`).join('')}${hasPack() ? '<a href="/flag-quiz/north-america/">Flags of North America</a><a href="/flag-quiz/south-america/">Flags of South America</a>' : ''}</nav>`
         : '';
   const body = `<h1>${esc(p.emoji)} ${esc(p.h1)}</h1>
 <p class="lead">${esc(p.intro)}</p>
@@ -256,7 +257,7 @@ export function shell(o: {
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(o.description)}">
 <link rel="canonical" href="${url}">
-<link rel="alternate" hreflang="en" href="${url}"><link rel="alternate" hreflang="x-default" href="${url}">
+${hreflangTags(o.path)}
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="theme-color" content="${SITE.themeColor}">
 <meta property="og:type" content="website">
@@ -289,6 +290,7 @@ ${o.bodyHtml}
 </main>
 <footer>
 <nav class="foot"><strong>Quizzes</strong> ${FOOTER_QUIZ_LINKS}</nav>
+${hasPack() ? FOOTER_PACK_LINKS : ''}
 <nav class="foot"><strong>Games</strong> <a href="/trivia">Trivia duel</a> <a href="/chess-puzzles">Chess puzzles</a> <a href="/mental-math">Mental math</a> <a href="/flag-quiz">Flag quiz</a> <a href="/rubiks-cube">Rubik’s Cube</a></nav>
 <p>© ${new Date().getFullYear()} Duel on 1v1game.net · 1v1 brain games in your browser · <a href="/privacy">Privacy</a></p>
 </footer>
@@ -303,6 +305,9 @@ const FOOTER_QUIZ_LINKS = [
 ]
   .map(([s, n]) => `<a href="/quiz/${s}">${n}</a>`)
   .join(' ');
+
+const FOOTER_PACK_LINKS = `<nav class="foot"><strong>More</strong> <a href="/quiz-of-the-day/">Quiz of the day</a> <a href="/general-knowledge-questions/">General knowledge questions</a> <a href="/quiz/world-capitals/">World capitals quiz</a> <a href="/quiz/space/">Space quiz</a> <a href="/quiz/music/">Music quiz</a> <a href="/quiz/art-literature/">Art &amp; literature quiz</a> <a href="/quiz-widget/">Quiz widget</a></nav>
+<nav class="foot" aria-label="Languages"><strong>Languages</strong> <a href="/" hreflang="en" lang="en">English</a> <a href="/es/" hreflang="es" lang="es">Español</a> <a href="/pt/" hreflang="pt" lang="pt">Português</a> <a href="/fr/" hreflang="fr" lang="fr">Français</a> <a href="/de/" hreflang="de" lang="de">Deutsch</a> <a href="/it/" hreflang="it" lang="it">Italiano</a> <a href="/ro/" hreflang="ro" lang="ro">Română</a> <a href="/pl/" hreflang="pl" lang="pl">Polski</a> <a href="/tr/" hreflang="tr" lang="tr">Türkçe</a></nav>`;
 
 export function homeJsonLd(): string {
   const base = publicUrl();
@@ -345,7 +350,7 @@ export function makeIndexRenderer(distDir: string): () => { html: string; inline
     const configScript = `window.__DUEL__=${JSON.stringify(clientConfig()).replace(/</g, '\\u003c')}`;
     const html = tpl
       .replaceAll('__PUBLIC_URL__', publicUrl())
-      .replace('<!--HOME_JSONLD-->', `<script type="application/ld+json">${homeJsonLd()}</script>`)
+      .replace('<!--HOME_JSONLD-->', `${hreflangTags('/')}\n<script type="application/ld+json">${homeJsonLd()}</script>`)
       .replace('<!--DUEL_CONFIG-->', `<script>${configScript}</script>`);
     cached = { html, inlineScriptHash: scriptHash(configScript) };
     return cached;
@@ -404,7 +409,7 @@ export function mountSeo(app: express.Express, extraPaths: () => string[] = () =
   });
 
   app.get('/robots.txt', (_req, res) => {
-    res.type('text/plain').send(`User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /admin\n\nSitemap: ${publicUrl()}/sitemap.xml\n`);
+    res.type('text/plain').send(`User-agent: *\nAllow: /\nAllow: /api/guest\nDisallow: /api/\nDisallow: /admin\n\nSitemap: ${publicUrl()}/sitemap.xml\n${hasPack() ? `Sitemap: ${publicUrl()}/sitemap-i18n.xml\n` : ''}`);
   });
 
   app.get('/sitemap.xml', (_req, res) => {
