@@ -289,8 +289,7 @@ ${ld}
 ${o.bodyHtml}
 </main>
 <footer>
-<nav class="foot"><strong>Quizzes</strong> ${FOOTER_QUIZ_LINKS}</nav>
-${hasPack() ? FOOTER_PACK_LINKS : ''}
+${hasPack() ? FOOTER_LANG_LINKS : ''}
 <nav class="foot"><strong>Games</strong> <a href="/trivia">Trivia duel</a> <a href="/chess-puzzles">Chess puzzles</a> <a href="/mental-math">Mental math</a> <a href="/flag-quiz">Flag quiz</a> <a href="/rubiks-cube">Rubik’s Cube</a></nav>
 <p>© ${new Date().getFullYear()} Duel on 1v1game.net · 1v1 brain games in your browser · <a href="/privacy">Privacy</a></p>
 </footer>
@@ -298,16 +297,7 @@ ${hasPack() ? FOOTER_PACK_LINKS : ''}
 </html>`;
 }
 
-const FOOTER_QUIZ_LINKS = [
-  ['general-knowledge', 'General knowledge'], ['history', 'History'], ['geography', 'Geography'], ['science', 'Science'],
-  ['sports', 'Sports'], ['football', 'Football'], ['movies-music', 'Movies & music'], ['tv-shows', 'TV shows'],
-  ['medical', 'Medical'], ['math', 'Math'], ['technology', 'Technology'], ['beauty', 'Beauty'], ['celebrities', 'Celebrities'],
-]
-  .map(([s, n]) => `<a href="/quiz/${s}">${n}</a>`)
-  .join(' ');
-
-const FOOTER_PACK_LINKS = `<nav class="foot"><strong>More</strong> <a href="/quiz-of-the-day/">Quiz of the day</a> <a href="/general-knowledge-questions/">General knowledge questions</a> <a href="/quiz/world-capitals/">World capitals quiz</a> <a href="/quiz/space/">Space quiz</a> <a href="/quiz/music/">Music quiz</a> <a href="/quiz/art-literature/">Art &amp; literature quiz</a> <a href="/quiz-widget/">Quiz widget</a></nav>
-<nav class="foot" aria-label="Languages"><strong>Languages</strong> <a href="/" hreflang="en" lang="en">English</a> <a href="/es/" hreflang="es" lang="es">Español</a> <a href="/pt/" hreflang="pt" lang="pt">Português</a> <a href="/fr/" hreflang="fr" lang="fr">Français</a> <a href="/de/" hreflang="de" lang="de">Deutsch</a> <a href="/it/" hreflang="it" lang="it">Italiano</a> <a href="/ro/" hreflang="ro" lang="ro">Română</a> <a href="/pl/" hreflang="pl" lang="pl">Polski</a> <a href="/tr/" hreflang="tr" lang="tr">Türkçe</a></nav>`;
+const FOOTER_LANG_LINKS = `<nav class="foot" aria-label="Languages"><strong>Languages</strong> <a href="/" hreflang="en" lang="en">English</a> <a href="/es/" hreflang="es" lang="es">Español</a> <a href="/pt/" hreflang="pt" lang="pt">Português</a> <a href="/fr/" hreflang="fr" lang="fr">Français</a> <a href="/de/" hreflang="de" lang="de">Deutsch</a> <a href="/it/" hreflang="it" lang="it">Italiano</a> <a href="/ro/" hreflang="ro" lang="ro">Română</a> <a href="/pl/" hreflang="pl" lang="pl">Polski</a> <a href="/tr/" hreflang="tr" lang="tr">Türkçe</a></nav>`;
 
 export function homeJsonLd(): string {
   const base = publicUrl();
