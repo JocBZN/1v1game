@@ -167,7 +167,142 @@ const HOW_TO_PLAY: TopicPage = {
   ],
 };
 
-const ALL_PAGES = [...TOPIC_PAGES, HOW_TO_PLAY];
+/**
+ * Pages for broad searches ("1v1 games", "2 player games", "quiz games"…). Each one answers its own
+ * intent with specific content and links into the game and the quizzes, rather than repeating the homepage.
+ */
+export const KEYWORD_PAGES: TopicPage[] = [
+  {
+    slug: '1v1-games',
+    emoji: '⚔️',
+    name: '1v1 games',
+    title: '1v1 Games Online – Free Brain Game Duels, No Download',
+    description:
+      'Free 1v1 games in your browser: trivia, flag quiz, chess puzzles, mental math and a 3D Rubik’s Cube. One opponent, three rounds, best of three. No download.',
+    h1: '1v1 games online: five brain games, one opponent',
+    intro:
+      'Duel is a 1v1 game where every match mixes three different brain games. You don’t pick the game: the server draws three topics at random, so you need to be good at trivia, flags, chess, maths and the Rubik’s Cube to win consistently. It runs in any browser, on phone or PC, and a match takes about five minutes.',
+    how: [
+      'Press Play: you are matched with a live player of similar rating, or a recorded duel of a real player (or a computer opponent) if nobody is online within a few seconds.',
+      'Three rounds on three different topics: trivia, flags, chess puzzles, mental math or Rubik’s Cube.',
+      'Win two rounds to win the duel. Every duel changes your Glicko-2 rating, overall and per topic.',
+      'Climb the leagues from Bronze to Legend and appear on the leaderboard once you create a free account.',
+    ],
+    faq: [
+      ['Is this the shooter game 1v1.LOL?', 'No. Duel (1v1game.net) is a 1v1 brain game: knowledge, logic and speed instead of building and shooting. It is free and runs in the browser.'],
+      ['Do I need to download anything?', 'No. Open 1v1game.net and press Play. You can install it on your phone’s home screen like an app if you want.'],
+      ['Which 1v1 games are included?', 'A trivia quiz with 1,200+ questions, a flag quiz with 194 countries, chess puzzles (mate in 1 and 2), mental math and a real 3D Rubik’s Cube.'],
+    ],
+  },
+  {
+    slug: '2-player-games',
+    emoji: '👥',
+    name: '2 player games',
+    title: '2 Player Games Online – Free Quiz, Chess & Math Duels',
+    description:
+      'Free 2 player games online: trivia, flags, chess puzzles, mental math and Rubik’s Cube duels, one round each. Play in the browser on phone or PC.',
+    h1: '2 player games online, in your browser',
+    intro:
+      'Every match on Duel is a two-player game: you and one opponent, the same questions or puzzles at the same moment, and you see their score move while you play. It is built for short sessions — one duel takes about five minutes — and works the same on a phone, a tablet or a laptop.',
+    how: [
+      'Both players get exactly the same content in each round, so the faster and more accurate player wins.',
+      'Scores update live on both screens during the round.',
+      'Rounds are short: 10 seconds per trivia question, 6 seconds per flag, 60–90 seconds for maths and chess.',
+      'If nobody else is online, you play a recorded duel of a real player, so you never wait.',
+    ],
+    faq: [
+      ['Can I play with a friend?', 'Private friend invites are coming soon. Today, Play matches you with another player automatically.'],
+      ['Is it free?', 'Yes. Duel is free, with no download and no sign-up needed to start.'],
+    ],
+  },
+  {
+    slug: 'quiz-games',
+    emoji: '❓',
+    name: 'Quiz games',
+    title: 'Quiz Games Online – Free Multiplayer Quiz, 1v1',
+    description:
+      'Free online quiz games: 1v1 trivia duels with 1,200+ questions in 12 categories, a flag quiz and free practice quizzes with answers. No sign-up.',
+    h1: 'Quiz games online: play the quiz against someone',
+    intro:
+      'Most online quizzes are solo: you answer, you get a score, you leave. On Duel the quiz is a match — an opponent answers the same questions at the same time, and speed matters as much as knowledge. Warm up on the free quizzes with answers, then put it to the test in a 1v1.',
+    how: [
+      'Trivia rounds: 5 questions from 5 different categories, 10 seconds each.',
+      'A correct answer scores 500 points plus up to 500 for speed.',
+      'Flag quiz rounds: 8 flags, 6 seconds each, with wrong answers from the same region.',
+      'Free practice quizzes with answers on history, geography, science, sports, football, films, TV and more.',
+    ],
+    faq: [
+      ['What kind of quiz questions are there?', 'General knowledge in 12 categories: history, geography, science, sport, football, film & music, TV shows, medicine, maths, technology, beauty and famous people.'],
+      ['Are the practice questions the same as in the game?', 'No. The questions published on the practice pages are never used in ranked rounds, so reading them doesn’t give anyone an unfair edge.'],
+    ],
+  },
+  {
+    slug: 'trivia-games',
+    emoji: '🧠',
+    name: 'Trivia games',
+    title: 'Trivia Games Online – Free Trivia with 1,200+ Questions',
+    description:
+      'Play free trivia games online: 1,200+ hand-checked questions in 12 categories, 1v1 trivia duels and trivia questions with answers. Works on phone and PC.',
+    h1: 'Trivia games online, free and fast',
+    intro:
+      'Duel’s trivia is built for quick, fair games: every question is checked by hand, each round mixes five categories so nobody can rely on one specialty, and fast correct answers score more. Play a 1v1 trivia duel, or browse the trivia questions and answers by topic.',
+    how: [
+      '1,200+ questions, at least 90 per category, with easy, medium and hard questions.',
+      'Each trivia round takes about a minute: 5 questions, 10 seconds each.',
+      'Trivia is one of five round types, so a duel can also include flags, chess, maths or the Rubik’s Cube.',
+      'A daily quiz of the day with 10 new questions to keep your streak going.',
+    ],
+    faq: [
+      ['Is there a daily trivia quiz?', 'Yes: the quiz of the day has 10 new general knowledge questions every day, with a score you can share.'],
+      ['Which trivia categories are there?', 'History, geography, science, sports, football, film & music, TV shows, medicine, maths, technology, beauty and famous people.'],
+    ],
+  },
+  {
+    slug: 'brain-games',
+    emoji: '🧩',
+    name: 'Brain games',
+    title: 'Brain Games Online – Free Brain Training Duels for Adults',
+    description:
+      'Free brain games for adults: general knowledge, flags, chess puzzles, mental arithmetic and a 3D Rubik’s Cube, played as short 1v1 duels in the browser.',
+    h1: 'Brain games online, played against an opponent',
+    intro:
+      'Brain training works better when there is something at stake. Duel turns five classic brain games — memory and knowledge, visual recognition, logic, arithmetic and spatial reasoning — into short duels against an opponent, with a rating that shows whether you are actually improving.',
+    how: [
+      'Knowledge: trivia questions from 12 categories.',
+      'Visual memory: recognise the flags of 194 countries.',
+      'Logic: chess puzzles, mate in 1 and mate in 2.',
+      'Speed arithmetic: mental math that gets harder as you go.',
+      'Spatial reasoning: a real 3D Rubik’s Cube you turn with your finger or mouse.',
+    ],
+    faq: [
+      ['Is it suitable for adults and teenagers?', 'Yes. The questions are general-audience and the difficulty adapts through matchmaking: you mostly play people of a similar rating.'],
+      ['How long does a game take?', 'About five minutes for a full duel of three rounds.'],
+    ],
+  },
+  {
+    slug: 'geography-games',
+    emoji: '🌍',
+    name: 'Geography games',
+    title: 'Geography Games Online – Flag & Capital Quiz Duels',
+    description:
+      'Free geography games: guess the flags of 194 countries, world capitals and geography trivia in 1v1 duels, plus flag lists by continent to learn from.',
+    h1: 'Geography games: flags, capitals and countries',
+    intro:
+      'Geography on Duel comes in two forms: the flag quiz, where you recognise 194 country flags against the clock, and geography trivia — capitals, rivers, mountains, deserts and borders. Learn with the flag lists by continent and the capitals quiz, then test yourself in a duel.',
+    how: [
+      'Flag rounds: 8 flags, 6 seconds each; the wrong options come from the same region.',
+      'Geography trivia: capitals, rivers, mountains, oceans and record holders.',
+      'Study pages: all flags of Europe, Asia, Africa, the Americas and Oceania, with names.',
+      'A world capitals quiz with answers to practise before you play.',
+    ],
+    faq: [
+      ['How many countries are in the flag quiz?', 'All 194: the 193 UN member states plus Vatican City, grouped by continent.'],
+      ['Can I learn the flags first?', 'Yes. The flag pages list every flag of each continent with the country name.'],
+    ],
+  },
+];
+
+const ALL_PAGES = [...TOPIC_PAGES, HOW_TO_PLAY, ...KEYWORD_PAGES];
 
 const PAGE_CSS = `
 *{box-sizing:border-box}body{margin:0;background:#fff1d1;color:#2b1b12;font:16px/1.6 Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
@@ -217,9 +352,9 @@ function pageHtml(p: TopicPage): string {
     },
   ];
   const quizHub =
-    p.slug === 'trivia'
+    !['flag-quiz', 'geography-games', 'chess-puzzles', 'mental-math', 'rubiks-cube', 'how-to-play'].includes(p.slug)
       ? `<h2>Practice quizzes with answers</h2><p>Warm up with free quizzes by topic: <a href="/quiz">all quizzes</a>, <a href="/quiz/general-knowledge">general knowledge</a>, <a href="/quiz/history">history</a>, <a href="/quiz/geography">geography</a>, <a href="/quiz/science">science</a>, <a href="/quiz/football">football</a>, <a href="/quiz/world-capitals/">world capitals</a>, <a href="/quiz/space/">space</a> and more, or the <a href="/quiz-of-the-day/">quiz of the day</a>.</p>`
-      : p.slug === 'flag-quiz'
+      : ['flag-quiz', 'geography-games'].includes(p.slug)
         ? `<h2>Flags by continent</h2><nav class="topics">${FLAG_REGIONS.map((r) => `<a href="/flag-quiz/${r.id}">Flags of ${esc(r.name)}</a>`).join('')}${hasPack() ? '<a href="/flag-quiz/north-america/">Flags of North America</a><a href="/flag-quiz/south-america/">Flags of South America</a>' : ''}</nav>`
         : '';
   const body = `<h1>${esc(p.emoji)} ${esc(p.h1)}</h1>
@@ -290,8 +425,7 @@ ${o.bodyHtml}
 </main>
 <footer>
 ${hasPack() ? FOOTER_LANG_LINKS : ''}
-<nav class="foot"><strong>Games</strong> <a href="/trivia">Trivia duel</a> <a href="/chess-puzzles">Chess puzzles</a> <a href="/mental-math">Mental math</a> <a href="/flag-quiz">Flag quiz</a> <a href="/rubiks-cube">Rubik’s Cube</a></nav>
-<p>© ${new Date().getFullYear()} Duel on 1v1game.net · 1v1 brain games in your browser · <a href="/privacy">Privacy</a></p>
+<nav class="foot"><strong>Games</strong> <a href="/trivia">Trivia duel</a> <a href="/chess-puzzles">Chess puzzles</a> <a href="/mental-math">Mental math</a> <a href="/flag-quiz">Flag quiz</a> <a href="/rubiks-cube">Rubik’s Cube</a></nav><p>© ${new Date().getFullYear()} Duel on 1v1game.net · 1v1 brain games in your browser · <a href="/privacy">Privacy</a></p>
 </footer>
 </body>
 </html>`;
