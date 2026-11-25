@@ -5,10 +5,10 @@ import type { League } from './api';
 export const LEAGUE_META: Record<League['id'], { name: string; icon: LucideIcon; color: string }> = {
   bronze: { name: 'Bronze', icon: Medal, color: '#9c5a2e' },
   silver: { name: 'Silver', icon: Medal, color: '#7a7268' },
-  gold: { name: 'Gold', icon: Medal, color: '#b56500' },
+  gold: { name: 'Gold', icon: Medal, color: '#c8705f' },
   platinum: { name: 'Platinum', icon: Shield, color: '#4f7f7a' },
-  diamond: { name: 'Diamond', icon: Gem, color: '#007f8f' },
-  legend: { name: 'Legend', icon: Crown, color: '#df301c' },
+  diamond: { name: 'Diamond', icon: Gem, color: '#15788c' },
+  legend: { name: 'Legend', icon: Crown, color: '#ff6973' },
 };
 
 export const LEAGUE_THRESHOLDS: { id: League['id']; min: number }[] = [

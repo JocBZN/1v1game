@@ -32,11 +32,11 @@ export function RoundEndScreen({ found, data }: { found: Found; data: RoundEnd }
           initial={{ scale: 1.6, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 300, damping: 12, delay: 0.1 }}
-          className={`mt-4 flex items-center justify-center gap-2 font-display text-4xl font-extrabold tracking-tight ${color}`}
+          className={`mt-4 flex items-center justify-center gap-2 font-display text-4xl font-bold tracking-tight ${color}`}
         >
           <Icon size={30} strokeWidth={2.6} /> {title}
         </motion.div>
-        <div className="mt-5 flex items-center justify-center gap-6 font-display text-5xl font-extrabold tabular-nums tracking-tight">
+        <div className="mt-5 flex items-center justify-center gap-6 font-display text-5xl font-bold tabular-nums tracking-tight">
           <span className="text-me">{you}</span>
           <span className="text-xl text-line-strong">–</span>
           <span className="text-foe">{opp}</span>

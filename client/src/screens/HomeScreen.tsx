@@ -5,41 +5,21 @@ import type { Me } from '../lib/api';
 import { DOMAIN_LIST } from '../lib/domains';
 import { LEAGUE_META, leagueProgress } from '../lib/leagues';
 import { useInstallPrompt } from '../lib/pwa';
-import { Avatar, LeagueBadge, LeagueIcon, Progress, Screen, TopicIcon, rise, useAnimatedNumber } from '../components/ui';
+import { Avatar, LeagueIcon, Screen, TopicIcon, rise, useAnimatedNumber } from '../components/ui';
 import { SignupPrompt } from '../components/SignupPrompt';
 
-/** The big Play button: rotating light ring, soft pulse, presses in like a real button. */
+/** The Play button: a plain teal circle with one quiet ring. */
 function PlayButton({ onPlay, disabled }: { onPlay: () => void; disabled: boolean }) {
   return (
-    <div className="relative flex h-52 w-52 items-center justify-center">
-      <motion.div
-        aria-hidden
-        className="absolute inset-0 rounded-full opacity-80 blur-[2px]"
-        style={{ background: 'conic-gradient(from 0deg, #ff9100, #df301c, #00b7cd, #ff9100)' }}
-        animate={{ rotate: 360 }}
-        transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
-      />
-      <motion.div
-        aria-hidden
-        className="absolute inset-0 rounded-full bg-red/40 blur-2xl"
-        animate={{ scale: [0.85, 1.08, 0.85], opacity: [0.5, 0.9, 0.5] }}
-        transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <div className="absolute inset-[7px] rounded-full bg-bg" />
-      <motion.button
-        onClick={onPlay}
-        disabled={disabled}
-        whileHover={disabled ? undefined : { scale: 1.04 }}
-        whileTap={disabled ? undefined : { scale: 0.94 }}
-        className="relative h-40 w-40 rounded-full font-display text-4xl font-extrabold tracking-tight text-[#fff8e8] disabled:opacity-50"
-        style={{
-          background: 'radial-gradient(circle at 35% 25%, #ff6a4d, #df301c 55%, #a8230f)',
-          boxShadow: '0 8px 0 #7d190a, 0 22px 40px -14px rgb(223 48 28 / 0.75), inset 0 3px 0 rgb(255 255 255 / 0.25)',
-        }}
-      >
-        Play
-      </motion.button>
-    </div>
+    <motion.button
+      onClick={onPlay}
+      disabled={disabled}
+      whileHover={disabled ? undefined : { scale: 1.03 }}
+      whileTap={disabled ? undefined : { scale: 0.97 }}
+      className="flex h-40 w-40 items-center justify-center rounded-full bg-teal font-display text-4xl font-bold tracking-tight text-[#fff8e6] ring-8 ring-teal/10 transition-colors hover:bg-[#12697b] disabled:opacity-50"
+    >
+      Play
+    </motion.button>
   );
 }
 
@@ -71,7 +51,7 @@ export function HomeScreen({ me, onPlay, onNavigate, connected }: {
             <button onClick={() => onNavigate('login')} className="btn btn-secondary h-9 px-3 text-sm">
               <LogIn size={15} strokeWidth={2.5} /> Log in
             </button>
-            <button onClick={() => onNavigate('signup')} className="btn btn-accent h-9 px-3 text-sm">
+            <button onClick={() => onNavigate('signup')} className="btn btn-primary h-9 px-3 text-sm">
               <UserPlus size={15} strokeWidth={2.5} /> Sign up
             </button>
           </div>
@@ -82,41 +62,29 @@ export function HomeScreen({ me, onPlay, onNavigate, connected }: {
         )}
       </motion.header>
 
-      <motion.section
-        {...rise(1)}
-        className="relative mt-5 overflow-hidden rounded-[1.75rem] p-5 text-[#fff8e8]"
-        style={{
-          background: `radial-gradient(120% 140% at 100% 0%, ${league.color}55, transparent 55%), linear-gradient(150deg, #3a2417, #2b1b12)`,
-          boxShadow: '0 18px 40px -22px rgb(43 27 18 / 0.8), inset 0 1px 0 rgb(255 255 255 / 0.08)',
-        }}
-      >
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#fff1d1]/60">Overall rating</span>
-          <span className="rounded-full bg-[#fff1d1]/95 px-0.5 py-0.5">
-            <LeagueBadge league={me.league.id} small />
-          </span>
+      <motion.section {...rise(1)} className="mt-6 flex items-end justify-between gap-4 border-b border-line pb-4">
+        <div>
+          <div className="label">Rating</div>
+          <div className="font-display text-4xl font-bold tabular-nums tracking-tight">{rating}</div>
         </div>
-        <div className="mt-1 font-display text-6xl font-extrabold tabular-nums tracking-tight">{rating}</div>
-        {prog.next ? (
-          <div className="mt-4">
-            <Progress value={prog.pct} color={`linear-gradient(90deg, ${league.color}, #ff9100)`} className="bg-[#fff1d1]/15 shadow-none" />
-            <div className="mt-2 flex items-center gap-1.5 text-xs font-medium text-[#fff1d1]/70">
-              {prog.toGo} to <LeagueIcon league={prog.next} size={13} /> <span className="font-semibold text-[#fff1d1]">{LEAGUE_META[prog.next].name}</span>
-            </div>
-          </div>
-        ) : (
-          <div className="mt-3 flex items-center gap-1.5 text-sm font-semibold text-[#ffb98a]">
-            <Crown size={16} strokeWidth={2.5} /> You’re at the top
-          </div>
-        )}
+        <div className="flex flex-col items-end gap-1 text-xs text-muted">
+          <span className="flex items-center gap-1.5 font-semibold" style={{ color: league.color }}>
+            <LeagueIcon league={me.league.id} size={14} /> {league.name}
+          </span>
+          {prog.next ? (
+            <span>{prog.toGo} to {LEAGUE_META[prog.next].name}</span>
+          ) : (
+            <span className="flex items-center gap-1"><Crown size={12} /> Top league</span>
+          )}
+        </div>
       </motion.section>
 
       {guest && (
-        <motion.div {...rise(2)} className="mt-3">
+        <motion.div {...rise(2)} className="mt-2">
           <SignupPrompt
             compact
             where="home"
-            title="You’re playing as a guest"
+            title="Playing as a guest"
             text={g.games > 0 ? 'Create a free account to save your rating and get on the leaderboard.' : 'Play now. Create a free account anytime to save your progress and get on the leaderboard.'}
             onSignup={() => onNavigate('signup')}
           />
@@ -124,15 +92,15 @@ export function HomeScreen({ me, onPlay, onNavigate, connected }: {
       )}
 
       <div className="flex flex-1 flex-col items-center justify-center py-7">
-        <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 180, damping: 14, delay: 0.12 }}>
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.1 }}>
           <PlayButton onPlay={onPlay} disabled={!connected} />
         </motion.div>
-        <p className="mt-4 text-sm font-semibold text-muted">{connected ? '3 rounds · random topics · best of 3' : 'Connecting…'}</p>
-        <div className="mt-4 flex gap-2">
-          {DOMAIN_LIST.map((d, i) => (
-            <motion.span key={d.id} title={d.name} initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.25 + i * 0.06, type: 'spring', stiffness: 260, damping: 18 }}>
-              <TopicIcon domain={d.id} size={40} solid />
-            </motion.span>
+        <p className="mt-6 text-sm text-muted">{connected ? '3 rounds · random topics' : 'Connecting…'}</p>
+        <div className="mt-3 flex gap-3 text-muted">
+          {DOMAIN_LIST.map((d) => (
+            <span key={d.id} title={d.name}>
+              <TopicIcon domain={d.id} size={32} />
+            </span>
           ))}
         </div>
         {canInstall && (
@@ -143,15 +111,15 @@ export function HomeScreen({ me, onPlay, onNavigate, connected }: {
       </div>
 
       <motion.div {...rise(3)} className="grid gap-3 pb-2">
-        <button onClick={() => onNavigate('friend')} disabled={!connected} className="btn btn-accent w-full py-3.5">
+        <button onClick={() => onNavigate('friend')} disabled={!connected} className="btn btn-secondary w-full py-3.5">
           <Users size={18} strokeWidth={2.5} /> Play with a friend
         </button>
         <nav className="grid grid-cols-2 gap-3">
           <button onClick={() => onNavigate('leaderboard')} className="btn btn-secondary py-3.5">
-            <Trophy size={17} strokeWidth={2.5} className="text-orange-strong" /> Leaderboard
+            <Trophy size={17} strokeWidth={2} /> Leaderboard
           </button>
           <button onClick={() => onNavigate('profile')} className="btn btn-secondary py-3.5">
-            <User size={17} strokeWidth={2.5} className="text-cyan-strong" /> Profile
+            <User size={17} strokeWidth={2} /> Profile
           </button>
         </nav>
       </motion.div>

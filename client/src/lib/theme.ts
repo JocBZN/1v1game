@@ -21,9 +21,9 @@ export const alpha = (color: string, pct: number) => `color-mix(in srgb, ${color
 
 /** Raw hex values (for canvas / three.js, which can't read CSS variables). */
 export const HEX = {
-  red: '#df301c',
-  orange: '#ff9100',
-  cream: '#fff1d1',
-  cyan: '#00b7cd',
-  text: '#2b1b12',
+  red: '#ff6973',
+  orange: '#ffb0a3',
+  cream: '#ffeecc',
+  cyan: '#00b9be',
+  text: '#46425e',
 } as const;

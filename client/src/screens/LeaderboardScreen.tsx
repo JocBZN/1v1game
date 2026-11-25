@@ -11,7 +11,7 @@ const TABS: { id: RatingTrack; label: string }[] = [
   ...DOMAIN_LIST.map((d) => ({ id: d.id as RatingTrack, label: d.short })),
 ];
 
-const PODIUM = ['#b56500', '#7a7268', '#9c5a2e'];
+const PODIUM = ['#c8705f', '#7a7268', '#9c5a2e'];
 
 function Row({ e, mine, delay }: { e: LeaderboardEntry; mine: boolean; delay: number }) {
   const league = LEAGUE_META[e.league];
@@ -26,8 +26,8 @@ function Row({ e, mine, delay }: { e: LeaderboardEntry; mine: boolean; delay: nu
       <div className="flex w-8 justify-center">
         {podium ? (
           <span
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-extrabold text-[#fff8e8]"
-            style={{ background: PODIUM[e.rank - 1], boxShadow: '0 2px 0 rgb(0 0 0 / 0.2)' }}
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold text-[#fff8e6]"
+            style={{ background: PODIUM[e.rank - 1] }}
           >
             {e.rank}
           </span>
@@ -44,7 +44,7 @@ function Row({ e, mine, delay }: { e: LeaderboardEntry; mine: boolean; delay: nu
           <LeagueIcon league={e.league} size={11} /> {league.name} · {e.wins}W {e.losses}L{e.draws ? ` ${e.draws}D` : ''}
         </div>
       </div>
-      <div className="font-display text-xl font-extrabold tabular-nums">{e.rating}</div>
+      <div className="font-display text-xl font-bold tabular-nums">{e.rating}</div>
     </motion.div>
   );
 }
@@ -90,7 +90,7 @@ export function LeaderboardScreen({ me, onBack, onSignup, onLogin }: { me: Me; o
             key={t.id}
             onClick={() => setTrack(t.id)}
             className={`chip shrink-0 px-3.5 py-1.5 text-sm transition-colors ${
-              track === t.id ? 'bg-text text-cream shadow-[0_3px_0_#000]' : 'border border-line bg-[#fffaf0] text-muted hover:text-text'
+              track === t.id ? 'bg-text text-cream' : 'border border-line bg-[#fff8e6] text-muted hover:text-text'
             }`}
           >
             {t.id !== 'general' && (() => { const Icon = DOMAINS[t.id].icon; return <Icon size={14} strokeWidth={2.5} />; })()}

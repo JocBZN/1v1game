@@ -32,8 +32,8 @@ const CONFETTI = 2350;
 const EXIT = 3900;
 const EXIT_MS = 550;
 
-const SPARK_COLORS = ['#ffffff', '#fff1d1', '#fff1d1', '#ff9100', '#ffc46b'];
-const CONFETTI_COLORS = ['#fff1d1', '#ff9100', '#00b7cd', '#2b1b12', '#ffe0aa'];
+const SPARK_COLORS = ['#ffffff', '#ffeecc', '#ffeecc', '#ffb0a3', '#ffc2b7'];
+const CONFETTI_COLORS = ['#ffeecc', '#ffb0a3', '#00b9be', '#46425e', '#ffe4dc'];
 
 interface Particle {
   x: number; y: number; vx: number; vy: number;
@@ -148,18 +148,18 @@ function Sword({ className, style }: { className?: string; style?: React.CSSProp
       <defs>
         <linearGradient id="blade" x1="0" x2="1">
           <stop offset="0" stopColor="#ffe6b0" />
-          <stop offset="0.5" stopColor="#fff8e8" />
+          <stop offset="0.5" stopColor="#fff8e6" />
           <stop offset="0.5" stopColor="#f3ddb0" />
           <stop offset="1" stopColor="#e9cf9c" />
         </linearGradient>
       </defs>
       <polygon points="20,0 28,16 28,138 12,138 12,16" fill="url(#blade)" />
-      <rect x="1" y="136" width="38" height="9" rx="4" fill="#ff9100" />
-      <rect x="15.5" y="145" width="9" height="36" rx="3" fill="#2b1b12" />
+      <rect x="1" y="136" width="38" height="9" rx="4" fill="#ffb0a3" />
+      <rect x="15.5" y="145" width="9" height="36" rx="3" fill="#46425e" />
       {[151, 159, 167, 175].map((y) => (
-        <rect key={y} x="15" y={y} width="10" height="3" rx="1.5" fill="#00b7cd" />
+        <rect key={y} x="15" y={y} width="10" height="3" rx="1.5" fill="#00b9be" />
       ))}
-      <circle cx="20" cy="188" r="8" fill="#ff9100" />
+      <circle cx="20" cy="188" r="8" fill="#ffb0a3" />
     </svg>
   );
 }
@@ -216,7 +216,7 @@ export function IntroSplash({ onDone }: { onDone: () => void }) {
   if (reduced) {
     return (
       <div className={`fixed inset-0 z-[100] flex items-center justify-center bg-red transition-opacity duration-300 ${exiting ? 'opacity-0' : 'opacity-100'}`}>
-        <div className="text-7xl font-extrabold tracking-tighter text-cream">DUEL</div>
+        <div className="text-7xl font-bold tracking-tighter text-cream">DUEL</div>
       </div>
     );
   }
@@ -226,7 +226,7 @@ export function IntroSplash({ onDone }: { onDone: () => void }) {
       <div className="splash-shake absolute inset-0">
         {/* spinning light rays */}
         <div className="splash-rays absolute left-1/2 top-[42%] h-[220vmax] w-[220vmax] -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,transparent_0,transparent_35%,rgb(184_36_15/0.85)_80%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,transparent_0,transparent_35%,rgb(194_63_74/0.85)_80%)]" />
 
         {/* shockwaves */}
         <div className="splash-ring absolute left-1/2 top-[42%] h-40 w-40 rounded-full border-[6px] border-orange" />
@@ -240,7 +240,7 @@ export function IntroSplash({ onDone }: { onDone: () => void }) {
 
         {/* title */}
         <div className="absolute inset-x-0 top-[50%] flex flex-col items-center">
-          <div className="flex select-none text-[clamp(84px,26vw,190px)] font-extrabold leading-none tracking-tighter">
+          <div className="flex select-none text-[clamp(84px,26vw,190px)] font-bold leading-none tracking-tighter">
             {'DUEL'.split('').map((ch, i) => (
               <span key={i} className="splash-letter inline-block" style={{ animationDelay: `${LETTER_START + i * LETTER_GAP}ms, ${LETTER_START + 700}ms` }}>
                 {ch}

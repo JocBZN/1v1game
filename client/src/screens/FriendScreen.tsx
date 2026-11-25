@@ -120,7 +120,7 @@ export function RoomScreen({ room, onLeave, onRematch }: {
 
       <section className="card mt-5 p-5 text-center animate-rise">
         <div className="label">Room code</div>
-        <button onClick={() => copy('code')} className="mt-2 font-mono text-5xl font-extrabold tracking-[0.25em] text-text" title="Copy code">
+        <button onClick={() => copy('code')} className="mt-2 font-mono text-5xl font-bold tracking-[0.25em] text-text" title="Copy code">
           {room.code}
         </button>
         <div className="mt-1 h-4 text-xs text-cyan-strong">{copied === 'code' ? 'Code copied' : copied === 'link' ? 'Link copied' : ''}</div>

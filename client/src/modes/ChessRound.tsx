@@ -101,7 +101,7 @@ export function ChessRound({ item, feedback, onAnswer, waiting }: ModeProps<Puzz
   if (lastMove) for (const s of lastMove) squareStyles[s] = { background: alpha(C.orange, 45) };
   if (selected) squareStyles[selected] = { background: alpha(C.cyan, 55) };
   for (const s of legalTargets) {
-    squareStyles[s] = { ...(squareStyles[s] ?? {}), backgroundImage: 'radial-gradient(circle, rgba(43,27,18,0.3) 20%, transparent 22%)' };
+    squareStyles[s] = { ...(squareStyles[s] ?? {}), backgroundImage: 'radial-gradient(circle, rgba(70,66,94,0.3) 20%, transparent 22%)' };
   }
 
   if (waiting) return <WaitingNote />;
@@ -156,7 +156,7 @@ export function ChessRound({ item, feedback, onAnswer, waiting }: ModeProps<Puzz
       <div className="mt-3 text-center text-sm text-muted">
         {status === 'thinking' && (
           <>
-            {myColor === 'w' ? 'White' : 'Black'} to move <span className="inline-block h-3 w-3 rounded-full align-middle" style={{ background: myColor === 'w' ? '#fff' : '#2b1b12', boxShadow: '0 0 0 1px #d8bb83' }} />
+            {myColor === 'w' ? 'White' : 'Black'} to move <span className="inline-block h-3 w-3 rounded-full align-middle" style={{ background: myColor === 'w' ? '#fff' : '#46425e', boxShadow: '0 0 0 1px #dcc59a' }} />
           </>
         )}
         {status === 'pending' && 'Checking…'}

@@ -15,7 +15,7 @@ export function FlagImage({ flag, className, alt = 'Flag' }: { flag: string; cla
       src={`/flags/${code}.svg`}
       alt={alt}
       draggable={false}
-      className={cn('aspect-[4/3] rounded-xl object-cover shadow-[0_10px_30px_-12px_rgb(43_27_18/0.45)] ring-1 ring-black/10', className)}
+      className={cn('aspect-[4/3] rounded-xl object-cover ring-1 ring-black/10', className)}
     />
   );
 }

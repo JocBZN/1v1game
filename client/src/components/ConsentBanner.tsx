@@ -12,7 +12,7 @@ export function ConsentBanner() {
   };
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] animate-rise">
-      <div className="card mx-auto flex max-w-md flex-col gap-3 p-4 shadow-[0_8px_30px_-12px_rgb(43_27_18/0.35)]">
+      <div className="card mx-auto flex max-w-md flex-col gap-3 p-4">
         <p className="text-sm text-text">
           We use analytics cookies to see what players like and make Duel better. You can play either way.{' '}
           <a href="/privacy" className="text-cyan-strong underline">Privacy</a>

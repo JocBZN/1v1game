@@ -13,7 +13,7 @@ const TIPS = [
   'Rubik’s Cube: drag a row to turn it, drag outside the cube to spin it.',
 ];
 
-const RINGS = ['#00b7cd', '#ff9100', '#df301c'];
+const RINGS = ['#15788c', '#15788c'];
 
 export function SearchingScreen({ me, since, onCancel }: { me: Me; since: number; onCancel: () => void }) {
   const [now, setNow] = useState(Date.now());
@@ -29,26 +29,18 @@ export function SearchingScreen({ me, since, onCancel }: { me: Me; since: number
       <div className="relative flex h-56 w-56 items-center justify-center">
         {RINGS.map((c, i) => (
           <motion.div
-            key={c}
-            className="absolute inset-0 rounded-full border-2"
+            key={i}
+            className="absolute inset-0 rounded-full border"
             style={{ borderColor: c }}
-            initial={{ scale: 0.45, opacity: 0.9 }}
-            animate={{ scale: 1.25, opacity: 0 }}
-            transition={{ duration: 2.1, repeat: Infinity, delay: i * 0.7, ease: 'easeOut' }}
+            initial={{ scale: 0.45, opacity: 0.6 }}
+            animate={{ scale: 1.15, opacity: 0 }}
+            transition={{ duration: 2.4, repeat: Infinity, delay: i * 1.2, ease: 'easeOut' }}
           />
         ))}
-        <motion.div
-          className="absolute inset-6 rounded-full"
-          style={{ background: 'conic-gradient(from 0deg, rgb(0 183 205 / 0.35), transparent 30%)' }}
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: 'linear' }}
-        />
-        <motion.div animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 1.6, repeat: Infinity }}>
-          <Avatar name={me.user.nickname} size={88} ring="var(--color-cyan)" />
-        </motion.div>
+        <Avatar name={me.user.nickname} size={88} />
       </div>
       <h2 className="mt-8 text-2xl font-bold tracking-tight">Finding an opponent</h2>
-      <p className="mt-1 font-display text-4xl font-extrabold tabular-nums tracking-tight text-cyan-strong">
+      <p className="mt-1 font-display text-4xl font-bold tabular-nums tracking-tight text-teal">
         0:{secs.toString().padStart(2, '0')}
       </p>
       <div className="mt-7 h-12 max-w-xs">
@@ -60,7 +52,7 @@ export function SearchingScreen({ me, since, onCancel }: { me: Me; since: number
             exit={{ opacity: 0, y: -8 }}
             className="flex items-start gap-2 text-left text-sm text-muted"
           >
-            <Lightbulb size={16} strokeWidth={2.4} className="mt-0.5 shrink-0 text-orange-strong" />
+            <Lightbulb size={16} strokeWidth={2.4} className="mt-0.5 shrink-0" />
             {tip}
           </motion.p>
         </AnimatePresence>

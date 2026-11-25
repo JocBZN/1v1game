@@ -21,7 +21,7 @@ function winRate(w: number, l: number, d: number) {
 function Stat({ value, label }: { value: React.ReactNode; label: string }) {
   return (
     <div className="py-1">
-      <div className="font-display text-3xl font-extrabold tabular-nums tracking-tight">{value}</div>
+      <div className="font-display text-3xl font-bold tabular-nums tracking-tight">{value}</div>
       <div className="label mt-0.5">{label}</div>
     </div>
   );

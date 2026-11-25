@@ -15,7 +15,7 @@ function Delta({ change, big }: { change: RatingChange; big?: boolean }) {
   const color = d > 0 ? 'text-cyan-strong bg-cyan-soft' : d < 0 ? 'text-red bg-red-soft' : 'text-muted bg-sunken';
   return (
     <div className="flex items-center gap-2">
-      <span className={`${big ? 'font-display text-5xl font-extrabold' : 'text-lg font-bold'} tabular-nums tracking-tight`}>{shown}</span>
+      <span className={`${big ? 'font-display text-5xl font-bold' : 'text-lg font-bold'} tabular-nums tracking-tight`}>{shown}</span>
       <span className={`rounded-full px-2 py-0.5 ${big ? 'text-sm' : 'text-xs'} font-bold tabular-nums ${color}`}>
         {d > 0 ? `+${d}` : d === 0 ? '±0' : d}
       </span>
@@ -25,7 +25,7 @@ function Delta({ change, big }: { change: RatingChange; big?: boolean }) {
 
 /** Palette confetti from both bottom corners. */
 function celebrate() {
-  const colors = ['#df301c', '#ff9100', '#00b7cd', '#fff1d1'];
+  const colors = ['#ff6973', '#ffb0a3', '#00b9be', '#ffeecc'];
   const fire = (x: number, angle: number) => confetti({ particleCount: 70, spread: 65, angle, origin: { x, y: 0.9 }, colors, scalar: 1.05, ticks: 220 });
   fire(0.1, 60);
   fire(0.9, 120);
@@ -48,7 +48,7 @@ export function ResultScreen({ me, found, result, room, onAgain, onLeaderboard, 
   const title = win ? 'Victory' : loss ? 'Defeat' : 'Draw';
   const color = win ? 'text-cyan-strong' : loss ? 'text-red' : 'text-orange-strong';
   const HeroIcon = win ? Trophy : loss ? ShieldX : Equal;
-  const heroBg = win ? 'linear-gradient(140deg, #19c6db, #007f8f)' : loss ? 'linear-gradient(140deg, #ec4630, #a8230f)' : 'linear-gradient(140deg, #ffa733, #b56500)';
+  const heroBg = win ? '#15788c' : loss ? '#ff6973' : '#46425e';
   const general = result.ratingChanges?.general;
   const domainChanges = Object.entries(result.ratingChanges ?? {}).filter(([k]) => k !== 'general') as [DomainId, RatingChange][];
   const leagueUp = result.league && result.league.before !== result.league.after;
@@ -65,8 +65,8 @@ export function ResultScreen({ me, found, result, room, onAgain, onLeaderboard, 
           initial={{ scale: 0, rotate: -30 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: 'spring', stiffness: 260, damping: 13 }}
-          className="flex h-20 w-20 items-center justify-center rounded-[1.6rem] text-[#fff8e8]"
-          style={{ background: heroBg, boxShadow: '0 6px 0 rgb(0 0 0 / 0.18), 0 20px 40px -18px rgb(43 27 18 / 0.7)' }}
+          className="flex h-20 w-20 items-center justify-center rounded-[1.6rem] text-[#fff8e6]"
+          style={{ background: heroBg }}
         >
           <HeroIcon size={40} strokeWidth={2.4} />
         </motion.div>
@@ -74,7 +74,7 @@ export function ResultScreen({ me, found, result, room, onAgain, onLeaderboard, 
           initial={{ scale: 1.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 280, damping: 14, delay: 0.08 }}
-          className={`mt-4 text-6xl font-extrabold tracking-tighter ${color}`}
+          className={`mt-4 text-6xl font-bold tracking-tighter ${color}`}
         >
           {title}
         </motion.h1>
@@ -88,11 +88,11 @@ export function ResultScreen({ me, found, result, room, onAgain, onLeaderboard, 
       <motion.div {...rise(2)} className="mt-6 flex items-center justify-center gap-4">
         <div className="flex items-center gap-2.5">
           <Avatar name={found?.you.name ?? 'You'} size={40} ring="var(--color-cyan)" />
-          <span className="font-display text-5xl font-extrabold tabular-nums text-me">{result.roundWins[0]}</span>
+          <span className="font-display text-5xl font-bold tabular-nums text-me">{result.roundWins[0]}</span>
         </div>
         <Swords size={20} strokeWidth={2.4} className="text-line-strong" />
         <div className="flex items-center gap-2.5">
-          <span className="font-display text-5xl font-extrabold tabular-nums text-foe">{result.roundWins[1]}</span>
+          <span className="font-display text-5xl font-bold tabular-nums text-foe">{result.roundWins[1]}</span>
           <Avatar name={result.opponent.name} size={40} ring="var(--color-red)" />
         </div>
       </motion.div>

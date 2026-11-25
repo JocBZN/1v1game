@@ -45,7 +45,7 @@ export function ChoiceRound({
           <motion.span
             initial={{ scale: 1.6, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className={cn('flex items-center gap-1 text-sm font-extrabold', fb.correct ? 'text-cyan-strong' : 'text-red')}
+            className={cn('flex items-center gap-1 text-sm font-bold', fb.correct ? 'text-cyan-strong' : 'text-red')}
           >
             {fb.timeout ? <><Clock size={14} strokeWidth={2.6} /> Time’s up</> : fb.correct ? `+${fb.points}` : <><X size={14} strokeWidth={3} /> Wrong</>}
           </motion.span>
@@ -59,23 +59,23 @@ export function ChoiceRound({
         {item.data.options.map((opt, i) => {
           const isCorrect = correctIndex === i;
           const isChosen = chosen === i || (fb?.chosen as number | null) === i;
-          let cls = 'border-line bg-[#fffaf0] shadow-[0_3px_0_var(--color-line)] hover:border-line-strong hover:bg-white';
+          let cls = 'border-line bg-surface hover:border-line-strong hover:bg-white';
           let badge = 'bg-sunken text-muted';
           let anim = '';
           if (fb) {
             if (isCorrect) {
-              cls = 'border-cyan bg-cyan-soft shadow-[0_3px_0_#00a3b7]';
-              badge = 'bg-cyan text-[#08343b]';
+              cls = 'border-teal bg-cyan-soft';
+              badge = 'bg-cyan text-[#46425e]';
               anim = isChosen ? 'animate-pop' : '';
             } else if (isChosen) {
-              cls = 'border-red bg-red-soft shadow-[0_3px_0_#df301c]';
+              cls = 'border-red bg-red-soft';
               badge = 'bg-red text-cream';
               anim = 'animate-shake';
             } else {
               cls = 'border-line bg-surface opacity-45';
             }
           } else if (isChosen) {
-            cls = 'border-text bg-white shadow-[0_3px_0_var(--color-text)]';
+            cls = 'border-text bg-white';
             badge = 'bg-text text-cream';
           }
           return (
@@ -97,7 +97,7 @@ export function ChoiceRound({
               )}
             >
               {layout === 'list' && (
-                <span className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs font-extrabold', badge)}>
+                <span className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs font-bold', badge)}>
                   {fb && isCorrect ? <Check size={16} strokeWidth={3} /> : fb && isChosen ? <X size={16} strokeWidth={3} /> : LETTERS[i]}
                 </span>
               )}

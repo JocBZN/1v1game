@@ -56,12 +56,12 @@ export function useAnimatedNumber(value: number, durationMs = 450): number {
 
 /** Gradient avatars built from the palette. */
 const AVATAR_GRADIENTS: [string, string, string][] = [
-  ['#ff9100', '#df301c', '#fff1d1'],
-  ['#00b7cd', '#007f8f', '#fff1d1'],
-  ['#df301c', '#8f1d0c', '#fff1d1'],
-  ['#ffc46b', '#ff9100', '#2b1b12'],
-  ['#7fdde8', '#00b7cd', '#2b1b12'],
-  ['#f9d6c9', '#df301c', '#2b1b12'],
+  ['#ffb0a3', '#ff6973', '#ffeecc'],
+  ['#00b9be', '#15788c', '#ffeecc'],
+  ['#ff6973', '#c23f4a', '#ffeecc'],
+  ['#ffc2b7', '#ffb0a3', '#46425e'],
+  ['#7fdcde', '#00b9be', '#46425e'],
+  ['#ffe1de', '#ff6973', '#46425e'],
 ];
 
 export function Avatar({ name, size = 44, ring }: { name: string; size?: number; ring?: string }) {
@@ -73,10 +73,8 @@ export function Avatar({ name, size = 44, ring }: { name: string; size?: number;
       className="flex shrink-0 items-center justify-center rounded-full font-display font-bold"
       style={{
         width: size, height: size, fontSize: size * 0.42, color: fg,
-        background: `linear-gradient(135deg, ${a}, ${b})`,
-        boxShadow: ring
-          ? `0 0 0 2px var(--color-bg), 0 0 0 4px ${ring}, 0 8px 20px -10px ${ring}`
-          : 'inset 0 -3px 0 rgb(0 0 0 / 0.12), 0 6px 16px -10px rgb(43 27 18 / 0.6)',
+        background: a === '#ffe1de' ? b : a,
+        boxShadow: ring ? `0 0 0 2px var(--color-bg), 0 0 0 4px ${ring}` : undefined,
       }}
     >
       {name.slice(0, 1).toUpperCase()}
@@ -109,8 +107,8 @@ export function TimerBar({ endsAt, totalMs, className = '' }: { endsAt: number; 
   const pct = totalMs > 0 ? Math.min(1, left / totalMs) : 0;
   const color = pct > 0.5 ? C.cyan : pct > 0.2 ? C.orange : C.red;
   return (
-    <div className={cn('h-2 w-full overflow-hidden rounded-full bg-sunken shadow-[inset_0_1px_2px_rgb(43_27_18/0.12)]', className)}>
-      <div className="h-full rounded-full" style={{ width: `${pct * 100}%`, background: `linear-gradient(90deg, ${color}, ${color}cc)` }} />
+    <div className={cn('h-1.5 w-full overflow-hidden rounded-full bg-sunken', className)}>
+      <div className="h-full rounded-full" style={{ width: `${pct * 100}%`, background: color }} />
     </div>
   );
 }
@@ -118,7 +116,7 @@ export function TimerBar({ endsAt, totalMs, className = '' }: { endsAt: number; 
 /** Thin progress bar (0..1). */
 export function Progress({ value, color = C.cyan, className = '' }: { value: number; color?: string; className?: string }) {
   return (
-    <div className={cn('h-2 w-full overflow-hidden rounded-full bg-sunken shadow-[inset_0_1px_2px_rgb(43_27_18/0.12)]', className)}>
+    <div className={cn('h-1.5 w-full overflow-hidden rounded-full bg-sunken', className)}>
       <motion.div
         className="h-full rounded-full"
         initial={{ width: 0 }}
@@ -152,19 +150,18 @@ export function TopicIcon({ domain, size = 40, solid }: { domain: DomainId; size
       className="inline-flex shrink-0 items-center justify-center"
       style={{
         width: size, height: size, borderRadius: size * 0.32,
-        background: solid ? `linear-gradient(140deg, ${m.base}, ${m.color})` : m.soft,
-        color: solid ? '#fff8e8' : m.color,
-        boxShadow: solid ? `inset 0 -3px 0 rgb(0 0 0 / 0.15), 0 8px 18px -10px ${m.base}` : 'inset 0 -2px 0 rgb(0 0 0 / 0.06)',
+        background: solid ? m.color : m.soft,
+        color: solid ? '#fff8e6' : m.color,
       }}
     >
-      <Icon size={size * 0.5} strokeWidth={2.3} aria-hidden />
+      <Icon size={size * 0.5} strokeWidth={2} aria-hidden />
     </span>
   );
 }
 
 /** A lucide icon on a round tinted chip (for headers, prompts). */
 export function IconChip({ icon: Icon, tone = 'cyan', size = 32 }: { icon: LucideIcon; tone?: 'cyan' | 'red' | 'orange'; size?: number }) {
-  const tones = { cyan: ['#c8ecea', '#007f8f'], red: ['#f9d6c9', '#b8240f'], orange: ['#ffe0aa', '#b56500'] }[tone];
+  const tones = { cyan: ['#d2f0ef', '#15788c'], red: ['#ffe1de', '#d94a55'], orange: ['#ffe4dc', '#c8705f'] }[tone];
   return (
     <span className="inline-flex shrink-0 items-center justify-center rounded-full" style={{ width: size, height: size, background: tones[0], color: tones[1] }}>
       <Icon size={size * 0.52} strokeWidth={2.4} aria-hidden />

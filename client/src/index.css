@@ -4,36 +4,40 @@
   --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-display: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
 
-  /* ---- Palette: four base colours + derivatives (strong = text/hover on cream, soft = tints) */
-  --color-red: #df301c;
-  --color-red-strong: #b8240f;
-  --color-red-soft: #f9d6c9;
+  /* ---- Palette "curiosities": slate #46425e, teal #15788c, cyan #00b9be,
+     cream #ffeecc, peach #ffb0a3, coral #ff6973 (strong = text on cream, soft = tints) */
+  --color-red: #ff6973;
+  --color-red-strong: #d94a55;
+  --color-red-soft: #ffe1de;
 
-  --color-orange: #ff9100;
-  --color-orange-strong: #b56500;
-  --color-orange-soft: #ffe0aa;
+  --color-orange: #ffb0a3;
+  --color-orange-strong: #c8705f;
+  --color-orange-soft: #ffe4dc;
 
-  --color-cream: #fff1d1;
+  --color-cream: #ffeecc;
 
-  --color-cyan: #00b7cd;
-  --color-cyan-strong: #007f8f;
-  --color-cyan-soft: #c8ecea;
+  --color-cyan: #00b9be;
+  --color-cyan-strong: #15788c;
+  --color-cyan-soft: #d2f0ef;
 
-  /* ---- Surfaces & text (warm neutrals derived from the cream) */
-  --color-bg: #fff1d1;
-  --color-surface: #fff8e8;
-  --color-sunken: #f7e4bc;
-  --color-line: #ecd6a8;
-  --color-line-strong: #d8bb83;
-  --color-text: #2b1b12;
-  --color-muted: #8a6e52;
+  --color-teal: #15788c;
+  --color-slate: #46425e;
+
+  /* ---- Surfaces & text */
+  --color-bg: #ffeecc;
+  --color-surface: #fff8e6;
+  --color-sunken: #f8e4bd;
+  --color-line: #ecd9b4;
+  --color-line-strong: #dcc59a;
+  --color-text: #46425e;
+  --color-muted: #7b7790;
 
   /* ---- Meaning */
-  --color-me: #007f8f; /* you: cyan */
-  --color-foe: #df301c; /* opponent: red */
-  --color-good: #007f8f;
-  --color-bad: #df301c;
-  --color-warn: #b56500;
+  --color-me: #15788c; /* you: teal */
+  --color-foe: #ff6973; /* opponent: coral */
+  --color-good: #15788c;
+  --color-bad: #ff6973;
+  --color-warn: #c8705f;
 
   --color-board-light: #fcefd2;
   --color-board-dark: #dcae74;
@@ -89,13 +93,7 @@ html, body, #root {
 
 body {
   margin: 0;
-  /* soft colour glows + a faint dot grid on the cream */
-  background:
-    radial-gradient(60rem 30rem at 110% -10%, rgb(0 183 205 / 0.14), transparent 60%),
-    radial-gradient(50rem 28rem at -20% 0%, rgb(255 145 0 / 0.16), transparent 60%),
-    radial-gradient(rgb(43 27 18 / 0.07) 1px, transparent 1px) 0 0 / 22px 22px,
-    var(--color-bg);
-  background-attachment: fixed;
+  background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans);
   font-feature-settings: 'cv11', 'ss01';
@@ -139,10 +137,9 @@ h1, h2, .font-display {
 /* ------------------------------------------------------------------ components */
 @layer components {
   .card {
-    border: 1px solid rgb(216 187 131 / 0.55);
-    background: linear-gradient(180deg, #fffdf6, var(--color-surface));
-    border-radius: 1.5rem;
-    box-shadow: 0 1px 0 #fff inset, 0 14px 34px -22px rgb(43 27 18 / 0.45), 0 2px 6px -3px rgb(43 27 18 / 0.12);
+    border: 1px solid var(--color-line);
+    background: var(--color-surface);
+    border-radius: 1.25rem;
   }
 
   .label {
@@ -153,65 +150,58 @@ h1, h2, .font-display {
     color: var(--color-muted);
   }
 
-  /* Chunky "game" buttons: a solid edge underneath that the button presses into. */
+  /* Flat, minimal buttons */
   .btn {
-    --edge: transparent;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    border-radius: 1rem;
+    border-radius: 0.875rem;
     border: 1px solid transparent;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: -0.01em;
     user-select: none;
-    box-shadow: 0 4px 0 var(--edge);
-    transition: background-color 120ms, border-color 120ms, color 120ms, transform 90ms, box-shadow 90ms, opacity 150ms;
+    transition: background-color 150ms, border-color 150ms, color 150ms, transform 100ms, opacity 150ms;
   }
   .btn:active:not(:disabled) {
-    transform: translateY(3px);
-    box-shadow: 0 1px 0 var(--edge);
+    transform: scale(0.98);
   }
   .btn:disabled {
     opacity: 0.45;
   }
 
-  /* Main action: red */
+  /* Main action: teal */
   .btn-primary {
-    --edge: #8f1d0c;
-    background: linear-gradient(180deg, #ec4630, var(--color-red));
-    color: #fff8e8;
+    background: var(--color-teal);
+    color: #fff8e6;
   }
   .btn-primary:hover:not(:disabled) {
-    background: linear-gradient(180deg, #f2533c, #e33520);
+    background: #12697b;
   }
 
-  /* Secondary: cyan */
+  /* Secondary: slate */
   .btn-accent {
-    --edge: #00788a;
-    background: linear-gradient(180deg, #19c6db, var(--color-cyan));
-    color: #08343b;
+    background: var(--color-slate);
+    color: #fff8e6;
   }
   .btn-accent:hover:not(:disabled) {
-    background: linear-gradient(180deg, #2fd0e3, #08bfd5);
+    background: #3b3850;
   }
 
-  /* Orange highlight */
+  /* Peach highlight */
   .btn-warm {
-    --edge: #b56500;
-    background: linear-gradient(180deg, #ffa733, var(--color-orange));
-    color: #3a2000;
+    background: var(--color-orange);
+    color: var(--color-slate);
   }
 
-  /* Quiet: light surface with a hairline */
+  /* Quiet: surface with a hairline */
   .btn-secondary {
-    --edge: var(--color-line);
-    background: #fffaf0;
+    background: var(--color-surface);
     border-color: var(--color-line);
     color: var(--color-text);
   }
   .btn-secondary:hover:not(:disabled) {
-    background: #fff4dc;
+    background: #fffcf3;
     border-color: var(--color-line-strong);
   }
 
@@ -239,7 +229,7 @@ h1, h2, .font-display {
 
 .splash-rays {
   opacity: 0;
-  background: repeating-conic-gradient(from 0deg, rgb(255 241 209 / 0.12) 0deg 5deg, transparent 5deg 15deg);
+  background: repeating-conic-gradient(from 0deg, rgb(255 238 204 / 0.12) 0deg 5deg, transparent 5deg 15deg);
   mask-image: radial-gradient(circle, #000 0, transparent 42%);
   animation: splash-fade-in 0.6s 0.1s ease-out forwards, splash-spin 12s linear infinite, splash-rays-pulse 0.7s 0.85s ease-out;
 }
@@ -252,7 +242,7 @@ h1, h2, .font-display {
 
 .splash-sword-l,
 .splash-sword-r {
-  filter: drop-shadow(6px 8px 0 rgb(43 27 18 / 0.35));
+  filter: drop-shadow(6px 8px 0 rgb(70 66 94 / 0.35));
   animation-duration: 1.15s, 0.6s;
   animation-delay: 0.1s, 1.7s;
   animation-fill-mode: both, forwards;

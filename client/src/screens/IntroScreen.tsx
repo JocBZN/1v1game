@@ -32,7 +32,7 @@ function Reel({ domain }: { domain: DomainId }) {
       style={{
         height: CELL,
         borderColor: landed ? m.base : undefined,
-        boxShadow: landed ? `0 0 0 3px ${m.soft}, 0 18px 40px -20px ${m.base}` : undefined,
+        boxShadow: landed ? `0 0 0 3px ${m.soft}` : undefined,
       }}
     >
       <div
@@ -48,7 +48,7 @@ function Reel({ domain }: { domain: DomainId }) {
           </div>
         ))}
       </div>
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-[#fffdf6] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-[#fff8e6] to-transparent" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-surface to-transparent" />
     </motion.div>
   );
@@ -80,12 +80,12 @@ export function VsHeader({ found, roundWins }: { found: Found; roundWins: [numbe
         className="flex flex-col items-center"
       >
         <span
-          className="rounded-xl px-2.5 py-1 font-display text-sm font-extrabold tracking-wider text-[#fff8e8]"
-          style={{ background: 'linear-gradient(135deg, #ff9100, #df301c)', boxShadow: '0 3px 0 #8f1d0c' }}
+          className="rounded-xl px-2.5 py-1 font-display text-sm font-bold tracking-wider text-[#fff8e6]"
+          style={{ background: '#46425e' }}
         >
           VS
         </span>
-        <div className="mt-2 font-display text-3xl font-extrabold tabular-nums">
+        <div className="mt-2 font-display text-3xl font-bold tabular-nums">
           <span className="text-me">{roundWins[0]}</span>
           <span className="mx-1 text-line-strong">:</span>
           <span className="text-foe">{roundWins[1]}</span>
@@ -103,7 +103,7 @@ export function FoundScreen({ found }: { found: Found }) {
         initial={{ scale: 0.6, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 260, damping: 16 }}
-        className="text-center font-display text-sm font-extrabold uppercase tracking-[0.2em] text-cyan-strong"
+        className="text-center font-display text-sm font-bold uppercase tracking-[0.2em] text-cyan-strong"
       >
         Opponent found
       </motion.div>
