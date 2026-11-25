@@ -100,7 +100,7 @@ function head({ l, title, desc, path, alts, type = 'website', extra = '' }) {
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 ${hreflangTags(alts)}
 <meta property="og:type" content="${type}">
-<meta property="og:site_name" content="1v1game · Duel">
+<meta property="og:site_name" content="1v1game">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="${url}">
@@ -190,7 +190,7 @@ const faqItems = (l) => LANGS[l].home.faq.map((x) => (Array.isArray(x) ? x : [x.
 const faqHtml = (l) => `<h2>${esc(LANGS[l].ui.faq)}</h2><dl class="faq">${faqItems(l).map(([q, a]) => `<dt>${esc(q)}</dt><dd>${esc(a)}</dd>`).join('')}</dl>`;
 const faqLd = (l) => ({ '@type': 'FAQPage', mainEntity: faqItems(l).map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) });
 const gameLd = (l) => ({
-  '@type': 'VideoGame', name: 'Duel', alternateName: '1v1game', url: abs('/'), inLanguage: l,
+  '@type': 'VideoGame', name: '1v1game', alternateName: 'Duel', url: abs('/'), inLanguage: l,
   description: LANGS[l].home.desc, genre: ['Trivia', 'Puzzle', 'Educational'], gamePlatform: ['Web browser'],
   playMode: 'MultiPlayer', image: abs(SITE.ogImage), offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
   publisher: { '@type': 'Organization', name: '1v1game', url: abs('/') },

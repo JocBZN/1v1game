@@ -33,8 +33,8 @@ export const LANGS = {
     name: 'English', locale: 'en_US', prefix: '',
     home: {
       modes: 'Also inside: a flag quiz with 194 countries, chess puzzles, a mental math game and a real 3D Rubik’s Cube.',
-      title: '1v1 Trivia Quiz Online – General Knowledge Quiz Duels | 1v1game',
-      desc: 'Free 1v1 trivia quiz in your browser: general knowledge duels with 1,200+ questions, plus a flag quiz, chess puzzles and mental math. No download, no sign-up.',
+      title: '1v1game – Free 1v1 Quiz Game Online: Trivia, Flags, Chess & Math',
+      desc: '1v1game is a free 1v1 quiz game in your browser: trivia duels with 1,200+ questions, a flag quiz, chess puzzles and mental math. No download, no sign-up.',
       h1: '1v1 Trivia Quiz: General Knowledge Duels',
       lead: 'Prove you know more. Start a free 1v1 quiz duel in seconds, answer general knowledge questions against the clock and win the best of three.',
       paras: [

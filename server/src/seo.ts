@@ -11,9 +11,9 @@ import { hasPack, hreflangTags } from './seo-pack';
 
 export const SITE = {
   name: 'Duel',
-  title: '1v1 Trivia Quiz Online – General Knowledge Quiz Duels | 1v1game',
+  title: '1v1game – Free 1v1 Quiz Game Online: Trivia, Flags, Chess & Math',
   description:
-    'Free 1v1 trivia quiz in your browser: general knowledge duels with 1,200+ questions, plus a flag quiz, chess puzzles and mental math. No download, no sign-up.',
+    '1v1game is a free 1v1 quiz game in your browser: trivia duels with 1,200+ questions, a flag quiz, chess puzzles and mental math. No download, no sign-up.',
   themeColor: '#fff1d1',
 };
 
@@ -58,7 +58,7 @@ export const TOPIC_PAGES: TopicPage[] = [
     slug: 'trivia',
     emoji: '🧠',
     name: 'Trivia',
-    title: '1v1 Trivia Quiz Online – Instant Trivia Duels',
+    title: 'Trivia Quiz Online – 1v1 General Knowledge Trivia Duels',
     description:
       'Play a 1v1 trivia quiz online with an instant opponent. 1,200+ questions on history, football, science, movies, TV, medicine, tech and more. Fast answers score more.',
     h1: '1v1 trivia duels',
@@ -206,7 +206,7 @@ function pageHtml(p: TopicPage): string {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: SITE.name, item: `${base}/` },
+        { '@type': 'ListItem', position: 1, name: '1v1game', item: `${base}/` },
         { '@type': 'ListItem', position: 2, name: p.name, item: url },
       ],
     },
@@ -261,7 +261,7 @@ ${hreflangTags(o.path)}
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="theme-color" content="${SITE.themeColor}">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="1v1game · Duel">
+<meta property="og:site_name" content="1v1game">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="${esc(o.title)}">
 <meta property="og:description" content="${esc(o.description)}">
@@ -312,7 +312,7 @@ const FOOTER_PACK_LINKS = `<nav class="foot"><strong>More</strong> <a href="/qui
 export function homeJsonLd(): string {
   const base = publicUrl();
   const ld = [
-    { '@context': 'https://schema.org', '@type': 'WebSite', name: '1v1game', alternateName: ['Duel', '1v1game.net'], url: `${base}/`, description: SITE.description },
+    { '@context': 'https://schema.org', '@type': 'WebSite', name: '1v1game', alternateName: ['1v1 game', '1v1game.net', 'Duel'], url: `${base}/`, description: SITE.description },
     {
       '@context': 'https://schema.org',
       '@type': 'Organization',
@@ -323,7 +323,8 @@ export function homeJsonLd(): string {
     {
       '@context': 'https://schema.org',
       '@type': 'VideoGame',
-      name: SITE.name,
+      name: '1v1game',
+      alternateName: SITE.name,
       url: `${base}/`,
       description: SITE.description,
       image: `${base}/og.png`,
