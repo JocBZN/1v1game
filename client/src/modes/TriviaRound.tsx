@@ -1,5 +1,5 @@
 import { ChoiceRound } from './ChoiceRound';
-import { WaitingNote } from './MathRound';
+import { WaitingNote } from './ItemHeader';
 import type { ModeProps } from './types';
 
 interface TriviaItem {

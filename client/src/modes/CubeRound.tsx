@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 // Same pure model the server uses to validate moves, so the local view can never drift from the server.
-import { applyMove, isSolved, progress as localProgress, type Axis, type CubeMove, type Sticker, type Vec3 } from '../../../server/src/cube/model';
+import { applyMove, goalProgress, type Axis, type CubeGoal, type CubeMove, type Sticker, type Vec3 } from '../../../server/src/cube/model';
 import type { ModeProps } from './types';
 import { Progress } from '../components/ui';
 
@@ -9,13 +9,19 @@ interface CubeItemData {
   stickers: Sticker[];
   progress: number;
   maxProgress: number;
+  goal: CubeGoal;
+  colorName: string;
   moves?: number;
 }
+
+const CSS_COLORS = ['#f7f7fb', '#ffd500', '#1fb85a', '#1e6bff', '#e8273b', '#ff8a1f'];
 
 const STICKER_COLORS = [0xf7f7fb, 0xffd500, 0x1fb85a, 0x1e6bff, 0xe8273b, 0xff8a1f];
 const AXES: Axis[] = ['x', 'y', 'z'];
 const TURN_MS = 140;
 const DRAG_THRESHOLD = 10;
+const FULL_TURN_PX = 90; // finger travel for a full quarter turn
+const clampN = (x: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, x));
 
 const key = (p: readonly number[]) => p.join(',');
 
@@ -51,7 +57,8 @@ class CubeView {
   animating = false;
   raycaster = new THREE.Raycaster();
   private bodyGeo = new THREE.BoxGeometry(0.96, 0.96, 0.96);
-  private bodyMat = new THREE.MeshStandardMaterial({ color: 0x2b1b12, roughness: 0.55, metalness: 0.1 });
+  private bodyMat = new THREE.MeshStandardMaterial({ color: 0x46425e, roughness: 0.55, metalness: 0.1 });
+  private highlightMat = new THREE.MeshStandardMaterial({ color: 0x00b9be, emissive: 0x00b9be, emissiveIntensity: 0.35, roughness: 0.5 });
   private stickerGeo = roundedRect(0.84, 0.12);
   private stickerMats = STICKER_COLORS.map((c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.3, metalness: 0.05 }));
   private ro: ResizeObserver;
@@ -165,7 +172,9 @@ class CubeView {
         const fn = hit.face!.normal;
         n = [Math.round(fn.x), Math.round(fn.y), Math.round(fn.z)] as Vec3;
       }
+      if (this.animating || this.preview) return;
       drag = { kind: 'turn', id: e.pointerId, start: at, pos: ud.pos, n, local: this.cube.worldToLocal(hit.point.clone()), world: hit.point.clone(), used: false };
+      this.setHighlight([this.cubies.get(key(ud.pos))!]); // show what was grabbed
     });
 
     el.addEventListener('pointermove', (e) => {
@@ -178,18 +187,24 @@ class CubeView {
         this.cube.quaternion.premultiply(q);
         return;
       }
-      if (drag.used) return;
       const delta = at.clone().sub(drag.start);
+      if (this.preview) {
+        // the grabbed layer follows the finger
+        this.setPreviewAngle(clampN(delta.dot(this.preview.sdir) / FULL_TURN_PX, -1, 1) * (Math.PI / 2));
+        return;
+      }
+      if (drag.used || this.animating) return;
       if (delta.length() < DRAG_THRESHOLD) return;
-      const move = this.moveFromDrag(drag.pos, drag.n, drag.local, drag.world, delta);
-      if (move) {
-        drag.used = true;
-        this.turn(move, true);
-      } else if (delta.length() > 60) drag.used = true; // never became clear: give up on this drag
+      const choice = this.moveFromDrag(drag.pos, drag.n, drag.local, drag.world, delta);
+      if (choice) this.startPreview(choice.axis, choice.layer, choice.sdir);
+      else if (delta.length() > 60) drag.used = true; // never became clear: give up on this drag
     });
 
     const end = (e: PointerEvent) => {
-      if (drag && drag.id === e.pointerId) drag = null;
+      if (!drag || drag.id !== e.pointerId) return;
+      drag = null;
+      this.setHighlight(null);
+      if (this.preview) this.releasePreview();
     };
     el.addEventListener('pointerup', end);
     el.addEventListener('pointercancel', end);
@@ -201,10 +216,10 @@ class CubeView {
    * screen and pick the turn whose on-screen motion best matches the drag, in the matching direction.
    * (Using the face tangent instead is wrong near edges, where the point also moves out of the face.)
    */
-  private moveFromDrag(pos: Vec3, nArr: Vec3, local: THREE.Vector3, world: THREE.Vector3, drag: THREE.Vector2): CubeMove | null {
+  private moveFromDrag(pos: Vec3, nArr: Vec3, local: THREE.Vector3, world: THREE.Vector3, drag: THREE.Vector2): { axis: Axis; layer: -1 | 0 | 1; sdir: THREE.Vector2 } | null {
     const p0 = this.toScreen(world);
     const dragDir = drag.clone().normalize();
-    let best: { k: number; score: number; sign: 1 | -1 } | null = null;
+    let best: { k: number; score: number; s: THREE.Vector2 } | null = null;
     for (let k = 0; k < 3; k++) {
       if (nArr[k] !== 0) continue; // can't turn around the face's own normal by dragging on it
       const axis = new THREE.Vector3(k === 0 ? 1 : 0, k === 1 ? 1 : 0, k === 2 ? 1 : 0);
@@ -213,13 +228,74 @@ class CubeView {
       const velWorld = vel.normalize().applyQuaternion(this.cube.quaternion);
       const s = this.toScreen(world.clone().addScaledVector(velWorld, 0.05)).sub(p0);
       if (s.lengthSq() < 1e-8) continue;
-      const dot = s.normalize().dot(dragDir);
-      if (!best || Math.abs(dot) > best.score) best = { k, score: Math.abs(dot), sign: dot >= 0 ? 1 : -1 };
+      s.normalize();
+      const dot = s.dot(dragDir);
+      if (!best || Math.abs(dot) > best.score) best = { k, score: Math.abs(dot), s };
     }
     // Ambiguous (diagonal drag, or a face seen almost edge-on): wait for a clearer drag.
     if (!best || best.score < 0.4) return null;
-    // the layer is the grabbed cubie's coordinate along the turn axis
-    return { axis: AXES[best.k], layer: pos[best.k] as -1 | 0 | 1, dir: best.sign };
+    // the layer is the grabbed cubie's coordinate along the turn axis; sdir = on-screen direction of a +turn
+    return { axis: AXES[best.k], layer: pos[best.k] as -1 | 0 | 1, sdir: best.s };
+  }
+
+  // ---- live preview: the grabbed layer is highlighted and turns with the finger, snaps on release
+  preview: { axis: Axis; layer: -1 | 0 | 1; sdir: THREE.Vector2; pivot: THREE.Group; angle: number } | null = null;
+  private highlighted: THREE.Group[] = [];
+
+  setHighlight(groups: THREE.Group[] | null) {
+    for (const g of this.highlighted) (g.children[0] as THREE.Mesh).material = this.bodyMat;
+    this.highlighted = groups?.filter(Boolean) ?? [];
+    for (const g of this.highlighted) (g.children[0] as THREE.Mesh).material = this.highlightMat;
+  }
+
+  private startPreview(axis: Axis, layer: -1 | 0 | 1, sdir: THREE.Vector2) {
+    const k = AXES.indexOf(axis);
+    const pivot = new THREE.Group();
+    this.cube.add(pivot);
+    const moving: THREE.Group[] = [];
+    for (const [k2, g] of this.cubies) {
+      if (Number(k2.split(',')[k]) === layer) {
+        pivot.attach(g);
+        moving.push(g);
+      }
+    }
+    this.setHighlight(moving);
+    this.preview = { axis, layer, sdir, pivot, angle: 0 };
+  }
+
+  private setPreviewAngle(angle: number) {
+    const p = this.preview!;
+    p.angle = angle;
+    const k = AXES.indexOf(p.axis);
+    p.pivot.quaternion.setFromAxisAngle(new THREE.Vector3(k === 0 ? 1 : 0, k === 1 ? 1 : 0, k === 2 ? 1 : 0), angle);
+  }
+
+  /** Finish the turn if it went far enough (a third of the way), otherwise spring back. */
+  private releasePreview() {
+    const p = this.preview!;
+    const frac = p.angle / (Math.PI / 2);
+    const dir: 1 | -1 | 0 = Math.abs(frac) >= 0.3 ? (frac > 0 ? 1 : -1) : 0;
+    const from = p.angle;
+    const to = (dir * Math.PI) / 2;
+    this.animating = true;
+    const t0 = performance.now();
+    const dur = Math.max(60, TURN_MS * Math.abs(to - from) / (Math.PI / 2));
+    const step = () => {
+      const t = Math.min(1, (performance.now() - t0) / dur);
+      this.setPreviewAngle(from + (to - from) * (1 - Math.pow(1 - t, 3)));
+      if (t < 1) return void requestAnimationFrame(step);
+      this.cube.remove(p.pivot);
+      this.preview = null;
+      this.highlighted = [];
+      if (dir !== 0) {
+        const m: CubeMove = { axis: p.axis, layer: p.layer, dir };
+        this.onMove(m);
+        this.stickers = applyMove(this.stickers, m);
+      }
+      this.rebuild();
+      this.animating = false;
+    };
+    requestAnimationFrame(step);
   }
 
   /** Animate a layer turn, then commit it to the logical state. */
@@ -258,10 +334,23 @@ class CubeView {
     this.renderer.dispose();
     this.bodyGeo.dispose();
     this.bodyMat.dispose();
+    this.highlightMat.dispose();
     this.stickerGeo.dispose();
     this.stickerMats.forEach((m) => m.dispose());
     this.renderer.domElement.remove();
   }
+}
+
+/** Mini 3×3 picture of the goal: a full face, or a cross (centre + edges). */
+function GoalIcon({ goal }: { goal: CubeGoal }) {
+  return (
+    <span className="grid h-9 w-9 shrink-0 grid-cols-3 gap-[2px] rounded-md bg-slate p-[3px]">
+      {Array.from({ length: 9 }, (_, i) => {
+        const on = goal.kind === 'face' || i % 2 === 1 || i === 4;
+        return <span key={i} className="rounded-[2px]" style={{ background: on ? CSS_COLORS[goal.color] : '#6b6784' }} />;
+      })}
+    </span>
+  );
 }
 
 export function CubeRound({ item, feedback, onAnswer }: ModeProps<CubeItemData>) {
@@ -269,7 +358,7 @@ export function CubeRound({ item, feedback, onAnswer }: ModeProps<CubeItemData>)
   const viewRef = useRef<CubeView | null>(null);
   const [progress, setProgress] = useState(item?.data.progress ?? 0);
   const [moves, setMoves] = useState(item?.data.moves ?? 0);
-  const [solved, setSolved] = useState(false);
+  const [done, setDone] = useState(false);
   const onAnswerRef = useRef(onAnswer);
   onAnswerRef.current = onAnswer;
 
@@ -281,46 +370,51 @@ export function CubeRound({ item, feedback, onAnswer }: ModeProps<CubeItemData>)
       onAnswerRef.current(m);
     });
     viewRef.current = view;
-    if (import.meta.env.DEV) (window as any).__cube = { view, progress: () => localProgress(view.stickers) };
+    if (import.meta.env.DEV) (window as any).__cube = { view, progress: () => goalProgress(view.stickers, item.data.goal) };
     setProgress(item.data.progress);
     setMoves(item.data.moves ?? 0);
-    setSolved(isSolved(item.data.stickers));
+    setDone(item.data.progress >= item.data.maxProgress);
     return () => {
       view.dispose();
       viewRef.current = null;
     };
   }, [item?.round, item?.item, item?.data]);
 
-  // Server verdicts: progress and the solve.
+  // Server verdicts: progress and the finish.
   useEffect(() => {
     if (!feedback || !item || feedback.round !== item.round) return;
     if (typeof feedback.progress === 'number') setProgress(feedback.progress);
-    if (feedback.solved) setSolved(true);
+    if (feedback.solved) setDone(true);
   }, [feedback?.seq]);
 
-  const pct = Math.round((progress / 48) * 100);
+  if (!item) return <div className="m-auto text-muted">…</div>;
+  const { goal, colorName, maxProgress } = item.data;
+  const what = goal.kind === 'face' ? `a full ${colorName} face` : `a ${colorName} cross`;
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="mb-2 flex items-center gap-3 text-xs font-medium">
-        <span className="label">Solved</span>
-        <Progress value={(solved ? 100 : pct) / 100} className="flex-1" />
-        <span className="w-10 text-right font-semibold tabular-nums">{solved ? 100 : pct}%</span>
-        <span className="tabular-nums text-muted">{moves} moves</span>
+      <div className="mb-3 flex items-center gap-3">
+        <GoalIcon goal={goal} />
+        <div className="min-w-0 flex-1">
+          <div className="font-display text-base font-bold leading-tight">Make {what}</div>
+          <div className="text-xs text-muted">{goal.kind === 'face' ? 'All 9 squares of one side' : 'Centre and the 4 edge squares of one side'}</div>
+        </div>
+        <span className="font-display text-lg font-bold tabular-nums">{done ? maxProgress : progress}/{maxProgress}</span>
       </div>
+      <Progress value={(done ? maxProgress : progress) / maxProgress} />
 
-      <div className="card relative min-h-[280px] flex-1 overflow-hidden rounded-2xl">
+      <div className="card relative mt-3 min-h-[280px] flex-1 overflow-hidden rounded-2xl">
         <div ref={hostRef} className="absolute inset-0" />
-        {solved && (
+        {done && (
           <div className="pointer-events-none absolute inset-x-0 top-6 text-center animate-pop">
-            <div className="text-3xl font-bold tracking-tight text-cyan-strong">Solved</div>
+            <div className="text-3xl font-bold tracking-tight text-teal">Done</div>
             <div className="mt-1 text-sm text-muted">in {moves} moves · waiting for your opponent…</div>
           </div>
         )}
       </div>
 
       <p className="mt-2 text-center text-xs text-muted">
-        Drag a row or column to turn it · drag outside the cube to spin it
+        Hold a square and drag: the row lights up and turns with you · drag outside the cube to spin it
       </p>
     </div>
   );

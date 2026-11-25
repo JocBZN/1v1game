@@ -147,7 +147,7 @@ function hubPage(): string {
     ...QUIZ_PAGES.map((p) => `<a href="/quiz/${p.slug}">${esc(p.name)} quiz <small>(${practiceQuestions(p.cat).length})</small></a>`),
     `<a href="/flag-quiz">Flag quiz</a>`,
     `<a href="/chess-puzzles">Chess puzzles</a>`,
-    `<a href="/mental-math">Mental math</a>`,
+    `<a href="/timeline-game">Timeline game</a>`,
     `<a href="/rubiks-cube">Rubik’s Cube</a>`,
     ...(hasPack()
       ? [
@@ -171,7 +171,7 @@ function hubPage(): string {
 <ul>
 <li><strong>Instant opponents:</strong> a live player matched by rating, or a recorded duel of a real player when nobody is online.</li>
 <li><strong>${total} free practice questions</strong> with answers on these pages, and more than 1,200 in the game.</li>
-<li><strong>More than trivia:</strong> flags of 194 countries, chess puzzles, mental math and a 3D Rubik’s Cube.</li>
+<li><strong>More than trivia:</strong> flags of 194 countries, chess puzzles, a 3D Rubik’s Cube, mini golf, a timeline game and more.</li>
 <li><strong>Ranked:</strong> Glicko-2 ratings, leagues from Bronze to Legend and a global leaderboard.</li>
 <li><strong>Free on any device:</strong> no download, play as a guest, install it like an app.</li>
 </ul>`;

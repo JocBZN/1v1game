@@ -8,9 +8,11 @@ const TIPS = [
   'The server picks the topics. Be ready for anything.',
   'In trivia, answering fast earns bonus points.',
   'In chess puzzles, one wrong move loses the puzzle.',
-  'In mental math, a mistake costs little. Don’t hesitate.',
+  'Split the shape: one straight cut, as close to 50/50 as you can.',
+  'Golf: pull back from the ball and let go. Walls bounce.',
+  'Timeline: drag the events, oldest at the top.',
   'Win 2 rounds out of 3 to win the duel.',
-  'Rubik’s Cube: drag a row to turn it, drag outside the cube to spin it.',
+  'Rubik’s Cube: you only need one face or a cross, not the whole cube.',
 ];
 
 const RINGS = ['#15788c', '#15788c'];

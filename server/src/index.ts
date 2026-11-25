@@ -30,6 +30,8 @@ app.get('/health', (_req, res) => res.json({ ok: true }));
 app.use('/api', createApi());
 mountAdmin(app);
 // Generated multilingual pages first: they own /es/, /quiz/space/, /flag-quiz/north-america/ …
+// The mental math game was retired: send old links and search traffic to the games hub.
+app.get(['/mental-math', '/mental-math/'], (_req, res) => res.redirect(301, '/1v1-games'));
 mountSeoPack(app);
 mountQuizPages(app);
 mountSeo(app, quizPaths);

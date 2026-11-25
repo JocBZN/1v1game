@@ -130,6 +130,22 @@ h1, h2, .font-display {
   animation: radar 2s ease-out infinite;
 }
 
+.color-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: #fff;
+  border: 2px solid var(--color-slate);
+}
+.color-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #fff;
+  border: 2px solid var(--color-slate);
+}
+
 .safe-bottom {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }

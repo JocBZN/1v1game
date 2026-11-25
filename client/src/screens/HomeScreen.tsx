@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Crown, Download, LogIn, Trophy, User, UserPlus, Users } from 'lucide-react';
+import { ArrowRight, Crown, Download, LogIn, Trophy, User, UserPlus, Users } from 'lucide-react';
 import type { Route } from '../App';
 import type { Me } from '../lib/api';
 import { DOMAIN_LIST } from '../lib/domains';
@@ -8,18 +8,20 @@ import { useInstallPrompt } from '../lib/pwa';
 import { Avatar, LeagueIcon, Screen, TopicIcon, rise, useAnimatedNumber } from '../components/ui';
 import { SignupPrompt } from '../components/SignupPrompt';
 
-/** The Play button: a plain teal circle with one quiet ring. */
+/** The Play button: one wide, plain button. */
 function PlayButton({ onPlay, disabled }: { onPlay: () => void; disabled: boolean }) {
   return (
-    <motion.button
+    <button
       onClick={onPlay}
       disabled={disabled}
-      whileHover={disabled ? undefined : { scale: 1.03 }}
-      whileTap={disabled ? undefined : { scale: 0.97 }}
-      className="flex h-40 w-40 items-center justify-center rounded-full bg-teal font-display text-4xl font-bold tracking-tight text-[#fff8e6] ring-8 ring-teal/10 transition-colors hover:bg-[#12697b] disabled:opacity-50"
+      className="btn btn-primary group w-full justify-between rounded-2xl px-6 py-5 text-left"
     >
-      Play
-    </motion.button>
+      <span>
+        <span className="block font-display text-3xl font-bold tracking-tight">Play</span>
+        <span className="block text-sm font-medium opacity-75">1v1 · 3 rounds · random games</span>
+      </span>
+      <ArrowRight size={28} strokeWidth={2} className="transition-transform group-hover:translate-x-1" />
+    </button>
   );
 }
 
@@ -91,18 +93,20 @@ export function HomeScreen({ me, onPlay, onNavigate, connected }: {
         </motion.div>
       )}
 
-      <div className="flex flex-1 flex-col items-center justify-center py-7">
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.1 }}>
-          <PlayButton onPlay={onPlay} disabled={!connected} />
-        </motion.div>
-        <p className="mt-6 text-sm text-muted">{connected ? '3 rounds · random topics' : 'Connecting…'}</p>
-        <div className="mt-3 flex gap-3 text-muted">
+      <div className="flex flex-1 flex-col justify-center py-6">
+        <div className="label mb-3">{DOMAIN_LIST.length} games in the mix</div>
+        <div className="grid grid-cols-4 gap-x-2 gap-y-4">
           {DOMAIN_LIST.map((d) => (
-            <span key={d.id} title={d.name}>
-              <TopicIcon domain={d.id} size={32} />
-            </span>
+            <div key={d.id} className="flex flex-col items-center gap-1.5 text-center">
+              <TopicIcon domain={d.id} size={40} />
+              <span className="text-[11px] font-medium leading-tight text-muted">{d.short}</span>
+            </div>
           ))}
         </div>
+        <motion.div className="mt-7" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.1 }}>
+          <PlayButton onPlay={onPlay} disabled={!connected} />
+        </motion.div>
+        {!connected && <p className="mt-3 text-center text-sm text-muted">Connecting…</p>}
         {canInstall && (
           <button onClick={install} className="btn btn-secondary mt-4 h-9 px-3 text-xs">
             <Download size={14} strokeWidth={2.5} /> Install the app

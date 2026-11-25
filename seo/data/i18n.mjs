@@ -32,9 +32,9 @@ export const LANGS = {
   en: {
     name: 'English', locale: 'en_US', prefix: '',
     home: {
-      modes: 'Also inside: a flag quiz with 194 countries, chess puzzles, a mental math game and a real 3D Rubik’s Cube.',
-      title: '1v1game – Free 1v1 Quiz Game Online: Trivia, Flags, Chess & Math',
-      desc: '1v1game is a free 1v1 quiz game in your browser: trivia duels with 1,200+ questions, a flag quiz, chess puzzles and mental math. No download, no sign-up.',
+      modes: 'Also inside: a flag quiz with 194 countries, chess puzzles, a real 3D Rubik’s Cube, mini golf, a timeline game, split the shape and guess the color.',
+      title: '1v1game – Free 1v1 Quiz Game Online: Trivia, Flags, Chess & More',
+      desc: '1v1game is a free 1v1 quiz game in your browser: trivia duels, a flag quiz, chess puzzles, a 3D cube, mini golf, timeline and color games. No sign-up.',
       h1: '1v1 Trivia Quiz: General Knowledge Duels',
       lead: 'Prove you know more. Start a free 1v1 quiz duel in seconds, answer general knowledge questions against the clock and win the best of three.',
       paras: [
@@ -80,9 +80,9 @@ export const LANGS = {
   es: {
     name: 'Español', locale: 'es_ES', prefix: '/es',
     home: {
-      modes: 'Y además: quiz de banderas con 194 países, problemas de ajedrez, cálculo mental y un cubo de Rubik 3D de verdad.',
+      modes: 'Y además: quiz de banderas con 194 países, problemas de ajedrez, un cubo de Rubik 3D de verdad, minigolf y un juego de línea de tiempo.',
       title: 'Trivia 1 contra 1 online – Preguntas de cultura general | 1v1game',
-      desc: 'Trivia 1 contra 1 gratis en el navegador: duelos de cultura general con más de 1.200 preguntas, quiz de banderas, ajedrez y cálculo mental. Sin descargas ni registro.',
+      desc: 'Trivia 1 contra 1 gratis en el navegador: duelos de cultura general con más de 1.200 preguntas, quiz de banderas, ajedrez, minigolf y más. Sin descargas ni registro.',
       h1: 'Juego de preguntas y respuestas 1 contra 1',
       lead: 'Demuestra quién sabe más. Empieza un duelo de trivia gratis en segundos, responde preguntas de cultura general contra el reloj y gana al mejor de tres.',
       paras: [
@@ -128,9 +128,9 @@ export const LANGS = {
   pt: {
     name: 'Português', locale: 'pt_BR', prefix: '/pt',
     home: {
-      modes: 'E mais: quiz de bandeiras com 194 países, problemas de xadrez, cálculo mental e um cubo mágico 3D de verdade.',
+      modes: 'E mais: quiz de bandeiras com 194 países, problemas de xadrez, um cubo mágico 3D de verdade, minigolfe e um jogo de linha do tempo.',
       title: 'Quiz 1x1 online – Perguntas de conhecimentos gerais | 1v1game',
-      desc: 'Quiz 1x1 grátis no navegador: duelos de conhecimentos gerais com mais de 1.200 perguntas, quiz de bandeiras, xadrez e cálculo mental. Sem download e sem cadastro.',
+      desc: 'Quiz 1x1 grátis no navegador: duelos de conhecimentos gerais com mais de 1.200 perguntas, quiz de bandeiras, xadrez, minigolfe e mais. Sem download e sem cadastro.',
       h1: 'Jogo de perguntas e respostas 1x1 online',
       lead: 'Prove quem sabe mais. Comece um duelo de quiz grátis em segundos, responda perguntas de conhecimentos gerais contra o relógio e vença a melhor de três.',
       paras: [
@@ -176,9 +176,9 @@ export const LANGS = {
   fr: {
     name: 'Français', locale: 'fr_FR', prefix: '/fr',
     home: {
-      modes: 'Et aussi : un quiz des drapeaux avec 194 pays, des problèmes d’échecs, du calcul mental et un vrai Rubik’s Cube en 3D.',
+      modes: 'Et aussi : un quiz des drapeaux avec 194 pays, des problèmes d’échecs, un vrai Rubik’s Cube en 3D, du mini-golf et un jeu de frise chronologique.',
       title: 'Quiz 1 contre 1 en ligne – Culture générale en duel | 1v1game',
-      desc: 'Quiz 1 contre 1 gratuit en ligne : duels de culture générale avec plus de 1 200 questions, quiz des drapeaux, échecs et calcul mental. Sans inscription.',
+      desc: 'Quiz 1 contre 1 gratuit en ligne : duels de culture générale avec plus de 1 200 questions, quiz des drapeaux, échecs, mini-golf et plus. Sans inscription.',
       h1: 'Quiz de culture générale en duel 1 contre 1',
       lead: 'Prouvez que vous en savez plus. Lancez un duel de quiz gratuit en quelques secondes, répondez à des questions de culture générale contre la montre et gagnez deux manches sur trois.',
       paras: [
@@ -224,9 +224,9 @@ export const LANGS = {
   de: {
     name: 'Deutsch', locale: 'de_DE', prefix: '/de',
     home: {
-      modes: 'Außerdem: ein Flaggen-Quiz mit 194 Ländern, Schachaufgaben, Kopfrechnen und ein echter 3D-Zauberwürfel.',
+      modes: 'Außerdem: ein Flaggen-Quiz mit 194 Ländern, Schachaufgaben, ein echter 3D-Zauberwürfel, Minigolf und ein Zeitleisten-Spiel.',
       title: '1 gegen 1 Quiz online – Allgemeinwissen im Duell | 1v1game',
-      desc: 'Kostenloses 1 gegen 1 Quiz im Browser: Wissensduelle mit über 1.200 Quizfragen, dazu Flaggen-Quiz, Schachaufgaben und Kopfrechnen. Ohne Download, ohne Anmeldung.',
+      desc: 'Kostenloses 1 gegen 1 Quiz im Browser: Wissensduelle mit über 1.200 Quizfragen, dazu Flaggen-Quiz, Schachaufgaben, Minigolf und mehr. Ohne Download, ohne Anmeldung.',
       h1: 'Allgemeinwissen Quiz: 1 gegen 1 im Duell',
       lead: 'Beweise, wer mehr weiß. Starte in Sekunden ein kostenloses Quiz-Duell, beantworte Quizfragen zum Allgemeinwissen gegen die Uhr und gewinne zwei von drei Runden.',
       paras: [
@@ -272,9 +272,9 @@ export const LANGS = {
   it: {
     name: 'Italiano', locale: 'it_IT', prefix: '/it',
     home: {
-      modes: 'E in più: quiz sulle bandiere con 194 paesi, problemi di scacchi, calcolo mentale e un vero cubo di Rubik in 3D.',
+      modes: 'E in più: quiz sulle bandiere con 194 paesi, problemi di scacchi, un vero cubo di Rubik in 3D, minigolf e un gioco sulla linea del tempo.',
       title: 'Quiz 1 contro 1 online – Sfida di cultura generale | 1v1game',
-      desc: 'Quiz 1 contro 1 gratis nel browser: sfide di cultura generale con oltre 1.200 domande, quiz sulle bandiere, scacchi e calcolo mentale. Senza download né registrazione.',
+      desc: 'Quiz 1 contro 1 gratis nel browser: sfide di cultura generale con oltre 1.200 domande, quiz sulle bandiere, scacchi, minigolf e altro. Senza download né registrazione.',
       h1: 'Quiz di cultura generale: sfida 1 contro 1',
       lead: 'Dimostra chi ne sa di più. Inizia una sfida a quiz gratis in pochi secondi, rispondi a domande di cultura generale contro il tempo e vinci al meglio delle tre.',
       paras: [
@@ -320,9 +320,9 @@ export const LANGS = {
   ro: {
     name: 'Română', locale: 'ro_RO', prefix: '/ro',
     home: {
-      modes: 'Mai ai și: quiz cu steagurile a 194 de țări, probleme de șah, calcul mental și un cub Rubik 3D adevărat.',
+      modes: 'Mai ai și: quiz cu steagurile a 194 de țări, probleme de șah, un cub Rubik 3D adevărat, minigolf și un joc cu cronologie.',
       title: 'Quiz 1 la 1 online – Test de cultură generală în duel | 1v1game',
-      desc: 'Quiz 1 la 1 gratuit în browser: dueluri de cultură generală cu peste 1.200 de întrebări, quiz cu steaguri, probleme de șah și calcul mental. Fără instalare și fără cont.',
+      desc: 'Quiz 1 la 1 gratuit în browser: dueluri de cultură generală cu peste 1.200 de întrebări, quiz cu steaguri, probleme de șah, minigolf și altele. Fără instalare și fără cont.',
       h1: 'Joc de cultură generală: duel 1 la 1 online',
       lead: 'Demonstrează cine știe mai mult. Pornește în câteva secunde un duel de quiz gratuit, răspunde la întrebări de cultură generală contra cronometru și câștigă două runde din trei.',
       paras: [
@@ -368,9 +368,9 @@ export const LANGS = {
   pl: {
     name: 'Polski', locale: 'pl_PL', prefix: '/pl',
     home: {
-      modes: 'A do tego: quiz flag 194 państw, zadania szachowe, liczenie w pamięci i prawdziwa kostka Rubika 3D.',
+      modes: 'A do tego: quiz flag 194 państw, zadania szachowe, prawdziwa kostka Rubika 3D, minigolf i gra z osią czasu.',
       title: 'Quiz 1 na 1 online – Pojedynek wiedzy ogólnej | 1v1game',
-      desc: 'Darmowy quiz 1 na 1 w przeglądarce: pojedynki wiedzy ogólnej z ponad 1200 pytaniami, quiz flag, zadania szachowe i liczenie w pamięci. Bez pobierania i rejestracji.',
+      desc: 'Darmowy quiz 1 na 1 w przeglądarce: pojedynki wiedzy ogólnej z ponad 1200 pytaniami, quiz flag, zadania szachowe, minigolf i więcej. Bez pobierania i rejestracji.',
       h1: 'Quiz wiedzy ogólnej: pojedynek 1 na 1',
       lead: 'Udowodnij, kto wie więcej. Rozpocznij darmowy pojedynek quizowy w kilka sekund, odpowiadaj na pytania z wiedzy ogólnej na czas i wygraj dwie rundy z trzech.',
       paras: [
@@ -416,9 +416,9 @@ export const LANGS = {
   tr: {
     name: 'Türkçe', locale: 'tr_TR', prefix: '/tr',
     home: {
-      modes: 'Ayrıca: 194 ülkenin bayrak testi, satranç bulmacaları, zihinden matematik oyunu ve gerçek bir 3D Rubik Küpü.',
+      modes: 'Ayrıca: 194 ülkenin bayrak testi, satranç bulmacaları, gerçek bir 3D Rubik Küpü, mini golf ve zaman çizelgesi oyunu.',
       title: '1v1 Bilgi Yarışması Online – Genel Kültür Düellosu | 1v1game',
-      desc: 'Tarayıcıda ücretsiz 1’e 1 bilgi yarışması: 1.200’den fazla soruyla genel kültür düelloları, bayrak testi, satranç bulmacaları ve zihinden matematik. Kayıt yok.',
+      desc: 'Tarayıcıda ücretsiz 1’e 1 bilgi yarışması: 1.200’den fazla soruyla genel kültür düelloları, bayrak testi, satranç bulmacaları, mini golf ve dahası. Kayıt yok.',
       h1: 'Genel Kültür Bilgi Yarışması: 1’e 1 Düello',
       lead: 'Kimin daha çok bildiğini kanıtla. Saniyeler içinde ücretsiz bir bilgi düellosu başlat, genel kültür sorularını zamana karşı cevapla ve üç turun ikisini kazan.',
       paras: [

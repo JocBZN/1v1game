@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Chess, type Square } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import { Check } from 'lucide-react';
-import { WaitingNote } from './MathRound';
+import { WaitingNote } from './ItemHeader';
 import type { ModeProps } from './types';
 import { alpha, C } from '../lib/theme';
 

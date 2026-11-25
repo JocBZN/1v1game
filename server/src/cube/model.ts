@@ -114,6 +114,33 @@ export function progress(stickers: readonly Sticker[]): number {
   return n - 6;
 }
 
+/** A short challenge instead of a full solve: one face, or a cross, of a given colour. */
+export interface CubeGoal {
+  kind: 'face' | 'cross';
+  /** colour index, see COLORS */
+  color: number;
+}
+
+export const goalMax = (g: CubeGoal) => (g.kind === 'face' ? 9 : 5);
+
+/**
+ * How close the cube is to the goal: the best face's count of goal-coloured stickers among the
+ * positions that matter (all 9 for a face; centre + 4 edges for a cross). Equals goalMax ⇔ done.
+ */
+export function goalProgress(stickers: readonly Sticker[], g: CubeGoal): number {
+  let best = 0;
+  for (const f of FACES) {
+    let n = 0;
+    for (const s of face(stickers, f.n)) {
+      const nonZero = s.p.filter((v) => v !== 0).length; // 1 centre, 2 edge, 3 corner
+      if (g.kind === 'cross' && nonZero === 3) continue;
+      if (s.c === g.color) n++;
+    }
+    best = Math.max(best, n);
+  }
+  return best;
+}
+
 export function parseMove(x: unknown): CubeMove | null {
   if (!x || typeof x !== 'object') return null;
   const { axis, layer, dir } = x as Record<string, unknown>;

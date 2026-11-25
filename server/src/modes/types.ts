@@ -52,6 +52,8 @@ export interface GameMode<C extends RoundContent = RoundContent> {
   feedbackDelay: number;
 
   generateRound(rng: Rng): C;
+  /** Optional: whether stored (ghost) content still matches this mode's current format. */
+  acceptsContent?(content: unknown): boolean;
   /** What the client may see of item `index` (no answers). */
   publicItem(content: C, index: number): unknown;
   /** Optional: public view of an item *in progress* (e.g. the current cube), used when a player reconnects. */

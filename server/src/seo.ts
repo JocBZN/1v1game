@@ -11,9 +11,9 @@ import { hasPack, hreflangTags } from './seo-pack';
 
 export const SITE = {
   name: 'Duel',
-  title: '1v1game – Free 1v1 Quiz Game Online: Trivia, Flags, Chess & Math',
+  title: '1v1game – Free 1v1 Quiz Game Online: Trivia, Flags, Chess & More',
   description:
-    '1v1game is a free 1v1 quiz game in your browser: trivia duels with 1,200+ questions, a flag quiz, chess puzzles and mental math. No download, no sign-up.',
+    '1v1game is a free 1v1 quiz game in your browser: trivia duels, a flag quiz, chess puzzles, a 3D cube, mini golf, timeline and color games. No sign-up.',
   themeColor: '#fff1d1',
 };
 
@@ -54,7 +54,7 @@ interface TopicPage {
 
 export const TOPIC_PAGES: TopicPage[] = [
   {
-    slug: 'trivia',
+    slug: 'trivia',
     name: 'Trivia',
     title: 'Trivia Quiz Online – 1v1 General Knowledge Trivia Duels',
     description:
@@ -75,7 +75,7 @@ export const TOPIC_PAGES: TopicPage[] = [
     ],
   },
   {
-    slug: 'chess-puzzles',
+    slug: 'chess-puzzles',
     name: 'Chess puzzles',
     title: 'Chess Puzzles Duel Online – Mate in 1, Mate in 2 Races',
     description:
@@ -95,22 +95,51 @@ export const TOPIC_PAGES: TopicPage[] = [
     ],
   },
   {
-    slug: 'mental-math',
-    name: 'Mental math',
-    title: 'Mental Math Game Online – 1v1 Speed Arithmetic Duels',
+    slug: 'split-the-shape',
+    name: 'Split the shape',
+    title: 'Split the Shape – Cut It 50/50, 1v1 Online Game',
     description:
-      'Speed arithmetic, 1v1: 60 seconds of mental math that gets harder as you go. Addition, subtraction, multiplication, division. Free online.',
-    h1: 'Mental math, head to head',
-    intro: 'Sixty seconds, as many problems as you can solve. The problems get harder the more you get right, and a mistake only costs a little.',
-    how: [
-      'Integer answers only: no decimals, no tricks.',
-      '100 to 250 points per answer depending on difficulty, −50 for a miss.',
-      'Use the on-screen keypad or your keyboard.',
-    ],
-    faq: [['Is it good practice for exams?', 'It trains fast, accurate arithmetic under time pressure — the same skill used in timed tests.']],
+      'One straight cut, two halves: split pixel aliens, rockets, hearts and more as close to 50/50 as you can. A free 1v1 precision game in your browser.',
+    h1: 'Split the shape, 50/50',
+    intro: 'A shape appears. Drag one straight line across it. The closer the two parts are to 50% each, the more points you get. Five shapes, ten seconds each.',
+    how: ['50/50 = 1000 points, 45/55 = 750, 40/60 = 500.', 'Shapes are rotated and mirrored every time.', 'Works with a finger or a mouse.'],
+    faq: [['What shapes are there?', 'Pixel aliens, an arcade ghost, rockets, crowns, hearts, falling blocks, a game controller and more.']],
   },
   {
-    slug: 'flag-quiz',
+    slug: 'color-game',
+    name: 'Guess the color',
+    title: 'Guess the Color – RGB Color Matching Game, 1v1',
+    description:
+      'See a color, rebuild it with red, green and blue sliders in 15 seconds. Scored on how close you get. Free 1v1 color guessing game online.',
+    h1: 'Guess the color, against an opponent',
+    intro: 'A color sample appears. Mix it yourself with three sliders (red, green, blue) before the 15 seconds run out. Four colors per round.',
+    how: ['Scored by perceptual distance, so close shades still earn points.', 'Your color is locked in automatically when time runs out.', 'The hex code is revealed after each color.'],
+    faq: [['Is it good practice for designers?', 'Yes. It trains your eye for hue, saturation and lightness, the same skill used when matching colors by hand.']],
+  },
+  {
+    slug: 'mini-golf',
+    name: 'One-shot golf',
+    title: 'Mini Golf Online – 1v1 One-Shot Golf in Your Browser',
+    description:
+      'Pull back, aim and shoot like in pool. Three holes, one or two walls each, up to three shots. Fewer shots or closer to the hole wins. Free 1v1 mini golf.',
+    h1: 'One-shot mini golf, 1v1',
+    intro: 'A hole with one or two walls in the way. Pull back from the ball to set direction and power, then let go. Walls bounce the ball.',
+    how: ['In with the first shot: 1000 points; second: 650; third: 400.', 'Not in after three shots: points for being close.', 'Same physics for both players.'],
+    faq: [['Can I bank shots off the walls?', 'Yes. Walls and the edges of the course bounce the ball.']],
+  },
+  {
+    slug: 'timeline-game',
+    name: 'Timeline',
+    title: 'Timeline Game – Put History, Games and Movies in Order',
+    description:
+      'Four events, one order: drag historical events, video game and movie releases from oldest to newest. Free 1v1 timeline quiz in your browser.',
+    h1: 'Timeline: what came first?',
+    intro: 'Four events appear: moments from history, video game releases, films and tech launches. Drag them into order, oldest at the top.',
+    how: ['Scored on how many pairs are in the right order.', 'The years are revealed after each set.', 'Events are always at least 3 years apart.'],
+    faq: [['What kind of events are included?', 'History from the fall of Rome to the euro, video games from Pong to Elden Ring, classic and modern films, and tech launches.']],
+  },
+  {
+    slug: 'flag-quiz',
     name: 'Flags',
     title: 'Flag Quiz Online – Guess the Country, 1v1',
     description:
@@ -122,14 +151,14 @@ export const TOPIC_PAGES: TopicPage[] = [
     faq: [['Which countries are included?', 'Every country in Europe, Asia, Africa, the Americas and Oceania, 194 in total.']],
   },
   {
-    slug: 'rubiks-cube',
+    slug: 'rubiks-cube',
     name: 'Rubik’s Cube',
     title: 'Rubik’s Cube Online – Solve a Real 3D Cube, 1v1',
     description:
-      'Solve a real 3D Rubik’s Cube online against an opponent. Drag a row to turn it, drag outside to spin the cube. 5 minutes, scored on progress and speed.',
+      'Solve a real 3D Rubik’s Cube online against an opponent. Make one full face or a cross of a given color in 3 minutes. Drag a row to turn it.',
     h1: 'A real Rubik’s Cube, online, 1v1',
     intro:
-      'A genuine 3×3 cube rendered in 3D. Drag a row or column with your finger or mouse to turn it, and drag outside the cube to look around. Both players get a scramble and five minutes.',
+      'A genuine 3×3 cube rendered in 3D. Drag a row or column with your finger or mouse to turn it, and drag outside the cube to look around. Both players get the same scramble and three minutes to build one full face or a cross of a given color.',
     how: [
       '20 points for every sticker that matches its face while you work.',
       'Solving it scores 3,000 plus up to 2,000 for speed.',
@@ -140,7 +169,7 @@ export const TOPIC_PAGES: TopicPage[] = [
 ];
 
 const HOW_TO_PLAY: TopicPage = {
-  slug: 'how-to-play',
+  slug: 'how-to-play',
   name: 'How to play',
   title: 'How to Play Duel – Rules, Leagues and Ratings',
   description:
@@ -149,7 +178,7 @@ const HOW_TO_PLAY: TopicPage = {
   intro:
     'Press Play and you are matched with a real player of similar rating. If nobody is online within a few seconds, you play a ghost (a recorded duel of a real player) or a computer opponent, so you never wait. The server picks three different topics; win two rounds to win the duel. Your overall rating and your rating in each topic change after every duel.',
   how: [
-    'Topics: trivia, chess puzzles, mental math, flags and Rubik’s Cube.',
+    'Games: trivia, flags, chess puzzles, a 3D Rubik’s Cube, split the shape, guess the color, mini golf and timeline.',
     'Leagues: Bronze, Silver (1300), Gold (1500), Platinum (1700), Diamond (1900), Legend (2100).',
     'Ratings use the Glicko-2 system, like many chess sites.',
     'Leaving or being disconnected for more than 15 seconds counts as a loss.',
@@ -166,32 +195,32 @@ const HOW_TO_PLAY: TopicPage = {
  */
 export const KEYWORD_PAGES: TopicPage[] = [
   {
-    slug: '1v1-games',
+    slug: '1v1-games',
     name: '1v1 games',
     title: '1v1 Games Online – Free Brain Game Duels, No Download',
     description:
-      'Free 1v1 games in your browser: trivia, flag quiz, chess puzzles, mental math and a 3D Rubik’s Cube. One opponent, three rounds, best of three. No download.',
+      'Free 1v1 games in your browser: trivia, flags, chess puzzles, Rubik’s Cube, mini golf, timeline and more. Three rounds, best of three.',
     h1: '1v1 games online: five brain games, one opponent',
     intro:
       'Duel is a 1v1 game where every match mixes three different brain games. You don’t pick the game: the server draws three topics at random, so you need to be good at trivia, flags, chess, maths and the Rubik’s Cube to win consistently. It runs in any browser, on phone or PC, and a match takes about five minutes.',
     how: [
       'Press Play: you are matched with a live player of similar rating, or a recorded duel of a real player (or a computer opponent) if nobody is online within a few seconds.',
-      'Three rounds on three different topics: trivia, flags, chess puzzles, mental math or Rubik’s Cube.',
+      'Three rounds on three different topics: trivia, flags, chess puzzles, a 3D Rubik’s Cube, split the shape, guess the color, mini golf and timeline.',
       'Win two rounds to win the duel. Every duel changes your Glicko-2 rating, overall and per topic.',
       'Climb the leagues from Bronze to Legend and appear on the leaderboard once you create a free account.',
     ],
     faq: [
       ['Is this the shooter game 1v1.LOL?', 'No. Duel (1v1game.net) is a 1v1 brain game: knowledge, logic and speed instead of building and shooting. It is free and runs in the browser.'],
       ['Do I need to download anything?', 'No. Open 1v1game.net and press Play. You can install it on your phone’s home screen like an app if you want.'],
-      ['Which 1v1 games are included?', 'A trivia quiz with 1,200+ questions, a flag quiz with 194 countries, chess puzzles (mate in 1 and 2), mental math and a real 3D Rubik’s Cube.'],
+      ['Which 1v1 games are included?', 'A trivia quiz with 1,200+ questions, a flag quiz with 194 countries, chess puzzles (mate in 1 and 2), a real 3D Rubik’s Cube, split the shape, guess the color, mini golf and a timeline game.'],
     ],
   },
   {
-    slug: '2-player-games',
+    slug: '2-player-games',
     name: '2 player games',
     title: '2 Player Games Online – Free Quiz, Chess & Math Duels',
     description:
-      'Free 2 player games online: trivia, flags, chess puzzles, mental math and Rubik’s Cube duels, one round each. Play in the browser on phone or PC.',
+      'Free 2 player games online: trivia, flags, chess, Rubik’s Cube, mini golf, timeline and more. Play in the browser on phone or PC.',
     h1: '2 player games online, in your browser',
     intro:
       'Every match on Duel is a two-player game: you and one opponent, the same questions or puzzles at the same moment, and you see their score move while you play. It is built for short sessions — one duel takes about five minutes — and works the same on a phone, a tablet or a laptop.',
@@ -207,7 +236,7 @@ export const KEYWORD_PAGES: TopicPage[] = [
     ],
   },
   {
-    slug: 'quiz-games',
+    slug: 'quiz-games',
     name: 'Quiz games',
     title: 'Quiz Games Online – Free Multiplayer Quiz, 1v1',
     description:
@@ -227,7 +256,7 @@ export const KEYWORD_PAGES: TopicPage[] = [
     ],
   },
   {
-    slug: 'trivia-games',
+    slug: 'trivia-games',
     name: 'Trivia games',
     title: 'Trivia Games Online – Free Trivia with 1,200+ Questions',
     description:
@@ -247,19 +276,20 @@ export const KEYWORD_PAGES: TopicPage[] = [
     ],
   },
   {
-    slug: 'brain-games',
+    slug: 'brain-games',
     name: 'Brain games',
     title: 'Brain Games Online – Free Brain Training Duels for Adults',
     description:
       'Free brain games for adults: general knowledge, flags, chess puzzles, mental arithmetic and a 3D Rubik’s Cube, played as short 1v1 duels in the browser.',
     h1: 'Brain games online, played against an opponent',
     intro:
-      'Brain training works better when there is something at stake. Duel turns five classic brain games — memory and knowledge, visual recognition, logic, arithmetic and spatial reasoning — into short duels against an opponent, with a rating that shows whether you are actually improving.',
+      'Brain training works better when there is something at stake. Duel turns eight brain games — knowledge, visual recognition, logic, spatial reasoning, precision and timing — into short duels against an opponent, with a rating that shows whether you are actually improving.',
     how: [
       'Knowledge: trivia questions from 12 categories.',
       'Visual memory: recognise the flags of 194 countries.',
       'Logic: chess puzzles, mate in 1 and mate in 2.',
-      'Speed arithmetic: mental math that gets harder as you go.',
+      'Precision: split a shape 50/50 with one cut, or match a color by eye.',
+      'Chronology: put four events in order on a timeline.',
       'Spatial reasoning: a real 3D Rubik’s Cube you turn with your finger or mouse.',
     ],
     faq: [
@@ -268,7 +298,7 @@ export const KEYWORD_PAGES: TopicPage[] = [
     ],
   },
   {
-    slug: 'geography-games',
+    slug: 'geography-games',
     name: 'Geography games',
     title: 'Geography Games Online – Flag & Capital Quiz Duels',
     description:
@@ -411,7 +441,7 @@ ${o.bodyHtml}
 </main>
 <footer>
 ${hasPack() ? FOOTER_LANG_LINKS : ''}
-<nav class="foot"><strong>Games</strong> <a href="/trivia">Trivia duel</a> <a href="/chess-puzzles">Chess puzzles</a> <a href="/mental-math">Mental math</a> <a href="/flag-quiz">Flag quiz</a> <a href="/rubiks-cube">Rubik’s Cube</a></nav><p>© ${new Date().getFullYear()} Duel on 1v1game.net · 1v1 brain games in your browser · <a href="/privacy">Privacy</a></p>
+<nav class="foot"><strong>Games</strong> <a href="/trivia">Trivia duel</a> <a href="/chess-puzzles">Chess puzzles</a> <a href="/flag-quiz">Flag quiz</a> <a href="/rubiks-cube">Rubik’s Cube</a> <a href="/split-the-shape">Split the shape</a> <a href="/color-game">Guess the color</a> <a href="/mini-golf">Mini golf</a> <a href="/timeline-game">Timeline</a></nav><p>© ${new Date().getFullYear()} Duel on 1v1game.net · 1v1 brain games in your browser · <a href="/privacy">Privacy</a></p>
 </footer>
 </body>
 </html>`;

@@ -67,7 +67,8 @@ export function buildGhostDuel(viewerId: number, myGeneral: number, rng: Rng): {
   for (const ghost of rng.shuffle(candidates.slice(0, 5))) {
     const unseen = new Map<DomainId, RecordingRow[]>();
     for (const d of availableDomains()) {
-      const recs = getGhostRecordings(ghost.user_id, d, viewerId);
+      const accepts = getMode(d).acceptsContent;
+      const recs = getGhostRecordings(ghost.user_id, d, viewerId).filter((r) => !accepts || accepts(JSON.parse(r.content)));
       if (recs.length) unseen.set(d, recs);
     }
     if (unseen.size === 0) continue;

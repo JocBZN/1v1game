@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
-  applyMove, applyMoves, inverse, isSolved, parseMove, progress, rotateVec, scramble, solvedCube, type CubeMove,
+  applyMove, applyMoves, goalMax, goalProgress, inverse, isSolved, parseMove, progress, rotateVec, scramble, solvedCube, type CubeMove,
 } from '../src/cube/model';
-import { CUBE_PROGRESS_POINTS, CUBE_SOLVE_POINTS, CUBE_TIME_MS, cubeMode, cubeScore } from '../src/modes/cube';
+import { CUBE_DONE_POINTS, CUBE_TIME_BONUS, CUBE_TIME_MS, cubeMode, cubeScore } from '../src/modes/cube';
 import { createRng } from '../src/rng';
 
 const R: CubeMove = { axis: 'x', layer: 1, dir: 1 };
@@ -83,14 +83,23 @@ describe('cube mode', () => {
     expect((pub.stickers as unknown[]).length).toBe(54);
   });
 
-  it('scoring: progress while unsolved, big bonus + time bonus when solved', () => {
-    expect(cubeScore(applyMove(solvedCube(), R), 0)).toBe(progress(applyMove(solvedCube(), R)) * CUBE_PROGRESS_POINTS);
-    expect(cubeScore(solvedCube(), 0)).toBe(CUBE_SOLVE_POINTS + 2000);
-    expect(cubeScore(solvedCube(), CUBE_TIME_MS)).toBe(CUBE_SOLVE_POINTS);
-    expect(cubeScore(solvedCube(), CUBE_TIME_MS / 2)).toBe(CUBE_SOLVE_POINTS + 1000);
+  const goal = content.items[0].goal;
+
+  it('the goal is a face or a cross of one colour, not already done', () => {
+    expect(['face', 'cross']).toContain(goal.kind);
+    expect(goalProgress(applyMoves(solvedCube(), scr), goal)).toBeLessThan(goalMax(goal));
+    expect(goalProgress(solvedCube(), { kind: 'face', color: 3 })).toBe(9);
+    expect(goalProgress(solvedCube(), { kind: 'cross', color: 3 })).toBe(5);
   });
 
-  it('solving it for real: replaying the inverse scramble move by move ends the round with a solve', () => {
+  it('scoring: progress towards the goal, big bonus + time bonus when done', () => {
+    expect(cubeScore(solvedCube(), goal, 0)).toBe(CUBE_DONE_POINTS + CUBE_TIME_BONUS);
+    expect(cubeScore(solvedCube(), goal, CUBE_TIME_MS)).toBe(CUBE_DONE_POINTS);
+    const p = goalProgress(applyMoves(solvedCube(), scr), goal);
+    expect(cubeScore(applyMoves(solvedCube(), scr), goal, 0)).toBe(p * (goal.kind === 'face' ? 100 : 160));
+  });
+
+  it('reaching the goal ends the round: replaying the inverse scramble gets there', () => {
     const itemState: Record<string, unknown> = {};
     const undo = [...scr].reverse().map(inverse);
     let sum = 0;
@@ -98,12 +107,10 @@ describe('cube mode', () => {
     for (let i = 0; i < undo.length; i++) {
       last = cubeMode.validateAnswer(content, 0, undo[i], ctx(60_000, itemState));
       sum += last.points;
-      if (i < undo.length - 1) expect(last.itemDone).toBe(false);
+      if (last.itemDone) break;
     }
-    expect(last).toMatchObject({ correct: true, itemDone: true, feedback: { solved: true, progress: 48 } });
-    // Sum of deltas == score of the final state.
-    expect(sum).toBe(cubeScore(solvedCube(), 60_000));
-    expect(cubeMode.scoreRound([{ points: sum }])).toBe(sum);
+    expect(last).toMatchObject({ correct: true, itemDone: true, feedback: { solved: true, progress: goalMax(goal) } });
+    expect(sum).toBe(CUBE_DONE_POINTS + Math.round(CUBE_TIME_BONUS * (1 - 60_000 / CUBE_TIME_MS)));
   });
 
   it('points always add up to the current state’s score, even when making it worse', () => {
@@ -113,9 +120,11 @@ describe('cube mode', () => {
     let stickers = applyMoves(solvedCube(), scr);
     for (let i = 0; i < 30; i++) {
       const m: CubeMove = { axis: rng.pick(['x', 'y', 'z'] as const), layer: rng.pick([-1, 0, 1] as const), dir: rng.pick([1, -1] as const) };
-      sum += cubeMode.validateAnswer(content, 0, m, ctx(1000, itemState)).points;
+      const r = cubeMode.validateAnswer(content, 0, m, ctx(1000, itemState));
+      sum += r.points;
       stickers = applyMove(stickers, m);
-      expect(sum).toBe(cubeScore(stickers, 1000));
+      expect(sum).toBe(cubeScore(stickers, goal, 1000));
+      if (r.itemDone) break;
     }
   });
 

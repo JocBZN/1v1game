@@ -10,7 +10,7 @@ function slot(kind: SlotInit['kind'], rating: number, rd = 200): SlotInit {
 
 const summary: DuelSummary = {
   rounds: [
-    { domain: 'math', scores: [900, 500], winner: 0 },
+    { domain: 'color', scores: [900, 500], winner: 0 },
     { domain: 'trivia', scores: [1200, 2500], winner: 1 },
     { domain: 'flags', scores: [4000, 3000], winner: 0 },
   ],
@@ -25,9 +25,9 @@ describe('computeRatingUpdates', () => {
 
   it('updates general from the duel and each played domain from its round', () => {
     const a = computeRatingUpdates(slots, 0, summary);
-    expect(Object.keys(a).sort()).toEqual(['flags', 'general', 'math', 'trivia']);
+    expect(Object.keys(a).sort()).toEqual(['color', 'flags', 'general', 'trivia']);
     expect(a.general!.after.rating).toBeGreaterThan(1500);
-    expect(a.math!.after.rating).toBeGreaterThan(1500);
+    expect(a.color!.after.rating).toBeGreaterThan(1500);
     expect(a.trivia!.after.rating).toBeLessThan(1500);
     expect(a.chess).toBeUndefined();
     expect(a.general).toMatchObject({ wins: 1, losses: 0, draws: 0 });
