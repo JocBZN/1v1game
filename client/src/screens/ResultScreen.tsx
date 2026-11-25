@@ -9,6 +9,21 @@ import { AsyncTag, Avatar, LeagueIcon, Screen, TopicIcon, rise, useAnimatedNumbe
 import { SignupPrompt } from '../components/SignupPrompt';
 import type { Me } from '../lib/api';
 
+/** Why the rating moved more or less than usual: streak, score margin, record. */
+function FactorChips({ f }: { f: NonNullable<DuelResult['ratingFactors']> }) {
+  const pct = (x: number) => `${x >= 1 ? '+' : '−'}${Math.round(Math.abs(x - 1) * 100)}%`;
+  const chips: string[] = [];
+  if (Math.abs(f.streak) >= 2) chips.push(`  in a row `);
+  if (Math.abs(f.marginX - 1) >= 0.05) chips.push(` score `);
+  if (Math.abs(f.recordX - 1) >= 0.03) chips.push(`Your record `);
+  if (!chips.length) return null;
+  return (
+    <div className="mt-2 flex flex-wrap gap-1.5">
+      {chips.map((c) => <span key={c} className="chip bg-sunken text-muted">{c}</span>)}
+    </div>
+  );
+}
+
 function Delta({ change, big }: { change: RatingChange; big?: boolean }) {
   const d = Math.round(change.after) - Math.round(change.before);
   const shown = useAnimatedNumber(Math.round(change.after), 1200);
@@ -130,6 +145,7 @@ export function ResultScreen({ me, found, result, room, onAgain, onLeaderboard, 
           <div className="mt-1">
             <Delta change={general} big />
           </div>
+          {result.ratingFactors && <FactorChips f={result.ratingFactors} />}
           {leagueUp && (
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}

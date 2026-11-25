@@ -56,14 +56,14 @@ export const flagsMode: GameMode<FlagsContent> = {
       const pool = sameRegion.length >= 3 ? sameRegion : all.filter((x) => x.code !== c.code);
       const wrong = rng.shuffle(pool).slice(0, 3).map((x) => x.name);
       const options = rng.shuffle([c.name, ...wrong]);
-      return { code: c.code, options, answer: options.indexOf(c.name), difficulty: EASY.has(c.code) ? 1 : rare.has(c.code) ? 3 : 2 };
+      return { code: c.code, options, answer: options.indexOf(c.name), difficulty: EASY.has(c.code) ? 1 : rare.has(c.code) ? 3 : 2, stars: EASY.has(c.code) ? 1 : rare.has(c.code) ? 5 : 3 };
     });
     return { items };
   },
 
   publicItem(content, index) {
     const it = content.items[index];
-    return { flag: flagEmoji(it.code), options: it.options, index, total: content.items.length };
+    return { flag: flagEmoji(it.code), options: it.options, stars: it.stars ?? 3, index, total: content.items.length };
   },
 
   validateAnswer(content, index, answer, ctx) {

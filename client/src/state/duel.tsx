@@ -65,6 +65,8 @@ export interface DuelResult {
   totals: [number, number];
   opponent: PlayerInfo;
   ratingChanges?: Partial<Record<'general' | DomainId, RatingChange>>;
+  /** why the overall rating moved as much as it did */
+  ratingFactors?: { streak: number; streakX: number; marginX: number; recordX: number; total: number };
   league?: { before: League['id']; after: League['id'] };
   /** Played in a private room: no rating change. */
   friendly?: boolean;

@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import type { Server } from 'socket.io';
-import { db, getRating, getRatings, getUserById, saveDuel, saveRating, type DuelPlayerRecord, type User } from './db';
+import { db, getQuestionStats, getRating, getRatings, getRecentResults, getUserById, recordQuestionAnswer, saveDuel, saveRating, type DuelPlayerRecord, type User } from './db';
 import { RATING_TRACKS, type RatingTrack } from './domains';
 import { Duel, type DuelSummary, type RatingSnap, type RoundPlan, type Slot, type SlotInit } from './duel/Duel';
 import { computeRatingUpdates } from './duel/results';
@@ -9,6 +9,18 @@ import { leagueFor } from './leagues';
 import { Matchmaker, type QueueEntry } from './matchmaking';
 import { getMode, pickDomains } from './modes';
 import { createRng } from './rng';
+import { starsFromRate } from './modes/scoring';
+import { setLiveStars, type TriviaContent } from './modes/trivia';
+
+/** Recompute each trivia question's live star difficulty from real answer rates. */
+function refreshLiveStars() {
+  const m = new Map<string, number>();
+  for (const s of getQuestionStats()) {
+    const st = starsFromRate(s.seen, s.correct);
+    if (st !== null) m.set(s.qid, st);
+  }
+  setLiveStars(m);
+}
 import { Rooms } from './rooms';
 
 function snapshot(userId: number): Record<RatingTrack, RatingSnap> {
@@ -37,6 +49,8 @@ export class GameServer {
       (a) => this.startGhostDuel(a),
     );
     this.mm.start();
+    refreshLiveStars();
+    setInterval(refreshLiveStars, 10 * 60_000).unref();
   }
 
   private emit(userId: number, event: string, data?: unknown) {
@@ -124,7 +138,10 @@ export class GameServer {
           // Friendly duel: no rating change for anyone.
           extras[slot] = { friendly: true };
         } else if (s.kind === 'human' && s.userId !== null) {
-          const updates = computeRatingUpdates(slots, slot, summary);
+          const updates = computeRatingUpdates(slots, slot, summary, {
+            recent: getRecentResults(s.userId),
+            general: getRating(s.userId, 'general'),
+          });
           for (const [track, u] of Object.entries(updates) as [RatingTrack, NonNullable<(typeof updates)[RatingTrack]>][]) {
             const row = getRating(s.userId, track);
             saveRating({
@@ -138,6 +155,7 @@ export class GameServer {
           generalAfter = updates.general!.after.rating;
           extras[slot] = {
             ratingChanges: changes,
+            ratingFactors: updates.general!.factors,
             league: { before: leagueFor(s.ratings.general.rating).id, after: leagueFor(generalAfter).id },
           };
         }
@@ -169,7 +187,13 @@ export class GameServer {
       emit: (userId, event, data) => this.emit(userId, event, data),
       onRoundRecorded: (slot, rec) => {
         const s = slots[slot];
-        if (s.kind === 'human' && s.userId !== null) recordRound(s.userId, s.ratings, rec);
+        if (s.kind === 'human' && s.userId !== null) {
+          recordRound(s.userId, s.ratings, rec);
+          if (rec.domain === 'trivia') {
+            const items = (rec.content as TriviaContent).items;
+            for (const ev of rec.events) if (ev.done && items[ev.item]) recordQuestionAnswer(items[ev.item].qid, ev.correct);
+          }
+        }
       },
       onFinish: (summary) => {
         try {

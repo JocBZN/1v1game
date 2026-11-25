@@ -7,10 +7,12 @@ import { flagEmoji, flagsMode, loadCountries } from '../src/modes/flags';
 const ctx = (elapsedMs: number) => ({ elapsedMs, itemState: {} });
 
 describe('speedPoints (trivia & flags)', () => {
-  it('is max 1000 for an instant answer and decreases linearly to 500', () => {
-    expect(speedPoints(true, 0, 10_000)).toBe(1000);
-    expect(speedPoints(true, 5_000, 10_000)).toBe(750);
-    expect(speedPoints(true, 10_000, 10_000)).toBe(500);
+  it('base points grow with the stars, plus up to 50 % for speed', () => {
+    expect(speedPoints(true, 0, 10_000, 3)).toBe(975);
+    expect(speedPoints(true, 10_000, 10_000, 1)).toBe(350);
+    expect(speedPoints(true, 0, 10_000, 5)).toBe(1425);
+    expect(speedPoints(true, 5_000, 10_000, 3)).toBe(813);
+    expect(speedPoints(true, 10_000, 10_000, 3)).toBe(650);
     expect(speedPoints(true, 2_500, 10_000)).toBeGreaterThan(speedPoints(true, 7_500, 10_000));
   });
   it('wrong or late answers score 0', () => {
@@ -68,7 +70,7 @@ describe('trivia mode', () => {
   it('scores correct answers by speed, wrong ones 0, and reveals the right option after answering', () => {
     const it0 = content.items[0];
     const ok = triviaMode.validateAnswer(content, 0, it0.answer, ctx(2_000));
-    expect(ok).toMatchObject({ correct: true, points: 900, itemDone: true });
+    expect(ok).toMatchObject({ correct: true, points: speedPoints(true, 2_000, 10_000, it0.stars), itemDone: true });
     const wrongIdx = (it0.answer + 1) % 4;
     const bad = triviaMode.validateAnswer(content, 0, wrongIdx, ctx(2_000));
     expect(bad).toMatchObject({ correct: false, points: 0, itemDone: true });
@@ -128,12 +130,12 @@ describe('flags mode', () => {
       const it = content.items[i];
       expect(new Set(it.options).size).toBe(4);
       const pub = flagsMode.publicItem(content, i) as Record<string, unknown>;
-      expect(Object.keys(pub).sort()).toEqual(['flag', 'index', 'options', 'total']);
+      expect(Object.keys(pub).sort()).toEqual(['flag', 'index', 'options', 'stars', 'total']);
     }
   });
   it('uses a 6 s timer for the speed bonus', () => {
     const content = flagsMode.generateRound(createRng(3));
     const r = flagsMode.validateAnswer(content, 0, content.items[0].answer, ctx(3_000));
-    expect(r.points).toBe(750);
+    expect(r.points).toBe(speedPoints(true, 3_000, 6_000, content.items[0].stars));
   });
 });

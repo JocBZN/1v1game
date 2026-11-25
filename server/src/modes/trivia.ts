@@ -30,6 +30,8 @@ export interface Question {
   id: string;
   cat: TriviaCategory;
   difficulty: 1 | 2 | 3;
+  /** 1–5 stars, initial estimate (live answer rates override it) */
+  stars?: number;
   q: string;
   correct: string;
   wrong: [string, string, string];
@@ -71,10 +73,18 @@ export function practiceQuestions(cat?: TriviaCategory): Question[] {
   return loadQuestions().filter((q) => isPracticeQuestion(q) && (!cat || q.cat === cat));
 }
 
+/** Live difficulty from real answer rates (set by the server from the DB; empty in tests). */
+const liveStars = new Map<string, number>();
+export function setLiveStars(m: Map<string, number>) {
+  liveStars.clear();
+  for (const [k, v] of m) liveStars.set(k, v);
+}
+export const questionStars = (q: Question) => liveStars.get(q.id) ?? q.stars ?? ({ 1: 2, 2: 3, 3: 4 } as const)[q.difficulty];
+
 /** Builds a round item: options shuffled, correct index kept server-side. */
 export function toItem(q: Question, rng: Rng): TriviaItem {
   const options = rng.shuffle([q.correct, ...q.wrong]);
-  return { qid: q.id, cat: q.cat, q: q.q, difficulty: q.difficulty, options, answer: options.indexOf(q.correct) };
+  return { qid: q.id, cat: q.cat, q: q.q, difficulty: q.difficulty, stars: questionStars(q), options, answer: options.indexOf(q.correct) };
 }
 
 export const triviaMode: GameMode<TriviaContent> = {
@@ -99,6 +109,7 @@ export const triviaMode: GameMode<TriviaContent> = {
       options: it.options,
       category: TRIVIA_CATEGORY_NAMES[it.cat],
       difficulty: it.difficulty,
+      stars: it.stars,
       index,
       total: content.items.length,
     };

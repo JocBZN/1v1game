@@ -78,7 +78,32 @@ CREATE TABLE IF NOT EXISTS round_recordings (
 );
 CREATE INDEX IF NOT EXISTS idx_rec_domain ON round_recordings(domain, general_rating);
 CREATE INDEX IF NOT EXISTS idx_rec_user ON round_recordings(user_id, domain);
+
+-- How often real players get each trivia question right (drives the live 1–5 star difficulty).
+CREATE TABLE IF NOT EXISTS question_stats (
+  qid      TEXT PRIMARY KEY,
+  seen     INTEGER NOT NULL DEFAULT 0,
+  correct  INTEGER NOT NULL DEFAULT 0
+);
 `);
+
+const stmtQStat = db.prepare(`
+  INSERT INTO question_stats (qid, seen, correct) VALUES (?, 1, ?)
+  ON CONFLICT(qid) DO UPDATE SET seen = seen + 1, correct = correct + excluded.correct`);
+export function recordQuestionAnswer(qid: string, correct: boolean) {
+  stmtQStat.run(qid, correct ? 1 : 0);
+}
+/** The user's latest duel results, newest first ('W' | 'L' | 'D'). Used for win/loss streaks. */
+export function getRecentResults(userId: number, limit = 10): ('W' | 'L' | 'D')[] {
+  const rows = db.prepare(`
+    SELECT me.result FROM duel_players me JOIN duels d ON d.id = me.duel_id
+    WHERE me.user_id = ? ORDER BY d.created_at DESC LIMIT ?`).all(userId, limit) as { result: 'W' | 'L' | 'D' }[];
+  return rows.map((r) => r.result);
+}
+const stmtQStats = db.prepare('SELECT qid, seen, correct FROM question_stats');
+export function getQuestionStats(): { qid: string; seen: number; correct: number }[] {
+  return stmtQStats.all() as { qid: string; seen: number; correct: number }[];
+}
 
 // ---------- migrations (add columns to databases created by older versions) ----------
 function addColumn(table: string, column: string, ddl: string) {

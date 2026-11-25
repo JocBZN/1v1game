@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, Star as StarIcon, type LucideIcon } from 'lucide-react';
 import { LEAGUE_META } from '../lib/leagues';
 import { DOMAINS, type DomainId } from '../lib/domains';
 import { C } from '../lib/theme';
@@ -202,3 +202,14 @@ export const rise = (i = 0) => ({
   animate: { opacity: 1, y: 0 },
   transition: { delay: 0.05 * i, type: 'spring' as const, stiffness: 260, damping: 24 },
 });
+
+/** 1–5 difficulty stars. */
+export function Stars({ n, size = 13, className }: { n: number; size?: number; className?: string }) {
+  return (
+    <span className={cn('inline-flex items-center gap-0.5', className)} title={`Difficulty ${n}/5`} aria-label={`Difficulty ${n} of 5`}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <StarIcon key={i} size={size} strokeWidth={1.8} className={i <= n ? 'fill-current' : 'opacity-30'} />
+      ))}
+    </span>
+  );
+}

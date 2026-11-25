@@ -322,7 +322,7 @@ export const LANGS = {
     home: {
       modes: 'Mai ai și: quiz cu steagurile a 194 de țări, probleme de șah, un cub Rubik 3D adevărat, minigolf și un joc cu cronologie.',
       title: 'Quiz 1 la 1 online – Test de cultură generală în duel | 1v1game',
-      desc: 'Quiz 1 la 1 gratuit în browser: dueluri de cultură generală cu peste 1.200 de întrebări, quiz cu steaguri, probleme de șah, minigolf și altele. Fără instalare și fără cont.',
+      desc: 'Quiz 1 la 1 gratuit în browser: dueluri de cultură generală cu peste 1.200 de întrebări, quiz cu steaguri, probleme de șah, minigolf și altele. Fără cont.',
       h1: 'Joc de cultură generală: duel 1 la 1 online',
       lead: 'Demonstrează cine știe mai mult. Pornește în câteva secunde un duel de quiz gratuit, răspunde la întrebări de cultură generală contra cronometru și câștigă două runde din trei.',
       paras: [

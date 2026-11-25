@@ -1,0 +1,86 @@
+import type { DomainId } from '../domains';
+import { isNum, simulateItemBot } from './sim';
+import { sumScore, type GameMode, type RoundContent } from './types';
+
+/** One "how many / how much / which year" question with the reference answer known to the server. */
+export interface EstimateQ {
+  q: string;
+  answer: number;
+  /** shown next to the number, e.g. "$", "km", "subscribers" */
+  unit?: string;
+  /** revealed with the answer: the assumption behind it or the source year */
+  note?: string;
+}
+
+export type EstimateInput =
+  | { kind: 'log'; min: number; max: number; prefix?: string }
+  | { kind: 'year'; min: number; max: number };
+
+export interface EstimateItem extends EstimateQ {}
+export type EstimateContent = RoundContent<EstimateItem>;
+
+/**
+ * Points for a guess:
+ *  - log games: by how many times off you are (×1 = 1000, ×`zeroAt` or more = 0, linear in log space)
+ *  - year game: 1000 for the exact year, minus ~83 per year off, 0 from 12 years off
+ */
+export function estimatePoints(input: EstimateInput, answer: number, guess: number, zeroAt = 10): number {
+  if (input.kind === 'year') return Math.round(1000 * Math.max(0, 1 - Math.abs(guess - answer) / 12));
+  if (guess <= 0 || answer <= 0) return 0;
+  const off = Math.abs(Math.log10(guess / answer)) / Math.log10(zeroAt);
+  return Math.round(1000 * Math.max(0, 1 - off));
+}
+
+export function makeEstimateMode(opts: {
+  id: DomainId;
+  name: string;
+  questions: () => EstimateQ[];
+  input: EstimateInput;
+  perRound: number;
+  itemMs: number;
+  /** log games: how many times off scores 0 */
+  zeroAt?: number;
+  thinkMs: number;
+}): GameMode<EstimateContent> {
+  const FEEDBACK_MS = 3_000;
+  const GRACE = 700; // auto-submit at the buzzer still counts
+  return {
+    id: opts.id,
+    name: opts.name,
+    itemTimeLimit: opts.itemMs + GRACE,
+    feedbackDelay: FEEDBACK_MS,
+    timeLimit: opts.perRound * (opts.itemMs + GRACE + FEEDBACK_MS) + 1_000,
+
+    generateRound(rng) {
+      return { items: rng.shuffle(opts.questions()).slice(0, opts.perRound) };
+    },
+
+    publicItem(content, index) {
+      const it = content.items[index];
+      return { q: it.q, unit: it.unit ?? '', input: opts.input, seconds: opts.itemMs / 1000, index, total: content.items.length };
+    },
+
+    validateAnswer(content, index, answer) {
+      const it = content.items[index];
+      const fb = { answer: it.answer, note: it.note ?? null };
+      if (!isNum(answer)) return { correct: false, points: 0, itemDone: true, feedback: fb };
+      const g = opts.input.kind === 'year' ? Math.round(answer) : answer;
+      const points = estimatePoints(opts.input, it.answer, g, opts.zeroAt);
+      return { correct: points >= 750, points, itemDone: true, feedback: { ...fb, guess: g } };
+    },
+
+    timeoutFeedback(content, index) {
+      return { answer: content.items[index].answer, note: content.items[index].note ?? null };
+    },
+
+    scoreRound: sumScore,
+
+    simulateBot(content, rating, rng) {
+      return simulateItemBot({
+        count: content.items.length, rating, rng, itemTimeLimit: opts.itemMs, feedbackDelay: FEEDBACK_MS,
+        roundLimit: this.timeLimit, thinkMs: opts.thinkMs,
+        points: (_i, q) => Math.round(250 + q * 650),
+      });
+    },
+  };
+}
