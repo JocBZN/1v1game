@@ -7,6 +7,8 @@ const SEEN_KEY = 'duel.introSeen';
 export function shouldShowIntro(): boolean {
   try {
     if (new URLSearchParams(location.search).has('intro')) return true;
+    // Opened from a friend's room link: the duel starts right away, don't cover it.
+    if (location.pathname.startsWith('/c/')) return false;
     return localStorage.getItem(SEEN_KEY) !== '1';
   } catch {
     return false;

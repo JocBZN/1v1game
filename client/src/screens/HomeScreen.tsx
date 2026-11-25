@@ -91,6 +91,10 @@ export function HomeScreen({ me, onPlay, onNavigate, connected }: {
         </div>
       </div>
 
+      <button onClick={() => onNavigate('friend')} disabled={!connected} className="btn btn-accent mb-3 w-full py-3.5">
+        👥 Play with a friend
+      </button>
+
       <nav className="grid grid-cols-2 gap-3 pb-2">
         <button onClick={() => onNavigate('leaderboard')} className="btn btn-secondary py-3.5">
           Leaderboard

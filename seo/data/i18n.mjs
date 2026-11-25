@@ -11,7 +11,7 @@
 // Romanian: numbers from 20 up take "de" ("57 de întrebări").
 const roN = (n) => `${n}${n % 100 >= 20 || (n >= 100 && n % 100 === 0) ? ' de' : ''}`;
 export const FEATURES = {
-  friend: false, // challenge a friend with a private invite link
+  friend: true, // private rooms: 5-character code or /c/<code> link
   ranked: true, // live matchmaking + Glicko-2 ratings, leagues, leaderboard (ghost/bot fallback after a few seconds)
 };
 

@@ -12,6 +12,7 @@ import { makeIndexRenderer, mountSeo } from './seo';
 import { mountQuizPages, quizPaths } from './seo-quiz';
 import { mountSeoPack } from './seo-pack';
 import { pruneIdleGuests } from './db';
+import { normalizeCode } from './rooms';
 import { attachSockets } from './socket';
 
 const PORT = Number(process.env.PORT ?? 3001);
@@ -42,6 +43,24 @@ if (fs.existsSync(path.join(CLIENT_DIST, 'index.html'))) {
     res.type('html').send(html);
   };
   app.get('/', sendIndex);
+  // Private room links (/c/K7QX2): the app opens the room; never indexed, but with a link preview.
+  app.get('/c/:code', (req, res) => {
+    const code = normalizeCode(req.params.code);
+    if (!code) return res.redirect(302, '/');
+    const { html, inlineScriptHash } = renderIndex();
+    const title = `Join my 1v1 duel · room ${code}`;
+    const desc = 'Your friend challenged you to a 1v1 quiz duel: 3 rounds, best of three. Free in the browser, no sign-up.';
+    const page = html
+      .replace(/<meta name="robots" content="[^"]*"\s*\/?>/, '<meta name="robots" content="noindex, nofollow" />')
+      .replace(/(<meta property="og:title" content=")[^"]*/, `$1${title}`)
+      .replace(/(<meta property="og:description" content=")[^"]*/, `$1${desc}`)
+      .replace(/(<meta name="twitter:title" content=")[^"]*/, `$1${title}`)
+      .replace(/(<meta name="twitter:description" content=")[^"]*/, `$1${desc}`);
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+    res.setHeader('Content-Security-Policy', contentSecurityPolicy([inlineScriptHash]));
+    res.type('html').send(page);
+  });
   // Hashed assets can be cached forever; the rest (icons, manifest, service worker) briefly.
   app.use('/assets', express.static(path.join(CLIENT_DIST, 'assets'), { immutable: true, maxAge: '1y' }));
   app.use(

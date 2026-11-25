@@ -37,14 +37,28 @@ export function attachSockets(server: http.Server) {
     // No duel on the server → tell this tab, so it drops any stale duel screen (e.g. after a restart).
     if (!game.onConnect(user)) socket.emit('duel:none');
 
-    socket.on('queue:join', () => {
+    /** Only the tab that starts something keeps playing; the account's other tabs are closed. */
+    const takeOver = () => {
       for (const other of sockets.get(user.id) ?? []) {
         if (other.id === socket.id) continue;
         other.emit('session:replaced');
         other.disconnect(true);
       }
+    };
+    socket.on('queue:join', () => {
+      takeOver();
       game.joinQueue(user);
     });
+    socket.on('room:create', () => {
+      takeOver();
+      game.createRoom(user);
+    });
+    socket.on('room:join', (payload) => {
+      takeOver();
+      game.joinRoom(user, payload?.code);
+    });
+    socket.on('room:rematch', () => game.rematch(user));
+    socket.on('room:leave', () => game.leaveRoom(user));
     socket.on('queue:leave', () => game.leaveQueue(user));
     socket.on('round:answer', (payload) => game.answer(user, payload));
     socket.on('duel:forfeit', () => game.forfeit(user));

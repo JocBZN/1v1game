@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
 import type { League } from '../lib/api';
 import type { DomainId } from '../lib/domains';
 import { getSocket } from '../lib/socket';
@@ -66,6 +66,33 @@ export interface DuelResult {
   opponent: PlayerInfo;
   ratingChanges?: Partial<Record<'general' | DomainId, RatingChange>>;
   league?: { before: League['id']; after: League['id'] };
+  /** Played in a private room: no rating change. */
+  friendly?: boolean;
+}
+
+export interface RoomMember {
+  name: string;
+  ready: boolean;
+  online: boolean;
+}
+
+export interface RoomState {
+  code: string;
+  you: 'host' | 'guest';
+  host: RoomMember;
+  guest: RoomMember | null;
+  inDuel: boolean;
+  duels: number;
+  /** Your wins, their wins in this room. */
+  score: [number, number];
+}
+
+export type RoomError = 'not_found' | 'full' | 'busy';
+
+/** /c/K7QX2 → "K7QX2" (the app is opened from a friend's link). */
+function codeFromPath(): string | null {
+  const m = location.pathname.match(/^\/c\/([A-Za-z0-9]{5})\/?$/);
+  return m ? m[1].toUpperCase() : null;
 }
 
 export type Phase = 'idle' | 'searching' | 'found' | 'intro' | 'playing' | 'roundEnd' | 'result';
@@ -212,6 +239,15 @@ function reducer(s: DuelState, a: Action): DuelState {
 
 interface DuelApi {
   state: DuelState;
+  room: RoomState | null;
+  roomError: RoomError | null;
+  /** True while joining from a /c/<code> link. */
+  joining: boolean;
+  createRoom(): void;
+  joinRoom(code: string): void;
+  rematch(): void;
+  leaveRoom(): void;
+  clearRoomError(): void;
   play(): void;
   cancel(): void;
   answer(answer: unknown): void;
@@ -225,6 +261,10 @@ export function DuelProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initial);
   const stateRef = useRef(state);
   stateRef.current = state;
+  const [room, setRoom] = useState<RoomState | null>(null);
+  const [roomError, setRoomError] = useState<RoomError | null>(null);
+  const pendingCode = useRef<string | null>(codeFromPath());
+  const [joining, setJoining] = useState(pendingCode.current !== null);
 
   useEffect(() => {
     const s = getSocket();
@@ -232,8 +272,28 @@ export function DuelProvider({ children }: { children: ReactNode }) {
       s.on(ev, fn);
       return () => void s.off(ev, fn);
     };
+    const joinPending = () => {
+      const code = pendingCode.current;
+      if (!code) return;
+      pendingCode.current = null;
+      history.replaceState(null, '', '/' + location.hash);
+      s.emit('room:join', { code });
+    };
     const offs = [
-      on('connect', () => dispatch({ type: 'connected', value: true })),
+      on('connect', () => {
+        dispatch({ type: 'connected', value: true });
+        joinPending();
+      }),
+      on<RoomState>('room:state', (r) => {
+        setRoom(r);
+        setRoomError(null);
+        setJoining(false);
+      }),
+      on('room:closed', () => setRoom(null)),
+      on<{ error: RoomError }>('room:error', (d) => {
+        setRoomError(d.error);
+        setJoining(false);
+      }),
       on('disconnect', () => dispatch({ type: 'connected', value: false })),
       on('session:replaced', () => dispatch({ type: 'replaced' })),
       on('queue:joined', () => dispatch({ type: 'queue:joined' })),
@@ -256,12 +316,36 @@ export function DuelProvider({ children }: { children: ReactNode }) {
         else if (phase === 'found' || phase === 'intro' || phase === 'playing' || phase === 'roundEnd') dispatch({ type: 'reset' });
       }),
     ];
-    if (s.connected) dispatch({ type: 'connected', value: true });
+    if (s.connected) {
+      dispatch({ type: 'connected', value: true });
+      joinPending();
+    }
     return () => offs.forEach((off) => off());
   }, []);
 
   const api = useMemo<DuelApi>(() => ({
     state,
+    room,
+    roomError,
+    joining,
+    createRoom: () => {
+      setRoomError(null);
+      getSocket().emit('room:create');
+    },
+    joinRoom: (code) => {
+      setRoomError(null);
+      getSocket().emit('room:join', { code });
+    },
+    rematch: () => {
+      dispatch({ type: 'reset' });
+      getSocket().emit('room:rematch');
+    },
+    leaveRoom: () => {
+      getSocket().emit('room:leave');
+      setRoom(null);
+      dispatch({ type: 'reset' });
+    },
+    clearRoomError: () => setRoomError(null),
     play: () => {
       dispatch({ type: 'queue:joined' });
       getSocket().emit('queue:join');
@@ -277,7 +361,7 @@ export function DuelProvider({ children }: { children: ReactNode }) {
     },
     forfeit: () => getSocket().emit('duel:forfeit'),
     reset: () => dispatch({ type: 'reset' }),
-  }), [state]);
+  }), [state, room, roomError, joining]);
 
   return <Ctx.Provider value={api}>{children}</Ctx.Provider>;
 }

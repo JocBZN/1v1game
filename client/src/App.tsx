@@ -11,13 +11,14 @@ import { RoundEndScreen } from './screens/RoundEndScreen';
 import { ResultScreen } from './screens/ResultScreen';
 import { LeaderboardScreen } from './screens/LeaderboardScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
+import { FriendScreen, RoomScreen } from './screens/FriendScreen';
 import { IntroSplash, shouldShowIntro } from './components/IntroSplash';
 import { ConsentBanner } from './components/ConsentBanner';
 import { pageview, track } from './lib/analytics';
 
-export type Route = 'home' | 'leaderboard' | 'profile' | 'signup' | 'login';
+export type Route = 'home' | 'leaderboard' | 'profile' | 'signup' | 'login' | 'friend';
 
-const HASH: Record<Route, string> = { home: '/', leaderboard: '/clasament', profile: '/profil', signup: '/signup', login: '/login' };
+const HASH: Record<Route, string> = { home: '/', leaderboard: '/clasament', profile: '/profil', signup: '/signup', login: '/login', friend: '/friend' };
 
 function routeFromHash(): Route {
   const h = location.hash.replace(/^#\/?/, '');
@@ -25,6 +26,7 @@ function routeFromHash(): Route {
   if (h.startsWith('profil')) return 'profile';
   if (h.startsWith('signup')) return 'signup';
   if (h.startsWith('login')) return 'login';
+  if (h.startsWith('friend')) return 'friend';
   return 'home';
 }
 
@@ -56,6 +58,11 @@ function Game({ me, refreshMe, onAuthDone, onLogout }: {
     document.body.classList.toggle('in-duel', state.phase !== 'idle');
     return () => document.body.classList.remove('in-duel');
   }, [state.phase]);
+
+  // A room link that didn't work (wrong or full room): show the error on the friend screen.
+  useEffect(() => {
+    if (duel.roomError && route !== 'friend' && state.phase === 'idle') go('friend');
+  }, [duel.roomError, route, state.phase, go]);
 
   // Refresh ratings when a duel ends.
   useEffect(() => {
@@ -109,12 +116,14 @@ function Game({ me, refreshMe, onAuthDone, onLogout }: {
           me={me}
           found={state.found}
           result={state.result}
-          onAgain={() => duel.play()}
+          room={state.result.friendly ? duel.room : null}
+          onAgain={() => (state.result!.friendly && duel.room ? duel.rematch() : duel.play())}
           onLeaderboard={() => {
             duel.reset();
             go('leaderboard');
           }}
           onHome={() => {
+            if (state.result!.friendly) duel.leaveRoom();
             duel.reset();
             go('home');
           }}
@@ -124,6 +133,34 @@ function Game({ me, refreshMe, onAuthDone, onLogout }: {
           }}
         />
       ) : null;
+  }
+
+  if (duel.room && (route === 'home' || route === 'friend')) {
+    return (
+      <RoomScreen
+        room={duel.room}
+        onRematch={duel.rematch}
+        onLeave={() => {
+          duel.leaveRoom();
+          go('home');
+        }}
+      />
+    );
+  }
+  if (duel.joining) return <div className="flex h-full items-center justify-center text-muted">Joining the room…</div>;
+  if (route === 'friend') {
+    return (
+      <FriendScreen
+        connected={state.connected}
+        error={duel.roomError}
+        onCreate={duel.createRoom}
+        onJoin={duel.joinRoom}
+        onBack={() => {
+          duel.clearRoomError();
+          go('home');
+        }}
+      />
+    );
   }
 
   const toSignup = () => go('signup');

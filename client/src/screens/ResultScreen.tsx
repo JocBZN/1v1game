@@ -1,6 +1,6 @@
 import { DOMAINS, type DomainId } from '../lib/domains';
 import { LEAGUE_META, leagueRank } from '../lib/leagues';
-import type { DuelResult, Found, RatingChange } from '../state/duel';
+import type { DuelResult, Found, RatingChange, RoomState } from '../state/duel';
 import { AsyncTag, Avatar, Screen, TopicIcon, useAnimatedNumber } from '../components/ui';
 import { SignupPrompt } from '../components/SignupPrompt';
 import type { Me } from '../lib/api';
@@ -19,10 +19,12 @@ function Delta({ change, big }: { change: RatingChange; big?: boolean }) {
   );
 }
 
-export function ResultScreen({ me, found, result, onAgain, onLeaderboard, onHome, onSignup }: {
+export function ResultScreen({ me, found, result, room, onAgain, onLeaderboard, onHome, onSignup }: {
   me: Me;
   found: Found | null;
   result: DuelResult;
+  /** Set for a duel played in a private room. */
+  room: RoomState | null;
   onAgain: () => void;
   onLeaderboard: () => void;
   onHome: () => void;
@@ -120,9 +122,24 @@ export function ResultScreen({ me, found, result, onAgain, onLeaderboard, onHome
         </div>
       )}
 
+      {result.friendly && (
+        <div className="card mt-3 p-4 text-center text-sm text-muted animate-rise" style={{ animationDelay: '200ms' }}>
+          {room && room.duels > 0 && (
+            <div className="mb-1 text-base">
+              Room score <span className="font-bold text-me">{room.score[0]}</span> – <span className="font-bold text-foe">{room.score[1]}</span>
+            </div>
+          )}
+          Friend duel · no rating change
+        </div>
+      )}
+
       <div className="mt-auto grid gap-3 pt-6">
         <button onClick={onAgain} className="btn btn-primary py-4 text-lg">
-          Another duel
+          {result.friendly && room
+            ? room.guest && (room.you === 'host' ? room.guest.ready : room.host.ready)
+              ? `${result.opponent.name} wants a rematch — Play`
+              : 'Rematch'
+            : 'Another duel'}
         </button>
         <div className="grid grid-cols-2 gap-3">
           <button onClick={onLeaderboard} className="btn btn-secondary py-3">Leaderboard</button>
