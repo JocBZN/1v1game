@@ -348,7 +348,7 @@ ${ids.map((i) => `<li><details><summary>${esc(data[i][0])}</summary><p>${esc(dat
   const e = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const ol = document.getElementById('daily'); ol.className = 'daily';
   ol.innerHTML = ids.map((i, n) => '<li><div class="card"><p class="q">' + (n + 1) + '. ' + e(Q[i][0]) + '</p><button type="button" class="btn sm rv">' + e(T.reveal) + '</button>'
-    + '<div class="ans" hidden><p class="a">' + e(Q[i][1]) + '</p><button type="button" class="btn sm ok" data-n="' + n + '">✓ ' + e(T.got) + '</button> <button type="button" class="btn sm ghost ko" data-n="' + n + '">✗ ' + e(T.missed) + '</button></div></div></li>').join('');
+    + '<div class="ans" hidden><p class="a">' + e(Q[i][1]) + '</p><button type="button" class="btn sm ok" data-n="' + n + '">' + e(T.got) + '</button> <button type="button" class="btn sm ghost ko" data-n="' + n + '">' + e(T.missed) + '</button></div></div></li>').join('');
   ol.addEventListener('click', (ev) => {
     const b = ev.target.closest('button'); if (!b) return; const li = b.closest('li');
     if (b.classList.contains('rv')) { b.hidden = true; li.querySelector('.ans').hidden = false; return; }
@@ -357,7 +357,7 @@ ${ids.map((i) => `<li><details><summary>${esc(data[i][0])}</summary><p>${esc(dat
     if (res.filter((x) => x !== undefined).length === N) done();
   });
   function done() {
-    const k = res.filter(Boolean).length; const grid = res.map((x) => (x ? '🟩' : '🟥')).join('');
+    const k = res.filter(Boolean).length; const grid = res.map((x) => (x ? '■' : '□')).join('');
     document.getElementById('score').textContent = T.score + ': ' + k + '/' + N; document.getElementById('grid').textContent = grid;
     const box = document.getElementById('result'); box.hidden = false; box.scrollIntoView({ behavior: 'smooth', block: 'center' });
     const text = T.share.replace('{d}', date).replace('{k}', k).replace('{n}', N) + '\\n' + grid + '\\n' + location.href;

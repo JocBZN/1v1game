@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { motion } from 'motion/react';
 import { DOMAINS, DOMAIN_LIST, type DomainId } from '../lib/domains';
 import type { Found } from '../state/duel';
 import { AsyncTag, Avatar, LeagueBadge, Screen, TopicIcon } from '../components/ui';
@@ -22,10 +23,17 @@ function Reel({ domain }: { domain: DomainId }) {
     };
   }, [target]);
 
+  const m = DOMAINS[domain];
   return (
-    <div
-      className="relative w-full overflow-hidden rounded-3xl border bg-surface transition-colors duration-300"
-      style={{ height: CELL, borderColor: landed ? DOMAINS[domain].color : 'var(--color-line)' }}
+    <motion.div
+      animate={landed ? { scale: [1, 1.04, 1] } : {}}
+      transition={{ duration: 0.35 }}
+      className="card relative w-full overflow-hidden transition-[border-color,box-shadow] duration-300"
+      style={{
+        height: CELL,
+        borderColor: landed ? m.base : undefined,
+        boxShadow: landed ? `0 0 0 3px ${m.soft}, 0 18px 40px -20px ${m.base}` : undefined,
+      }}
     >
       <div
         style={{
@@ -35,38 +43,55 @@ function Reel({ domain }: { domain: DomainId }) {
       >
         {strip.map((d, i) => (
           <div key={i} className="flex items-center justify-center gap-4 px-6" style={{ height: CELL }}>
-            <TopicIcon emoji={d.emoji} soft={d.soft} size={56} />
-            <div className="text-2xl font-semibold tracking-tight">{d.name}</div>
+            <TopicIcon domain={d.id} size={58} solid />
+            <div className="font-display text-2xl font-bold tracking-tight">{d.name}</div>
           </div>
         ))}
       </div>
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-5 bg-gradient-to-b from-surface to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-5 bg-gradient-to-t from-surface to-transparent" />
-    </div>
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-[#fffdf6] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-surface to-transparent" />
+    </motion.div>
+  );
+}
+
+function Fighter({ name, league, side }: { name: string; league: Found['you']['league']; side: 'me' | 'foe' }) {
+  return (
+    <motion.div
+      initial={{ x: side === 'me' ? -60 : 60, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ type: 'spring', stiffness: 220, damping: 20 }}
+      className="flex min-w-0 flex-1 flex-col items-center gap-2"
+    >
+      <Avatar name={name} size={64} ring={side === 'me' ? 'var(--color-cyan)' : 'var(--color-red)'} />
+      <div className="max-w-full truncate font-display text-lg font-bold">{name}</div>
+      <LeagueBadge league={league} small />
+    </motion.div>
   );
 }
 
 export function VsHeader({ found, roundWins }: { found: Found; roundWins: [number, number] }) {
   return (
     <div className="flex items-center justify-between gap-2">
-      <div className="flex min-w-0 flex-1 flex-col items-center gap-2">
-        <Avatar name={found.you.name} size={56} ring="var(--color-cyan)" />
-        <div className="max-w-full truncate font-semibold">{found.you.name}</div>
-        <LeagueBadge league={found.you.league} small />
-      </div>
-      <div className="flex flex-col items-center">
-        <div className="label">vs</div>
-        <div className="text-3xl font-bold tabular-nums">
+      <Fighter name={found.you.name} league={found.you.league} side="me" />
+      <motion.div
+        initial={{ scale: 2.2, opacity: 0, rotate: -12 }}
+        animate={{ scale: 1, opacity: 1, rotate: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 14, delay: 0.15 }}
+        className="flex flex-col items-center"
+      >
+        <span
+          className="rounded-xl px-2.5 py-1 font-display text-sm font-extrabold tracking-wider text-[#fff8e8]"
+          style={{ background: 'linear-gradient(135deg, #ff9100, #df301c)', boxShadow: '0 3px 0 #8f1d0c' }}
+        >
+          VS
+        </span>
+        <div className="mt-2 font-display text-3xl font-extrabold tabular-nums">
           <span className="text-me">{roundWins[0]}</span>
           <span className="mx-1 text-line-strong">:</span>
           <span className="text-foe">{roundWins[1]}</span>
         </div>
-      </div>
-      <div className="flex min-w-0 flex-1 flex-col items-center gap-2">
-        <Avatar name={found.opponent.name} size={56} ring="var(--color-red)" />
-        <div className="max-w-full truncate font-semibold">{found.opponent.name}</div>
-        <LeagueBadge league={found.opponent.league} small />
-      </div>
+      </motion.div>
+      <Fighter name={found.opponent.name} league={found.opponent.league} side="foe" />
     </div>
   );
 }
@@ -74,8 +99,15 @@ export function VsHeader({ found, roundWins }: { found: Found; roundWins: [numbe
 export function FoundScreen({ found }: { found: Found }) {
   return (
     <Screen className="justify-center">
-      <div className="label text-center text-cyan-strong animate-pop">Opponent found</div>
-      <div className="mt-6 animate-rise">
+      <motion.div
+        initial={{ scale: 0.6, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 16 }}
+        className="text-center font-display text-sm font-extrabold uppercase tracking-[0.2em] text-cyan-strong"
+      >
+        Opponent found
+      </motion.div>
+      <div className="mt-7">
         <VsHeader found={found} roundWins={[0, 0]} />
       </div>
       {found.opponent.async && (
@@ -104,12 +136,12 @@ export function IntroScreen({ found, index, domain, roundWins }: { found: Found;
       </div>
       <div className="mt-5 h-14 text-center">
         {reveal && (
-          <div className="animate-pop">
-            <div className="text-lg font-semibold" style={{ color: meta.color }}>
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+            <div className="font-display text-xl font-bold" style={{ color: meta.color }}>
               {meta.name}
             </div>
             <div className="mt-0.5 text-sm text-muted">{meta.tagline}</div>
-          </div>
+          </motion.div>
         )}
       </div>
     </Screen>

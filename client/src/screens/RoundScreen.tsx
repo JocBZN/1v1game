@@ -2,7 +2,7 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { DOMAINS } from '../lib/domains';
 import { MODE_COMPONENTS } from '../modes/registry';
 import { useDuel } from '../state/duel';
-import { AsyncTag, Avatar, SecondsLeft, TimerBar, useAnimatedNumber } from '../components/ui';
+import { AsyncTag, Avatar, SecondsLeft, TimerBar, TopicIcon, useAnimatedNumber } from '../components/ui';
 
 function LiveScore({ name, score, side, async: isAsync, sub }: { name: string; score: number; side: 'me' | 'foe'; async?: boolean; sub?: string }) {
   const shown = useAnimatedNumber(score);
@@ -18,7 +18,7 @@ function LiveScore({ name, score, side, async: isAsync, sub }: { name: string; s
       <Avatar name={name} size={32} ring={side === 'me' ? 'var(--color-cyan)' : 'var(--color-red)'} />
       <div className="min-w-0">
         <div className="truncate text-xs font-medium text-muted">{name}</div>
-        <div key={bump} className={`text-2xl font-bold tabular-nums leading-tight tracking-tight ${color} ${bump ? 'animate-score' : ''}`}>{shown}</div>
+        <div key={bump} className={`font-display text-3xl font-extrabold tabular-nums leading-tight tracking-tight ${color} ${bump ? 'animate-score' : ''}`}>{shown}</div>
         {(sub || isAsync) && (
           <div className={`flex items-center gap-1 text-[10px] font-medium text-muted ${side === 'foe' ? 'justify-end' : ''}`}>
             {isAsync && <AsyncTag />}
@@ -60,8 +60,8 @@ export function RoundScreen() {
           </div>
           <LiveScore name={found.opponent.name} score={scores.opponent} side="foe" async={found.opponent.async} sub={oppSub} />
         </div>
-        <div className="mt-3 flex items-center gap-2">
-          <span className="text-sm">{meta.emoji}</span>
+        <div className="mt-3 flex items-center gap-2" title={meta.name}>
+          <TopicIcon domain={round.domain} size={22} />
           <TimerBar endsAt={round.endsAt} totalMs={round.timeLimit} />
           <SecondsLeft endsAt={round.endsAt} className="w-9 text-right text-xs font-semibold" />
         </div>

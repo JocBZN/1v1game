@@ -89,7 +89,7 @@ describe('SEO pages', () => {
   it('flag pages list every country of their continent', async () => {
     const { html } = await get('/flag-quiz/europe');
     expect(html).toContain('Flags of Europe');
-    expect(html).toContain('aria-label="Flag of Romania"');
+    expect(html).toContain('alt="Flag of Romania"');
     expect((await get('/flag-quiz/atlantis')).status).toBe(404);
     expect((await get('/quiz/not-a-topic')).status).toBe(404);
   });

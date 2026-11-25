@@ -1,3 +1,5 @@
+import { motion } from 'motion/react';
+import { LockKeyhole, LogIn, UserPlus } from 'lucide-react';
 import { track } from '../lib/analytics';
 
 /** "Create an account" call to action shown to guests (home, leaderboard, profile, after a duel). */
@@ -10,11 +12,18 @@ export function SignupPrompt({ title, text, where, onSignup, onLogin, compact }:
   compact?: boolean;
 }) {
   return (
-    <div className={`rounded-3xl border border-cyan bg-cyan-soft/70 ${compact ? 'p-4' : 'p-5'} animate-rise`}>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`relative overflow-hidden rounded-3xl border border-cyan/60 ${compact ? 'p-4' : 'p-5'}`}
+      style={{ background: 'linear-gradient(140deg, #dff6f4, #c8ecea)', boxShadow: '0 12px 30px -22px rgb(0 127 143 / 0.8)' }}
+    >
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan text-base">🔒</span>
+        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan text-[#08343b] shadow-[0_3px_0_#00788a]">
+          <LockKeyhole size={17} strokeWidth={2.6} />
+        </span>
         <div className="min-w-0">
-          <div className="font-semibold leading-snug">{title}</div>
+          <div className="font-display font-bold leading-snug">{title}</div>
           <p className="mt-0.5 text-sm text-text/75">{text}</p>
         </div>
       </div>
@@ -26,7 +35,7 @@ export function SignupPrompt({ title, text, where, onSignup, onLogin, compact }:
             onSignup();
           }}
         >
-          Create free account
+          <UserPlus size={17} strokeWidth={2.5} /> Create free account
         </button>
         {onLogin && (
           <button
@@ -36,10 +45,10 @@ export function SignupPrompt({ title, text, where, onSignup, onLogin, compact }:
               onLogin();
             }}
           >
-            Log in
+            <LogIn size={16} strokeWidth={2.5} /> Log in
           </button>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

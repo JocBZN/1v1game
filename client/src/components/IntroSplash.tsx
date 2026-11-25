@@ -254,10 +254,10 @@ export function IntroSplash({ onDone }: { onDone: () => void }) {
             {DOMAIN_LIST.map((d, i) => (
               <div
                 key={d.id}
-                className="splash-icon flex h-12 w-12 items-center justify-center rounded-full bg-cream text-2xl"
-                style={{ animationDelay: `${ICONS + i * 90}ms`, ['--from-x' as string]: `${(i - 1.5) * 60}vw`, ['--from-y' as string]: i % 2 ? '60vh' : '-60vh' }}
+                className="splash-icon flex h-12 w-12 items-center justify-center rounded-2xl bg-cream"
+                style={{ color: d.color, boxShadow: '0 4px 0 rgb(0 0 0 / 0.25)', animationDelay: `${ICONS + i * 90}ms`, ['--from-x' as string]: `${(i - 1.5) * 60}vw`, ['--from-y' as string]: i % 2 ? '60vh' : '-60vh' }}
               >
-                {d.emoji}
+                <d.icon size={24} strokeWidth={2.5} aria-hidden />
               </div>
             ))}
           </div>

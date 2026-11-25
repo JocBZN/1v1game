@@ -43,7 +43,6 @@ const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 
 interface TopicPage {
   slug: string;
-  emoji: string;
   name: string;
   title: string;
   description: string;
@@ -55,8 +54,7 @@ interface TopicPage {
 
 export const TOPIC_PAGES: TopicPage[] = [
   {
-    slug: 'trivia',
-    emoji: '🧠',
+    slug: 'trivia',
     name: 'Trivia',
     title: 'Trivia Quiz Online – 1v1 General Knowledge Trivia Duels',
     description:
@@ -77,8 +75,7 @@ export const TOPIC_PAGES: TopicPage[] = [
     ],
   },
   {
-    slug: 'chess-puzzles',
-    emoji: '♞',
+    slug: 'chess-puzzles',
     name: 'Chess puzzles',
     title: 'Chess Puzzles Duel Online – Mate in 1, Mate in 2 Races',
     description:
@@ -98,8 +95,7 @@ export const TOPIC_PAGES: TopicPage[] = [
     ],
   },
   {
-    slug: 'mental-math',
-    emoji: '🧮',
+    slug: 'mental-math',
     name: 'Mental math',
     title: 'Mental Math Game Online – 1v1 Speed Arithmetic Duels',
     description:
@@ -114,8 +110,7 @@ export const TOPIC_PAGES: TopicPage[] = [
     faq: [['Is it good practice for exams?', 'It trains fast, accurate arithmetic under time pressure — the same skill used in timed tests.']],
   },
   {
-    slug: 'flag-quiz',
-    emoji: '🚩',
+    slug: 'flag-quiz',
     name: 'Flags',
     title: 'Flag Quiz Online – Guess the Country, 1v1',
     description:
@@ -127,8 +122,7 @@ export const TOPIC_PAGES: TopicPage[] = [
     faq: [['Which countries are included?', 'Every country in Europe, Asia, Africa, the Americas and Oceania, 194 in total.']],
   },
   {
-    slug: 'rubiks-cube',
-    emoji: '🧊',
+    slug: 'rubiks-cube',
     name: 'Rubik’s Cube',
     title: 'Rubik’s Cube Online – Solve a Real 3D Cube, 1v1',
     description:
@@ -146,8 +140,7 @@ export const TOPIC_PAGES: TopicPage[] = [
 ];
 
 const HOW_TO_PLAY: TopicPage = {
-  slug: 'how-to-play',
-  emoji: '⚔️',
+  slug: 'how-to-play',
   name: 'How to play',
   title: 'How to Play Duel – Rules, Leagues and Ratings',
   description:
@@ -173,8 +166,7 @@ const HOW_TO_PLAY: TopicPage = {
  */
 export const KEYWORD_PAGES: TopicPage[] = [
   {
-    slug: '1v1-games',
-    emoji: '⚔️',
+    slug: '1v1-games',
     name: '1v1 games',
     title: '1v1 Games Online – Free Brain Game Duels, No Download',
     description:
@@ -195,8 +187,7 @@ export const KEYWORD_PAGES: TopicPage[] = [
     ],
   },
   {
-    slug: '2-player-games',
-    emoji: '👥',
+    slug: '2-player-games',
     name: '2 player games',
     title: '2 Player Games Online – Free Quiz, Chess & Math Duels',
     description:
@@ -216,8 +207,7 @@ export const KEYWORD_PAGES: TopicPage[] = [
     ],
   },
   {
-    slug: 'quiz-games',
-    emoji: '❓',
+    slug: 'quiz-games',
     name: 'Quiz games',
     title: 'Quiz Games Online – Free Multiplayer Quiz, 1v1',
     description:
@@ -237,8 +227,7 @@ export const KEYWORD_PAGES: TopicPage[] = [
     ],
   },
   {
-    slug: 'trivia-games',
-    emoji: '🧠',
+    slug: 'trivia-games',
     name: 'Trivia games',
     title: 'Trivia Games Online – Free Trivia with 1,200+ Questions',
     description:
@@ -258,8 +247,7 @@ export const KEYWORD_PAGES: TopicPage[] = [
     ],
   },
   {
-    slug: 'brain-games',
-    emoji: '🧩',
+    slug: 'brain-games',
     name: 'Brain games',
     title: 'Brain Games Online – Free Brain Training Duels for Adults',
     description:
@@ -280,8 +268,7 @@ export const KEYWORD_PAGES: TopicPage[] = [
     ],
   },
   {
-    slug: 'geography-games',
-    emoji: '🌍',
+    slug: 'geography-games',
     name: 'Geography games',
     title: 'Geography Games Online – Flag & Capital Quiz Duels',
     description:
@@ -329,8 +316,7 @@ ol.opts{list-style:upper-alpha;margin:0 0 6px;padding-left:22px;color:#5c4734}ol
 ol.qs details{border:0;padding:4px 0 0}ol.qs summary{color:#007f8f;font-size:14px}.ans{font-weight:700;color:#007f8f}
 .flags{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:12px}
 .flags div{background:#fff8e8;border:1px solid #ecd6a8;border-radius:14px;padding:10px;display:flex;align-items:center;gap:10px;font-weight:600;font-size:14px}
-.flag{font-family:'Twemoji Country Flags',sans-serif;font-size:32px;line-height:1}
-@font-face{font-family:'Twemoji Country Flags';src:url(/fonts/TwemojiCountryFlags.woff2) format('woff2');unicode-range:U+1F1E6-1F1FF,U+1F3F4,U+E0062-E0063,U+E0065,U+E0067,U+E006C,U+E006E,U+E0073-E0074,U+E0077,U+E007F;font-display:swap}`;
+img.flag{width:44px;height:33px;border-radius:5px;object-fit:cover;box-shadow:0 0 0 1px rgb(0 0 0 / .1)}`;
 
 function pageHtml(p: TopicPage): string {
   const base = publicUrl();
@@ -357,7 +343,7 @@ function pageHtml(p: TopicPage): string {
       : ['flag-quiz', 'geography-games'].includes(p.slug)
         ? `<h2>Flags by continent</h2><nav class="topics">${FLAG_REGIONS.map((r) => `<a href="/flag-quiz/${r.id}">Flags of ${esc(r.name)}</a>`).join('')}${hasPack() ? '<a href="/flag-quiz/north-america/">Flags of North America</a><a href="/flag-quiz/south-america/">Flags of South America</a>' : ''}</nav>`
         : '';
-  const body = `<h1>${esc(p.emoji)} ${esc(p.h1)}</h1>
+  const body = `<h1>${esc(p.h1)}</h1>
 <p class="lead">${esc(p.intro)}</p>
 <a class="cta" href="/">Play now — it’s free</a>
 <h2>How it works</h2>
@@ -366,7 +352,7 @@ ${quizHub}
 <h2>Questions</h2>
 <div class="card">${p.faq.map(([q, a]) => `<details open><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>
 <h2>More ways to duel</h2>
-<nav class="topics">${others.map((o) => `<a href="/${o.slug}">${esc(o.emoji)} ${esc(o.name)}</a>`).join('')}</nav>`;
+<nav class="topics">${others.map((o) => `<a href="/${o.slug}">${esc(o.name)}</a>`).join('')}</nav>`;
   return shell({ path: `/${p.slug}`, title: p.title, description: p.description, bodyHtml: body, jsonLd: ld });
 }
 

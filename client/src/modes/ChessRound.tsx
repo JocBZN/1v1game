@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Chess, type Square } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
+import { Check } from 'lucide-react';
 import { WaitingNote } from './MathRound';
 import type { ModeProps } from './types';
 import { alpha, C } from '../lib/theme';
@@ -113,7 +114,7 @@ export function ChessRound({ item, feedback, onAnswer, waiting }: ModeProps<Puzz
       <div className="mb-2 flex w-full items-center justify-between text-xs">
         <span className="label">Puzzle {item.data.index + 1}</span>
         <span className="chip bg-cyan-soft text-cyan-strong">{item.data.theme}</span>
-        <span className="font-semibold text-cyan-strong">✓ {solvedCount}</span>
+        <span className="flex items-center gap-1 font-bold text-cyan-strong"><Check size={15} strokeWidth={3} /> {solvedCount}</span>
       </div>
 
       <div className="relative w-full max-w-[min(100%,420px)]">

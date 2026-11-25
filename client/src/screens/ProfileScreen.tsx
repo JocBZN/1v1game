@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { LogOut } from 'lucide-react';
 import { api, type Me, type ProfileResponse } from '../lib/api';
 import { DOMAINS, DOMAIN_LIST, type DomainId } from '../lib/domains';
 import { AsyncTag, Avatar, LeagueBadge, PageHeader, Screen, TopicIcon } from '../components/ui';
@@ -20,7 +21,7 @@ function winRate(w: number, l: number, d: number) {
 function Stat({ value, label }: { value: React.ReactNode; label: string }) {
   return (
     <div className="py-1">
-      <div className="text-2xl font-bold tabular-nums tracking-tight">{value}</div>
+      <div className="font-display text-3xl font-extrabold tabular-nums tracking-tight">{value}</div>
       <div className="label mt-0.5">{label}</div>
     </div>
   );
@@ -93,7 +94,7 @@ export function ProfileScreen({ me, onBack, onSignup, onLogin, onLogout }: {
           const r = data.ratings[d.id];
           return (
             <div key={d.id} className="flex items-center gap-3 px-4 py-3">
-              <TopicIcon emoji={d.emoji} soft={d.soft} size={32} />
+              <TopicIcon domain={d.id} size={34} />
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-medium">{d.name}</div>
                 <div className="text-xs text-muted">
@@ -126,7 +127,7 @@ export function ProfileScreen({ me, onBack, onSignup, onLogin, onLogout }: {
                   <div className="flex items-center gap-1 text-xs text-muted">
                     {d.rounds.map((r, i) => (
                       <span key={i} title={DOMAINS[r.domain as DomainId]?.name} className={r.mine > r.theirs ? 'opacity-100' : 'opacity-35'}>
-                        {DOMAINS[r.domain as DomainId]?.emoji}
+                        {DOMAINS[r.domain as DomainId] && <TopicIcon domain={r.domain as DomainId} size={18} />}
                       </span>
                     ))}
                     <span className="ml-1">
@@ -153,7 +154,9 @@ export function ProfileScreen({ me, onBack, onSignup, onLogin, onLogout }: {
               <button className="font-semibold text-muted" onClick={() => setConfirmLogout(false)}>Cancel</button>
             </div>
           ) : (
-            <button className="btn btn-ghost text-sm" onClick={() => setConfirmLogout(true)}>Log out</button>
+            <button className="btn btn-ghost text-sm" onClick={() => setConfirmLogout(true)}>
+              <LogOut size={15} strokeWidth={2.5} /> Log out
+            </button>
           )}
         </div>
       )}

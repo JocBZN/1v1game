@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { api, ApiError, setToken, type Me } from '../lib/api';
+import { Check } from 'lucide-react';
 import { PageHeader, Screen } from '../components/ui';
 
 const ERRORS: Record<string, string> = {
@@ -77,7 +78,7 @@ export function AuthScreen({ mode, me, onDone, onBack, onSwitch }: {
           <ul className="space-y-1.5 text-sm">
             {PERKS.map((p) => (
               <li key={p} className="flex items-center gap-2">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-soft text-[11px] font-bold text-cyan-strong">✓</span>
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-soft text-[11px] font-bold text-cyan-strong"><Check size={12} strokeWidth={3.2} /></span>
                 {p}
               </li>
             ))}

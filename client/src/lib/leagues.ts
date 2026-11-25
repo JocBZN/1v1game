@@ -1,13 +1,14 @@
+import { Crown, Gem, Medal, Shield, type LucideIcon } from 'lucide-react';
 import type { League } from './api';
 
 /** League colours are tuned to read on the cream background. */
-export const LEAGUE_META: Record<League['id'], { name: string; emoji: string; color: string }> = {
-  bronze: { name: 'Bronze', emoji: '🥉', color: '#9c5a2e' },
-  silver: { name: 'Silver', emoji: '🥈', color: '#7a7268' },
-  gold: { name: 'Gold', emoji: '🥇', color: '#b56500' },
-  platinum: { name: 'Platinum', emoji: '💠', color: '#4f7f7a' },
-  diamond: { name: 'Diamond', emoji: '💎', color: '#007f8f' },
-  legend: { name: 'Legend', emoji: '👑', color: '#df301c' },
+export const LEAGUE_META: Record<League['id'], { name: string; icon: LucideIcon; color: string }> = {
+  bronze: { name: 'Bronze', icon: Medal, color: '#9c5a2e' },
+  silver: { name: 'Silver', icon: Medal, color: '#7a7268' },
+  gold: { name: 'Gold', icon: Medal, color: '#b56500' },
+  platinum: { name: 'Platinum', icon: Shield, color: '#4f7f7a' },
+  diamond: { name: 'Diamond', icon: Gem, color: '#007f8f' },
+  legend: { name: 'Legend', icon: Crown, color: '#df301c' },
 };
 
 export const LEAGUE_THRESHOLDS: { id: League['id']; min: number }[] = [

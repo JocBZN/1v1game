@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { api, type LeaderboardEntry, type LeaderboardResponse, type Me, type RatingTrack } from '../lib/api';
 import { DOMAINS, DOMAIN_LIST } from '../lib/domains';
 import { LEAGUE_META } from '../lib/leagues';
-import { Avatar, PageHeader, Screen } from '../components/ui';
+import { motion } from 'motion/react';
+import { Avatar, LeagueIcon, PageHeader, Screen } from '../components/ui';
 import { SignupPrompt } from '../components/SignupPrompt';
 
 const TABS: { id: RatingTrack; label: string }[] = [
@@ -14,25 +15,37 @@ const PODIUM = ['#b56500', '#7a7268', '#9c5a2e'];
 
 function Row({ e, mine, delay }: { e: LeaderboardEntry; mine: boolean; delay: number }) {
   const league = LEAGUE_META[e.league];
+  const podium = e.rank <= 3;
   return (
-    <div
-      className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 animate-rise ${mine ? 'border border-cyan bg-cyan-soft/60' : ''}`}
-      style={{ animationDelay: `${delay}ms` }}
+    <motion.div
+      initial={{ opacity: 0, x: -12 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: delay / 1000, type: 'spring', stiffness: 300, damping: 26 }}
+      className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 ${mine ? 'border border-cyan bg-cyan-soft/60' : ''}`}
     >
-      <div className="w-7 text-center text-sm font-semibold tabular-nums" style={{ color: e.rank <= 3 ? PODIUM[e.rank - 1] : 'var(--color-muted)' }}>
-        {e.rank}
+      <div className="flex w-8 justify-center">
+        {podium ? (
+          <span
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-extrabold text-[#fff8e8]"
+            style={{ background: PODIUM[e.rank - 1], boxShadow: '0 2px 0 rgb(0 0 0 / 0.2)' }}
+          >
+            {e.rank}
+          </span>
+        ) : (
+          <span className="text-sm font-bold tabular-nums text-muted">{e.rank}</span>
+        )}
       </div>
-      <Avatar name={e.nickname} size={32} />
+      <Avatar name={e.nickname} size={34} />
       <div className="min-w-0 flex-1">
-        <div className="truncate font-medium">
-          {e.nickname} {mine && <span className="text-xs font-semibold text-cyan-strong">you</span>}
+        <div className="truncate font-semibold">
+          {e.nickname} {mine && <span className="text-xs font-bold text-cyan-strong">you</span>}
         </div>
-        <div className="text-[11px] text-muted">
-          {league.emoji} {league.name} · {e.wins}W {e.losses}L{e.draws ? ` ${e.draws}D` : ''}
+        <div className="flex items-center gap-1 text-[11px] text-muted">
+          <LeagueIcon league={e.league} size={11} /> {league.name} · {e.wins}W {e.losses}L{e.draws ? ` ${e.draws}D` : ''}
         </div>
       </div>
-      <div className="text-lg font-semibold tabular-nums">{e.rating}</div>
-    </div>
+      <div className="font-display text-xl font-extrabold tabular-nums">{e.rating}</div>
+    </motion.div>
   );
 }
 
@@ -77,9 +90,10 @@ export function LeaderboardScreen({ me, onBack, onSignup, onLogin }: { me: Me; o
             key={t.id}
             onClick={() => setTrack(t.id)}
             className={`chip shrink-0 px-3.5 py-1.5 text-sm transition-colors ${
-              track === t.id ? 'bg-text text-cream' : 'border border-line text-muted hover:text-text'
+              track === t.id ? 'bg-text text-cream shadow-[0_3px_0_#000]' : 'border border-line bg-[#fffaf0] text-muted hover:text-text'
             }`}
           >
+            {t.id !== 'general' && (() => { const Icon = DOMAINS[t.id].icon; return <Icon size={14} strokeWidth={2.5} />; })()}
             {t.label}
           </button>
         ))}

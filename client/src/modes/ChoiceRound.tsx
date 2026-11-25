@@ -1,6 +1,9 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { motion } from 'motion/react';
+import { Check, Clock, X } from 'lucide-react';
 import type { CurrentItem, Feedback } from '../state/duel';
 import { SecondsLeft, TimerBar } from '../components/ui';
+import { cn } from '../lib/cn';
 
 const LETTERS = ['A', 'B', 'C', 'D'];
 
@@ -26,68 +29,83 @@ export function ChoiceRound({
   const locked = chosen !== null || !!fb;
 
   return (
-    <div key={`${item.round}-${item.item}`} className="flex flex-1 flex-col animate-rise">
+    <motion.div
+      key={`${item.round}-${item.item}`}
+      initial={{ opacity: 0, x: 24 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+      className="flex flex-1 flex-col"
+    >
       <div className="mb-2 flex items-center justify-between text-xs">
         <span className="label">
           {item.data.index + 1} / {item.data.total}
         </span>
-        {item.endsAt && !fb && <SecondsLeft endsAt={item.endsAt} className="text-sm font-semibold" />}
+        {item.endsAt && !fb && <SecondsLeft endsAt={item.endsAt} className="text-sm font-bold" />}
         {fb && (
-          <span className={`text-sm font-semibold ${fb.correct ? 'text-cyan-strong' : 'text-red'} animate-pop`}>
-            {fb.timeout ? 'Time’s up' : fb.correct ? `+${fb.points}` : 'Wrong'}
-          </span>
+          <motion.span
+            initial={{ scale: 1.6, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className={cn('flex items-center gap-1 text-sm font-extrabold', fb.correct ? 'text-cyan-strong' : 'text-red')}
+          >
+            {fb.timeout ? <><Clock size={14} strokeWidth={2.6} /> Time’s up</> : fb.correct ? `+${fb.points}` : <><X size={14} strokeWidth={3} /> Wrong</>}
+          </motion.span>
         )}
       </div>
-      {item.endsAt && item.limitMs ? (fb ? <div className="h-1.5" /> : <TimerBar endsAt={item.endsAt} totalMs={item.limitMs} />) : null}
+      {item.endsAt && item.limitMs ? (fb ? <div className="h-2" /> : <TimerBar endsAt={item.endsAt} totalMs={item.limitMs} />) : null}
 
       <div className="flex flex-1 flex-col justify-center py-4">{header}</div>
 
-      <div className={layout === 'grid' ? 'grid grid-cols-2 gap-2.5 pb-2' : 'grid gap-2 pb-2'}>
+      <div className={layout === 'grid' ? 'grid grid-cols-2 gap-2.5 pb-2' : 'grid gap-2.5 pb-2'}>
         {item.data.options.map((opt, i) => {
           const isCorrect = correctIndex === i;
           const isChosen = chosen === i || (fb?.chosen as number | null) === i;
-          let cls = 'border-line bg-surface hover:border-line-strong hover:bg-sunken';
+          let cls = 'border-line bg-[#fffaf0] shadow-[0_3px_0_var(--color-line)] hover:border-line-strong hover:bg-white';
           let badge = 'bg-sunken text-muted';
           let anim = '';
           if (fb) {
             if (isCorrect) {
-              cls = 'border-cyan bg-cyan-soft';
-              badge = 'bg-cyan text-text';
+              cls = 'border-cyan bg-cyan-soft shadow-[0_3px_0_#00a3b7]';
+              badge = 'bg-cyan text-[#08343b]';
               anim = isChosen ? 'animate-pop' : '';
             } else if (isChosen) {
-              cls = 'border-red bg-red-soft';
+              cls = 'border-red bg-red-soft shadow-[0_3px_0_#df301c]';
               badge = 'bg-red text-cream';
               anim = 'animate-shake';
             } else {
               cls = 'border-line bg-surface opacity-45';
             }
           } else if (isChosen) {
-            cls = 'border-text bg-surface';
+            cls = 'border-text bg-white shadow-[0_3px_0_var(--color-text)]';
             badge = 'bg-text text-cream';
           }
           return (
-            <button
+            <motion.button
               key={i}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.04 * i, type: 'spring', stiffness: 320, damping: 26 }}
+              whileTap={locked ? undefined : { y: 3 }}
               disabled={locked}
               onClick={() => {
                 if (locked) return;
                 setChosen(i);
                 onAnswer(i);
               }}
-              className={`flex min-h-14 items-center gap-3 rounded-2xl border px-3 py-3 text-left text-[15px] leading-tight transition-colors disabled:cursor-default ${cls} ${anim} ${
-                layout === 'grid' ? 'justify-center text-center' : ''
-              }`}
+              className={cn(
+                'flex min-h-14 items-center gap-3 rounded-2xl border px-3 py-3 text-left text-[15px] leading-tight transition-colors disabled:cursor-default',
+                cls, anim, layout === 'grid' && 'justify-center text-center',
+              )}
             >
               {layout === 'list' && (
-                <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${badge}`}>
-                  {fb && isCorrect ? '✓' : fb && isChosen ? '✕' : LETTERS[i]}
+                <span className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs font-extrabold', badge)}>
+                  {fb && isCorrect ? <Check size={16} strokeWidth={3} /> : fb && isChosen ? <X size={16} strokeWidth={3} /> : LETTERS[i]}
                 </span>
               )}
-              <span className="font-medium">{opt}</span>
-            </button>
+              <span className="font-semibold">{opt}</span>
+            </motion.button>
           );
         })}
       </div>
-    </div>
+    </motion.div>
   );
 }

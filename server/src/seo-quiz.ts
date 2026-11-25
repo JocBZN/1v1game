@@ -8,7 +8,7 @@
  */
 import crypto from 'node:crypto';
 import type express from 'express';
-import { flagEmoji, loadCountries } from './modes/flags';
+import { loadCountries } from './modes/flags';
 import { practiceQuestions, TRIVIA_CATEGORIES, type Question } from './modes/trivia';
 import { publicUrl, shell } from './seo';
 import { FLAG_REGIONS, GENERAL_KNOWLEDGE, QUIZ_HUB, QUIZ_PAGES } from './seo-quiz-content';
@@ -143,20 +143,20 @@ ${faqHtml(GENERAL_KNOWLEDGE.faq)}
 function hubPage(): string {
   const total = practiceQuestions().length;
   const cards = [
-    `<a href="/quiz/${GENERAL_KNOWLEDGE.slug}">🎯 General knowledge</a>`,
+    `<a href="/quiz/${GENERAL_KNOWLEDGE.slug}">General knowledge</a>`,
     ...QUIZ_PAGES.map((p) => `<a href="/quiz/${p.slug}">${esc(p.name)} quiz <small>(${practiceQuestions(p.cat).length})</small></a>`),
-    `<a href="/flag-quiz">🚩 Flag quiz</a>`,
-    `<a href="/chess-puzzles">♞ Chess puzzles</a>`,
-    `<a href="/mental-math">🧮 Mental math</a>`,
-    `<a href="/rubiks-cube">🧊 Rubik’s Cube</a>`,
+    `<a href="/flag-quiz">Flag quiz</a>`,
+    `<a href="/chess-puzzles">Chess puzzles</a>`,
+    `<a href="/mental-math">Mental math</a>`,
+    `<a href="/rubiks-cube">Rubik’s Cube</a>`,
     ...(hasPack()
       ? [
-          `<a href="/quiz/world-capitals/">🏛️ World capitals</a>`,
-          `<a href="/quiz/space/">🪐 Space</a>`,
-          `<a href="/quiz/music/">🎵 Music</a>`,
-          `<a href="/quiz/art-literature/">🎨 Art &amp; literature</a>`,
-          `<a href="/quiz-of-the-day/">📅 Quiz of the day</a>`,
-          `<a href="/general-knowledge-questions/">❓ General knowledge Q&amp;A</a>`,
+          `<a href="/quiz/world-capitals/">World capitals</a>`,
+          `<a href="/quiz/space/">Space</a>`,
+          `<a href="/quiz/music/">Music</a>`,
+          `<a href="/quiz/art-literature/">Art &amp; literature</a>`,
+          `<a href="/quiz-of-the-day/">Quiz of the day</a>`,
+          `<a href="/general-knowledge-questions/">General knowledge Q&amp;A</a>`,
         ]
       : []),
   ];
@@ -210,7 +210,7 @@ function flagRegionPage(id: string): string | null {
 <p class="lead">Every country flag of ${esc(region.name)} in one list, alphabetically, with its name. Study them here, then test yourself in a live flag quiz: eight flags, six seconds each, and the wrong answers always come from the same continent.</p>
 <a class="cta" href="/">Play the flag quiz 1v1</a>
 <h2>${n} flags of ${esc(region.name)}</h2>
-<div class="flags">${countries.map((c) => `<div><span class="flag" role="img" aria-label="Flag of ${esc(c.name)}">${flagEmoji(c.code)}</span>${esc(c.name)}</div>`).join('')}</div>
+<div class="flags">${countries.map((c) => `<div><img class="flag" src="/flags/${c.code.toLowerCase()}.svg" alt="Flag of ${esc(c.name)}" width="44" height="33" loading="lazy">${esc(c.name)}</div>`).join('')}</div>
 <h2>Flags of other continents</h2>
 <nav class="topics">${others.map((r) => `<a href="/flag-quiz/${r.id}">Flags of ${esc(r.name.replace(/^the /, ''))}</a>`).join('')}<a href="/quiz/geography">Geography quiz</a></nav>`;
   return shell({
