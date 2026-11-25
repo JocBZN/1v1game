@@ -35,6 +35,7 @@
 ## Ce mai e de făcut, în ordine
 1. **Șterge proiectul Railway „1v1game”** (id `276f51bb-d789-42bf-a550-833449ac8eef`). Are serviciile `server` și `client` (client = CRASHED), fără domeniu și fără volum. E un duplicat creat automat și consumă credit. Site-ul live e în proiectul **duel**; acela NU se șterge. Se face din dashboard: proiect → Settings → Danger → Delete. Ștergerea o confirmă utilizatorul.
 2. **Google Search Console, în fiecare zi câteva minute** (limita e de ~10 cereri pe zi). Request indexing, în ordinea asta:
+   - **întâi** paginile pentru căutări generale, adăugate pe 25 nov seara (commit `72723f5`, live, trimise deja prin IndexNow, 210 URL-uri): `/1v1-games`, `/quiz-games`, `/trivia-games`, `/brain-games`, `/2-player-games`, `/geography-games`;
    - `/pl/`, `/tr/`, `/quiz/space/`, `/quiz/music/`, `/quiz/art-literature/`, `/quiz-widget/`;
    - hub-urile pe limbi: `/es/quiz/`, `/ro/quiz/` etc.;
    - paginile cu steaguri: `/flag-quiz/north-america/`, `/es/quiz-banderas/` etc.;
