@@ -1,3 +1,4 @@
+import { capture } from './analytics';
 import express, { type Request, type Response, type NextFunction } from 'express';
 import { authenticate, createGuest, login, register } from './auth';
 import { getLeaderboard, getRank, getRatings, getRecentDuels, getUserById, type User } from './db';
@@ -69,12 +70,19 @@ export function createApi() {
     const current = authenticate(bearer(req));
     const r = register(req.body?.nickname, req.body?.password, current);
     if (!r.ok) return res.status(400).json({ error: r.error });
+    capture(r.user.id, 'signed_up', {
+      from_guest: r.upgraded,
+      games_as_guest: r.upgraded ? getRatings(r.user.id).general.games : 0,
+      $set: { nickname: r.user.nickname, is_guest: false },
+      $set_once: { signed_up_at: new Date().toISOString() },
+    });
     res.json({ token: r.user.token, upgraded: r.upgraded, ...me(r.user) });
   });
 
   api.post('/login', rateLimit(20, 10 * 60_000), (req, res) => {
     const r = login(req.body?.nickname, req.body?.password);
     if (!r.ok) return res.status(401).json({ error: r.error });
+    capture(r.user.id, 'logged_in', { $set: { nickname: r.user.nickname, is_guest: false } });
     res.json({ token: r.user.token, ...me(r.user) });
   });
 

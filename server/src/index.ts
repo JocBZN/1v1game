@@ -4,6 +4,7 @@ import http from 'node:http';
 import path from 'node:path';
 import cors from 'cors';
 import { mountAdmin } from './admin';
+import { flush as flushAnalytics, mountPosthogProxy } from './analytics';
 import { createApi } from './api';
 import { db } from './db';
 import { SERVER_ROOT } from './paths';
@@ -27,6 +28,8 @@ mountSecurity(app);
 // Same-origin app: no cross-origin API access needed in production.
 if (process.env.NODE_ENV !== 'production') app.use(cors());
 app.get('/health', (_req, res) => res.json({ ok: true }));
+// Browser analytics go through our domain (see analytics.ts).
+mountPosthogProxy(app);
 app.use('/api', createApi());
 mountAdmin(app);
 // Generated multilingual pages first: they own /es/, /quiz/space/, /flag-quiz/north-america/ …
@@ -101,9 +104,10 @@ setInterval(prune, 6 * 3600 * 1000).unref();
 
 // Hosts stop the old instance with SIGTERM on every deploy: close cleanly so SQLite is checkpointed.
 for (const sig of ['SIGTERM', 'SIGINT'] as const) {
-  process.once(sig, () => {
+  process.once(sig, async () => {
     console.log(`[duel] ${sig}, shutting down`);
     server.close();
+    await flushAnalytics(); // send queued analytics events (bounded by its 10 s timeout)
     db.close();
     process.exit(0);
   });

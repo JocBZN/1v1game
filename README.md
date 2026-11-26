@@ -69,6 +69,8 @@ origin there.
 | `GA4_ID` | optional | Google Analytics 4 measurement ID (`G-…`), loaded after cookie consent |
 | `CLARITY_ID` | optional | Microsoft Clarity project ID (heatmaps, session replays), after consent |
 | `UMAMI_WEBSITE_ID`, `UMAMI_SRC` | optional | Umami (cookieless page views/events, no banner needed) |
+| `POSTHOG_KEY` | optional | PostHog project API key (`phc_…`): browser events through the `/ingest` proxy + game events sent by the server; cookies and session replay only after consent |
+| `POSTHOG_HOST` | optional | PostHog API host, default `https://eu.i.posthog.com` (use `https://us.i.posthog.com` for a US project) |
 | `CONTACT_EMAIL` | recommended | shown on `/privacy` for data-deletion requests |
 | `TWA_PACKAGE`, `TWA_SHA256` | for Google Play | publishes `/.well-known/assetlinks.json` |
 

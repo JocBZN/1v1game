@@ -6,6 +6,7 @@ import { Duel, type DuelSummary, type RatingSnap, type RoundPlan, type Slot, typ
 import { computeRatingUpdates } from './duel/results';
 import { buildBotDuel, buildGhostDuel, recordRound } from './ghost';
 import { leagueFor } from './leagues';
+import { capture } from './analytics';
 import { Matchmaker, type QueueEntry } from './matchmaking';
 import { getMode, pickDomains } from './modes';
 import { createRng } from './rng';
@@ -29,6 +30,20 @@ function snapshot(userId: number): Record<RatingTrack, RatingSnap> {
   for (const t of RATING_TRACKS) out[t] = { rating: rows[t].rating, rd: rows[t].rd, vol: rows[t].vol };
   return out;
 }
+
+/** How a duel came about, for analytics. */
+interface DuelMeta {
+  mode: 'live' | 'ghost' | 'bot' | 'friend';
+  /** ms each human spent in the queue (ranked duels) */
+  waitMs?: Record<number, number>;
+}
+
+type DuelExtra = {
+  friendly?: boolean;
+  ratingChanges?: Record<string, { before: number; after: number }>;
+  league?: { before: string; after: string };
+  ratingFactors?: { streak: number };
+} | null;
 
 /** Orchestrates queue → duel → results. */
 export class GameServer {
@@ -66,6 +81,8 @@ export class GameServer {
   }
 
   onDisconnect(user: User) {
+    if (this.mm.has(user.id)) capture(user.id, 'queue_abandoned', { reason: 'disconnect' });
+    if (this.duels.has(user.id)) capture(user.id, 'duel_disconnected');
     this.mm.leave(user.id);
     this.duels.get(user.id)?.disconnected(user.id);
     this.rooms.offline(user.id);
@@ -79,12 +96,17 @@ export class GameServer {
     // Searching for a random opponent means leaving any private room.
     this.rooms.leave(user.id);
     const rating = getRatings(user.id).general.rating;
+    const wasQueued = this.mm.has(user.id);
     const entry = this.mm.join(user.id, rating);
+    if (!wasQueued) capture(user.id, 'queue_joined', { rating: Math.round(rating), queue_size: this.mm.size, is_guest: !!user.is_guest });
     if (this.mm.has(user.id)) this.emit(user.id, 'queue:joined', { since: entry.joinedAt });
   }
 
   leaveQueue(user: User) {
-    if (this.mm.leave(user.id)) this.emit(user.id, 'queue:left');
+    if (this.mm.leave(user.id)) {
+      capture(user.id, 'queue_abandoned', { reason: 'cancel' });
+      this.emit(user.id, 'queue:left');
+    }
   }
 
   answer(user: User, payload: unknown) {
@@ -114,6 +136,7 @@ export class GameServer {
 
   forfeit(user: User) {
     const duel = this.duels.get(user.id);
+    if (duel) capture(user.id, 'duel_forfeit_clicked');
     if (duel) duel.forfeit(user.id);
     else this.emit(user.id, 'duel:none');
   }
@@ -179,15 +202,41 @@ export class GameServer {
     return extras;
   }
 
-  private launch(slots: [SlotInit, SlotInit], plans: RoundPlan[], opts: { rated?: boolean; onEnd?: (s: DuelSummary) => void } = {}) {
+  private launch(slots: [SlotInit, SlotInit], plans: RoundPlan[], meta: DuelMeta, opts: { rated?: boolean; onEnd?: (s: DuelSummary) => void } = {}) {
     const rated = opts.rated ?? true;
     const id = crypto.randomUUID();
     const humans = slots.filter((s) => s.kind === 'human').map((s) => s.userId!);
+    const startedAt = Date.now();
+    const domains = plans.map((p) => p.domain);
+    for (const slot of [0, 1] as Slot[]) {
+      const s = slots[slot];
+      if (s.kind !== 'human' || s.userId === null) continue;
+      const o = slots[1 - slot];
+      capture(s.userId, 'duel_started', {
+        duel_id: id,
+        mode: meta.mode,
+        opponent_kind: o.kind,
+        rated,
+        wait_ms: meta.waitMs?.[s.userId],
+        rating: Math.round(s.ratings.general.rating),
+        opponent_rating: Math.round(o.ratings.general.rating),
+        rating_gap: Math.round(o.ratings.general.rating - s.ratings.general.rating),
+        domains,
+      });
+    }
     const duel: Duel = new Duel(id, slots, plans, {
       emit: (userId, event, data) => this.emit(userId, event, data),
       onRoundRecorded: (slot, rec) => {
         const s = slots[slot];
         if (s.kind === 'human' && s.userId !== null) {
+          capture(s.userId, 'round_played', {
+            duel_id: id,
+            mode: meta.mode,
+            domain: rec.domain,
+            score: rec.score,
+            duration_ms: rec.durationMs,
+            answers: rec.events.filter((e) => (e as { done?: boolean }).done).length,
+          });
           recordRound(s.userId, s.ratings, rec);
           if (rec.domain === 'trivia') {
             const items = (rec.content as TriviaContent).items;
@@ -197,7 +246,13 @@ export class GameServer {
       },
       onFinish: (summary) => {
         try {
-          return this.finalize(slots, summary, rated);
+          const extras = this.finalize(slots, summary, rated);
+          try {
+            this.trackFinish(id, slots, summary, extras as [DuelExtra, DuelExtra], meta, Date.now() - startedAt);
+          } catch (e) {
+            console.warn('[posthog] duel_finished', e);
+          }
+          return extras;
         } finally {
           opts.onEnd?.(summary);
         }
@@ -211,6 +266,63 @@ export class GameServer {
     return duel;
   }
 
+  /** One `duel_finished` per human, plus person properties (rating, league, games) for cohorts. */
+  private trackFinish(id: string, slots: [SlotInit, SlotInit], summary: DuelSummary, extras: [DuelExtra, DuelExtra], meta: DuelMeta, durationMs: number) {
+    for (const slot of [0, 1] as Slot[]) {
+      const s = slots[slot];
+      if (s.kind !== 'human' || s.userId === null) continue;
+      const other = (1 - slot) as Slot;
+      const result = summary.winner === null ? 'draw' : summary.winner === slot ? 'win' : 'loss';
+      const x = extras[slot];
+      const g = x?.ratingChanges?.general;
+      const user = getUserById(s.userId);
+      const general = getRating(s.userId, 'general');
+      capture(s.userId, 'duel_finished', {
+        duel_id: id,
+        mode: meta.mode,
+        opponent_kind: slots[other].kind,
+        result,
+        forfeit: summary.forfeitSlot === null ? 'none' : summary.forfeitSlot === slot ? 'self' : 'opponent',
+        rounds_won: summary.roundWins[slot],
+        rounds_lost: summary.roundWins[other],
+        score: summary.totals[slot],
+        opponent_score: summary.totals[other],
+        duration_ms: durationMs,
+        domains: summary.rounds.map((r) => r.domain),
+        rounds: summary.rounds.map((r) => ({ domain: r.domain, score: r.scores[slot], opponent: r.scores[other], won: r.winner === slot })),
+        rating_before: g?.before,
+        rating_after: g?.after,
+        rating_delta: g ? g.after - g.before : undefined,
+        league_before: x?.league?.before,
+        league_after: x?.league?.after,
+        promoted: x?.league ? x.league.before !== x.league.after && (g?.after ?? 0) > (g?.before ?? 0) : undefined,
+        streak: x?.ratingFactors?.streak,
+        $set: {
+          nickname: user?.nickname,
+          is_guest: !!user?.is_guest,
+          rating: Math.round(general.rating),
+          league: leagueFor(general.rating).id,
+          games: general.games,
+          wins: general.wins,
+          losses: general.losses,
+          last_duel_at: new Date().toISOString(),
+        },
+        $set_once: { first_duel_at: new Date().toISOString() },
+      });
+      // Per-game outcome, for "which games do players win / lose" breakdowns.
+      for (const r of summary.rounds) {
+        capture(s.userId, 'round_result', {
+          duel_id: id,
+          mode: meta.mode,
+          domain: r.domain,
+          score: r.scores[slot],
+          opponent_score: r.scores[other],
+          outcome: r.winner === null ? 'tie' : r.winner === slot ? 'won' : 'lost',
+        });
+      }
+    }
+  }
+
   private startHumanDuel(a: QueueEntry, b: QueueEntry) {
     const rng = createRng();
     const plans: RoundPlan[] = pickDomains(rng).map((domain) => ({
@@ -218,7 +330,11 @@ export class GameServer {
       content: getMode(domain).generateRound(rng),
       scripts: [null, null],
     }));
-    this.launch([this.humanSlot(a.userId), this.humanSlot(b.userId)], plans);
+    const now = Date.now();
+    this.launch([this.humanSlot(a.userId), this.humanSlot(b.userId)], plans, {
+      mode: 'live',
+      waitMs: { [a.userId]: now - a.joinedAt, [b.userId]: now - b.joinedAt },
+    });
   }
 
   /** Private room: two friends, same rounds as a normal duel, no rating change. */
@@ -229,7 +345,7 @@ export class GameServer {
       content: getMode(domain).generateRound(rng),
       scripts: [null, null],
     }));
-    this.launch([this.humanSlot(hostId), this.humanSlot(guestId)], plans, {
+    this.launch([this.humanSlot(hostId), this.humanSlot(guestId)], plans, { mode: 'friend' }, {
       rated: false,
       onEnd: (summary) => onEnd(summary.winner),
     });
@@ -247,6 +363,6 @@ export class GameServer {
       console.error('[ghost] failed, falling back to bot', e);
     }
     const { opponent, plans } = built ?? buildBotDuel(myGeneral, rng);
-    this.launch([me, opponent], plans);
+    this.launch([me, opponent], plans, { mode: opponent.kind === 'ghost' ? 'ghost' : 'bot', waitMs: { [a.userId]: Date.now() - a.joinedAt } });
   }
 }

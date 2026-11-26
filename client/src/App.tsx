@@ -15,7 +15,7 @@ import { ProfileScreen } from './screens/ProfileScreen';
 import { FriendScreen, RoomScreen } from './screens/FriendScreen';
 import { IntroSplash, shouldShowIntro } from './components/IntroSplash';
 import { ConsentBanner } from './components/ConsentBanner';
-import { pageview, track } from './lib/analytics';
+import { pageview, track, identifyUser, resetUser } from './lib/analytics';
 
 export type Route = 'home' | 'leaderboard' | 'profile' | 'signup' | 'login' | 'friend';
 
@@ -103,7 +103,16 @@ function Game({ me, refreshMe, onAuthDone, onLogout }: {
 
   switch (state.phase) {
     case 'searching':
-      return <SearchingScreen me={me} since={state.searchSince ?? Date.now()} onCancel={duel.cancel} />;
+      return (
+        <SearchingScreen
+          me={me}
+          since={state.searchSince ?? Date.now()}
+          onCancel={() => {
+            track('search_cancel', { wait_s: Math.round((Date.now() - (state.searchSince ?? Date.now())) / 1000) });
+            duel.cancel();
+          }}
+        />
+      );
     case 'found':
       return state.found ? <FoundScreen found={state.found} /> : null;
     case 'intro':
@@ -121,12 +130,17 @@ function Game({ me, refreshMe, onAuthDone, onLogout }: {
           found={state.found}
           result={state.result}
           room={state.result.friendly ? duel.room : null}
-          onAgain={() => (state.result!.friendly && duel.room ? duel.rematch() : duel.play())}
+          onAgain={() => {
+            track('result_action', { action: 'again', result: state.result!.result });
+            return state.result!.friendly && duel.room ? duel.rematch() : duel.play();
+          }}
           onLeaderboard={() => {
+            track('result_action', { action: 'leaderboard', result: state.result!.result });
             duel.reset();
             go('leaderboard');
           }}
           onHome={() => {
+            track('result_action', { action: 'home', result: state.result!.result });
             if (state.result!.friendly) duel.leaveRoom();
             duel.reset();
             go('home');
@@ -199,6 +213,11 @@ export default function App() {
     api.me().then(setMe).catch(() => {});
   }, []);
 
+  // Analytics: browser events belong to the same person as the server's game events.
+  useEffect(() => {
+    if (me) identifyUser(me.user, { rating: Math.round(me.ratings.general.rating), league: me.league.id, games: me.ratings.general.games });
+  }, [me]);
+
   /** Anyone can play right away: no token → a fresh guest account. */
   const startGuest = useCallback(async () => {
     const { token, ...m } = await api.guest();
@@ -221,6 +240,7 @@ export default function App() {
       }
       await startGuest();
     } catch {
+      track('boot_failed');
       setFailed(true);
     }
   }, [startGuest]);
@@ -231,6 +251,7 @@ export default function App() {
 
   const logout = useCallback(() => {
     track('logout');
+    resetUser();
     closeSocket();
     clearToken();
     setMe(null);

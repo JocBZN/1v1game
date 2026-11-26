@@ -47,7 +47,7 @@ function analyticsOrigins() {
       /* ignore bad UMAMI_SRC */
     }
   }
-  return { script, connect, img };
+  return { script, connect, img, blobWorker: !!cfg.posthog };
 }
 
 export function contentSecurityPolicy(inlineScriptHashes: string[] = [], opts: { framable?: boolean } = {}): string {
@@ -61,7 +61,8 @@ export function contentSecurityPolicy(inlineScriptHashes: string[] = [], opts: {
     `font-src ${self} https://fonts.gstatic.com data:`,
     `img-src ${[self, 'data:', 'blob:', ...a.img].join(' ')}`,
     `connect-src ${[self, 'wss:', ...a.connect].join(' ')}`,
-    `worker-src ${self}`,
+    // PostHog's session replay compresses in a blob: worker.
+    `worker-src ${self}${a.blobWorker ? ' blob:' : ''}`,
     `manifest-src ${self}`,
     "object-src 'none'",
     `base-uri ${self}`,

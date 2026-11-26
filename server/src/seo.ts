@@ -2,6 +2,7 @@
  * SEO for a single-page game: crawlable landing pages per topic, robots.txt, sitemap.xml, structured data
  * and the runtime values injected into the client's index.html (public URL, analytics IDs).
  */
+import { posthogUiHost } from './analytics';
 import fs from 'node:fs';
 import path from 'node:path';
 import type express from 'express';
@@ -33,6 +34,8 @@ export function clientConfig() {
     publicUrl: publicUrl(),
     ga4: process.env.GA4_ID || null, // e.g. G-XXXXXXX
     clarity: process.env.CLARITY_ID || null, // Microsoft Clarity project id
+    // PostHog: the project key is public by design; the browser sends events to /ingest (our proxy).
+    posthog: process.env.POSTHOG_KEY ? { key: process.env.POSTHOG_KEY, apiHost: '/ingest', uiHost: posthogUiHost() } : null,
     umami: process.env.UMAMI_WEBSITE_ID
       ? { src: process.env.UMAMI_SRC || 'https://cloud.umami.is/script.js', websiteId: process.env.UMAMI_WEBSITE_ID }
       : null,
@@ -553,7 +556,7 @@ function privacyHtml(): string {
 <main><h1>Privacy Policy</h1><p class="lead">Short version: we store what the game needs, nothing more, and we never sell data.</p>
 ${section('What we store', 'Your nickname, a hashed password if you create an account (never the password itself), your ratings, and the results and moves of the duels you play. Rounds you play may be replayed to other players as a “ghost” opponent, shown with your nickname.')}
 ${section('Guests', 'Guests get a random nickname and a token saved in their browser. Guest data stays on our server until it is cleaned up; guests never appear on the leaderboard.')}
-${section('Analytics', 'We count page views and game events (for example “duel finished”) to improve the game. Cookie-based analytics (Google Analytics, Microsoft Clarity) only run if you accept them in the banner. You can change your mind by clearing this site’s data in your browser.')}
+${section('Analytics', 'We count page views and game events (for example “duel finished”, with your score and rating change) to improve the game, linked to your account number, never to an email address. We use PostHog (hosted in the EU) for this. Cookies, Google Analytics, Microsoft Clarity and anonymised session recordings (what you tap on screen; typed text is hidden) only run if you accept them in the banner. You can change your mind by clearing this site’s data in your browser.')}
 ${section('Your rights', `You can ask us to delete your account and all its data${contact ? ` by writing to <a href="mailto:${esc(contact)}">${esc(contact)}</a>` : ''}. We answer within 30 days.`)}
 ${section('Children', 'Duel is a general-audience game and does not knowingly collect personal data from children beyond a nickname.')}
 <p class="lead" style="font-size:14px">Last updated: ${new Date().toISOString().slice(0, 10)}</p>

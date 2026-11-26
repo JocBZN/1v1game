@@ -7,6 +7,7 @@ import { ArrowLeft, Crown, Trophy } from 'lucide-react';
 import { Avatar, LeagueIcon, TopicIcon } from '../components/ui';
 import { FloatingShapes } from '../components/Fun';
 import { SignupPrompt } from '../components/SignupPrompt';
+import { track as trackEvent } from '../lib/analytics';
 
 const TABS: { id: RatingTrack; label: string }[] = [
   { id: 'general', label: 'Overall' },
@@ -174,7 +175,10 @@ export function LeaderboardScreen({ me, onBack, onSignup, onLogin }: { me: Me; o
             return (
               <motion.button
                 key={t.id}
-                onClick={() => setTrack(t.id)}
+                onClick={() => {
+                  setTrack(t.id);
+                  trackEvent('leaderboard_tab', { tab: t.id });
+                }}
                 whileTap={{ scale: 0.94 }}
                 className={`flex shrink-0 items-center gap-1.5 rounded-full py-1 text-sm font-semibold transition-shadow ${d ? 'pl-1 pr-3.5' : 'px-4'} ${active ? 'shadow-[0_8px_18px_-10px_rgb(70_66_94/0.8)] ring-2 ring-slate' : 'opacity-80 hover:opacity-100'}`}
                 style={d ? { background: d.soft, color: d.color } : { background: active ? '#46425e' : '#fff8e6', color: active ? '#ffeecc' : '#46425e' }}

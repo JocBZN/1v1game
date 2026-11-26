@@ -3,6 +3,7 @@ import { Server, type Socket } from 'socket.io';
 import { authenticate } from './auth';
 import type { User } from './db';
 import { GameServer } from './game';
+import { capture, posthogEnabled } from './analytics';
 
 let online = () => 0;
 /** Players with at least one open tab right now. */
@@ -20,6 +21,10 @@ export function attachSockets(server: http.Server) {
    */
   const sockets = new Map<number, Set<Socket>>();
   online = () => sockets.size;
+  // Concurrent players over time (a chart of "players online" in PostHog).
+  if (posthogEnabled()) {
+    setInterval(() => capture('server', 'players_online', { online: sockets.size, $process_person_profile: false }), 5 * 60_000).unref();
+  }
 
   io.use((socket, next) => {
     const user = authenticate(socket.handshake.auth?.token);
