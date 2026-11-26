@@ -53,9 +53,9 @@ export function RoundScreen() {
     <div className="relative mx-auto flex h-full w-full max-w-md flex-col px-4 pt-3 safe-bottom lg:max-w-2xl">
       {/* Live scoreboard */}
       <div>
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
           <LiveScore name={found.you.name} score={scores.you} side="me" />
-          <div className="-mx-3"><VsBubble size={46} still>
+          <div className="relative z-10 shrink-0"><VsBubble size={46} still>
             <span className="mt-0.5 text-[11px] tabular-nums opacity-90">{state.roundWins[0]}:{state.roundWins[1]}</span>
           </VsBubble></div>
           <LiveScore name={found.opponent.name} score={scores.opponent} side="foe" async={found.opponent.async} sub={oppSub} />

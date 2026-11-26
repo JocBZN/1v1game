@@ -47,7 +47,7 @@ export function SearchingScreen({ me, since, onCancel }: { me: Me; since: number
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ type: 'spring', stiffness: 240, damping: 22, delay: 0.05 }}
-          className="flex items-center"
+          className="flex items-center gap-2 sm:gap-3"
         >
           <SoftPanel className="flex min-w-0 flex-1 items-center gap-3 lg:p-5">
             <Avatar name={me.user.nickname} size={48} ring={league.color} />
@@ -58,7 +58,7 @@ export function SearchingScreen({ me, since, onCancel }: { me: Me; since: number
               </div>
             </div>
           </SoftPanel>
-          <div className="-mx-4"><VsBubble size={56} /></div>
+          <div className="relative z-10 shrink-0"><VsBubble size={56} /></div>
           <SoftPanel dark className="flex min-w-0 flex-1 items-center justify-end gap-3 lg:p-5">
             <div className="min-w-0 text-right">
               <div className="text-sm font-bold">Searching</div>

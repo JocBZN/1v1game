@@ -74,7 +74,7 @@ function FaceOff({ me, onProfile }: { me: Me; onProfile: () => void }) {
         </div>
       </motion.button>
 
-      <div className="-mx-5"><VsBubble /></div>
+      <div className="relative z-10 shrink-0"><VsBubble /></div>
 
       <div className="flex flex-1 items-center justify-end gap-3 rounded-3xl bg-slate p-3 text-cream">
         <div className="min-w-0 text-right">

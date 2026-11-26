@@ -71,13 +71,13 @@ function Fighter({ name, league, side }: { name: string; league: Found['you']['l
 
 export function VsHeader({ found, roundWins }: { found: Found; roundWins: [number, number] }) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between gap-2 sm:gap-3">
       <Fighter name={found.you.name} league={found.you.league} side="me" />
       <motion.div
         initial={{ scale: 2.2, opacity: 0, rotate: -12 }}
         animate={{ scale: 1, opacity: 1, rotate: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 14, delay: 0.15 }}
-        className="-mx-4 flex flex-col items-center"
+        className="relative z-10 flex shrink-0 flex-col items-center"
       >
         <VsBubble size={64}>
           <span className="mt-1 text-[13px] tabular-nums opacity-90">{roundWins[0]}:{roundWins[1]}</span>
