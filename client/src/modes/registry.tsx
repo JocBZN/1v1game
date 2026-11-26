@@ -1,8 +1,22 @@
 import { lazy, type ComponentType } from 'react';
 import type { DomainId } from '../lib/domains';
-// three.js and the chessboard are big: load them only when such a round actually starts.
-const CubeRound = lazy(() => import('./CubeRound').then((m) => ({ default: m.CubeRound })));
-const ChessRound = lazy(() => import('./ChessRound').then((m) => ({ default: m.ChessRound })));
+// three.js and the chessboard are big: kept out of the first download, then fetched in the
+// background (prefetchHeavyModes) so a cube or chess round never waits on the network.
+const loadCube = () => import('./CubeRound');
+const loadChess = () => import('./ChessRound');
+const CubeRound = lazy(() => loadCube().then((m) => ({ default: m.CubeRound })));
+const ChessRound = lazy(() => loadChess().then((m) => ({ default: m.ChessRound })));
+
+let prefetched = false;
+/** Download the cube and chess code while the player is on the home screen or searching. */
+export function prefetchHeavyModes() {
+  if (prefetched) return;
+  prefetched = true;
+  const go = () => void Promise.all([loadCube(), loadChess()]).catch(() => { prefetched = false; });
+  const ric = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => void }).requestIdleCallback;
+  if (ric) ric(go, { timeout: 3000 });
+  else setTimeout(go, 1500);
+}
 import { ColorRound } from './ColorRound';
 import { EstimateRound } from './EstimateRound';
 import { FlagsRound } from './FlagsRound';

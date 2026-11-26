@@ -5,8 +5,8 @@ import { getMode } from '../modes';
 import type { GameMode, ReplayEvent, RoundContent } from '../modes/types';
 import { countRoundWins, duelWinner, isDuelOver, roundWinner, type RoundOutcome } from './logic';
 
-export const INTRO_MS = 3600;
-export const ROUND_RESULT_MS = 3800;
+export const INTRO_MS = 3000;
+export const ROUND_RESULT_MS = 2800;
 export const DISCONNECT_FORFEIT_MS = 15_000;
 
 export type Slot = 0 | 1;

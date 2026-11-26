@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { prefetchHeavyModes } from './modes/registry';
 import { api, ApiError, clearToken, getToken, setToken, type Me } from './lib/api';
 import { closeSocket } from './lib/socket';
 import { DuelProvider, useDuel } from './state/duel';
@@ -58,6 +59,9 @@ function Game({ me, refreshMe, onAuthDone, onLogout }: {
     document.body.classList.toggle('in-duel', state.phase !== 'idle');
     return () => document.body.classList.remove('in-duel');
   }, [state.phase]);
+
+  // Fetch the big cube/chess code in the background so those rounds start instantly.
+  useEffect(() => prefetchHeavyModes(), []);
 
   // A room link that didn't work (wrong or full room): show the error on the friend screen.
   useEffect(() => {

@@ -10,7 +10,8 @@ export function getSocket(): Socket {
   if (socket && socketToken === token) return socket;
   socket?.close();
   socketToken = token;
-  socket = io({ auth: { token }, transports: ['websocket'], reconnectionDelay: 500, reconnectionDelayMax: 2000 });
+  // WebSocket first; fall back to HTTP long-polling on networks that block WebSockets.
+  socket = io({ auth: { token }, transports: ['websocket', 'polling'], tryAllTransports: true, reconnectionDelay: 300, reconnectionDelayMax: 1500, timeout: 8000 });
   return socket;
 }
 

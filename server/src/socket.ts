@@ -9,7 +9,8 @@ let online = () => 0;
 export const onlineCount = () => online();
 
 export function attachSockets(server: http.Server) {
-  const io = new Server(server, { cors: { origin: '*' }, pingInterval: 5000, pingTimeout: 5000 });
+  const io = new Server(server, { cors: { origin: '*' }, // Phones on mobile data lag now and then: don't drop them after 5 s of silence.
+    pingInterval: 10_000, pingTimeout: 20_000, perMessageDeflate: false });
   const game = new GameServer(io);
 
   /**
