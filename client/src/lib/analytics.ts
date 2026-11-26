@@ -15,7 +15,7 @@ interface DuelConfig {
   ga4: string | null;
   clarity: string | null;
   umami: { src: string; websiteId: string } | null;
-  posthog: { key: string; apiHost: string; uiHost: string } | null;
+  posthog: { key: string; apiHost: string; uiHost: string; app: string } | null;
 }
 
 type PostHog = typeof import('posthog-js').default;
@@ -48,6 +48,8 @@ async function loadPosthog() {
       capture_exceptions: true,
       person_profiles: 'identified_only',
       loaded: () => {
+        // Shared project: tag every event with this site, so it can be filtered on `app`.
+        posthog.register({ app: c.app });
         ph = posthog;
         for (const fn of phQueue.splice(0)) fn(posthog);
       },
@@ -135,7 +137,8 @@ export function setConsent(v: Consent) {
 /** Ties browser events to the player (same id the server uses). Nickname/rating become person properties. */
 export function identifyUser(user: { id: number; nickname: string; guest: boolean }, extra: Record<string, string | number> = {}) {
   withPh((p) => {
-    if (p.get_distinct_id() !== String(user.id)) p.identify(String(user.id));
+    const id = `${cfg!.posthog!.app}:${user.id}`; // same id the server uses (server/src/analytics.ts)
+    if (p.get_distinct_id() !== id) p.identify(id);
     p.setPersonProperties({ nickname: user.nickname, is_guest: user.guest, ...extra });
   });
 }

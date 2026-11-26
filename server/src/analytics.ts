@@ -3,7 +3,7 @@
  *
  *  - capture(): game events sent from the server (duel started/finished, rounds, rating changes…).
  *    They can't be blocked by ad blockers and are the source of truth for game numbers.
- *    distinct_id is the user id, the same id the browser uses in posthog.identify(), so server and
+ * *distinct_id is "1v1game:<user id>", the same id the browser uses in posthog.identify(), so server and
  *    browser events land on the same person. A guest who signs up keeps their id.
  *  - mountPosthogProxy(): /ingest/* is forwarded to PostHog, so the browser SDK talks to our own
  *    domain (ad blockers drop requests to *.posthog.com, losing ~20–40 % of events).
@@ -19,6 +19,13 @@ const assetsHost = () =>
 export const posthogUiHost = () => (posthogHost().includes('://us.') ? 'https://us.posthog.com' : 'https://eu.posthog.com');
 
 export const posthogEnabled = () => !!key();
+
+/**
+ * The PostHog project can be shared with other sites: every event carries `app` (filter on it) and
+ * person ids are prefixed, so player 7 here is never merged with user 7 of another site.
+ */
+export const APP = process.env.POSTHOG_APP || '1v1game';
+export const personId = (userId: number | string) => `${APP}:${userId}`;
 
 type Props = Record<string, unknown>;
 interface QueuedEvent {
@@ -39,8 +46,8 @@ export function capture(distinctId: number | string, event: string, properties: 
   const clean = Object.fromEntries(Object.entries(properties).filter(([, v]) => v !== undefined));
   queue.push({
     event,
-    distinct_id: String(distinctId),
-    properties: { ...clean, $lib: 'duel-server', source: 'server' },
+    distinct_id: personId(distinctId),
+    properties: { ...clean, app: APP, $lib: 'duel-server', source: 'server' },
     timestamp: new Date().toISOString(),
   });
   if (queue.length >= MAX_BATCH) void flush();

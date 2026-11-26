@@ -2,7 +2,7 @@
  * SEO for a single-page game: crawlable landing pages per topic, robots.txt, sitemap.xml, structured data
  * and the runtime values injected into the client's index.html (public URL, analytics IDs).
  */
-import { posthogUiHost } from './analytics';
+import { APP, posthogUiHost } from './analytics';
 import fs from 'node:fs';
 import path from 'node:path';
 import type express from 'express';
@@ -35,7 +35,7 @@ export function clientConfig() {
     ga4: process.env.GA4_ID || null, // e.g. G-XXXXXXX
     clarity: process.env.CLARITY_ID || null, // Microsoft Clarity project id
     // PostHog: the project key is public by design; the browser sends events to /ingest (our proxy).
-    posthog: process.env.POSTHOG_KEY ? { key: process.env.POSTHOG_KEY, apiHost: '/ingest', uiHost: posthogUiHost() } : null,
+    posthog: process.env.POSTHOG_KEY ? { key: process.env.POSTHOG_KEY, apiHost: '/ingest', uiHost: posthogUiHost(), app: APP } : null,
     umami: process.env.UMAMI_WEBSITE_ID
       ? { src: process.env.UMAMI_SRC || 'https://cloud.umami.is/script.js', websiteId: process.env.UMAMI_WEBSITE_ID }
       : null,
