@@ -1,9 +1,28 @@
-# HANDOFF: unde am rămas (25 nov 2026, seara)
+# HANDOFF: unde am rămas (26 nov 2026)
 
 > **Pentru Claude pe celălalt PC:** citește întâi fișierul ăsta, apoi `README.md` și `seo/PATCHES.md`. Utilizatorul vorbește română.
+> **Reguli de lucru cu utilizatorul:** întreabă înainte de fiecare `git push` (dacă nu ți-a cerut explicit push), verifică mereu output-ul push-ului, fără bucle lungi de așteptare, fără emoji în UI.
 
 ## Proiectul pe scurt
-- **1v1game.net** („Duel”): duel 1v1 în browser, 3 runde pe teme la întâmplare (trivia, steaguri, șah, calcul mental, cub Rubik 3D), câștigi 2 din 3.
+- **1v1game.net** („Duel”): duel 1v1 în browser, 3 runde pe jocuri alese la întâmplare din **12**: trivia, steaguri, șah, cub Rubik, Split the shape, Guess the color, One-shot golf, Timeline, Opinion, Release year, The right price, Followers. Câștigi 2 din 3.
+
+## Ce s-a făcut pe 25–26 nov (totul e live, commit `1d44196` + cel de după)
+1. **Redesign minimalist:** paleta „curiosities” (`#46425e` slate, `#15788c` teal, `#00b9be` cyan, `#ffeecc` cream, `#ffb0a3` peach, `#ff6973` coral), butoane și carduri plate, fără emoji nicăieri (iconițe lucide, steaguri SVG). Play e un buton lat teal, rating-ul e o linie simplă.
+2. **Calcul mental scos de tot.** `/mental-math` face 301 spre `/1v1-games`. Textele SEO (toate cele 9 limbi) nu-l mai menționează.
+3. **Cubul:** 3 minute, scopul e **o față întreagă sau o cruce** de o culoare dată (`server/src/cube/model.ts` → `goalProgress`). Când ții apăsat pe cub, rândul prins se luminează și se rotește odată cu degetul; dacă dai drumul sub o treime de rotire, revine.
+4. **Jocuri noi:**
+   - `split` (forme pop-culture, o tăietură cât mai aproape de 50/50; `modes/shapes.ts`);
+   - `color` (RGB, 15 s, ΔE perceptual);
+   - `golf` (fizică deterministă pe server în `server/src/golf/physics.ts`, clientul doar animă traseul);
+   - `timeline` (4 evenimente, drag-and-drop cu `Reorder` din motion);
+   - **estimare** (`modes/estimate.ts` + `modes/estimate-data.ts`, ecran comun `client/src/modes/EstimateRound.tsx`): `opinion` (388 de întrebări: 76 de fapte + 312 „câte încap”, calculate din dimensiuni reale), `year` (118 titluri, 1980–2023), `price` (48 de obiecte, USD), `followers` (27; cifrele sunt aproximative pentru 2025 și trebuie actualizate din când în când).
+5. **Stele de dificultate 1–5** pe fiecare întrebare (`stars` în `server/data/questions.json`; steagurile 1/3/5). Punctele cresc cu stelele (★ 350–525 … ★★★★★ 950–1425). Stelele se recalibrează singure din rata reală de răspunsuri corecte (tabelul `question_stats`, după 15 răspunsuri, reîmprospătat la 10 min).
+6. **Rating:** Glicko-2, apoi trei multiplicatori (`server/src/duel/results.ts` → `ratingFactors`): streak +10%/rezultat la rând (max +50%), marja de scor ×0.8…×1.4, istoricul (win rate) ×0.85…×1.15. Ecranul de rezultat arată motivele ca etichete.
+7. **Pagini SEO noi:** `/split-the-shape`, `/color-game`, `/mini-golf`, `/timeline-game`, `/estimation-game`, `/guess-the-year`, `/price-guessing-game`, `/followers-game`. IndexNow trimis pe 26 nov (213 URL-uri).
+8. **Atenție la build:** `seo/scripts/check.mjs` pică dacă o descriere depășește limita (ex. RO 172 de caractere). Dacă build-ul pică, Railway nu face deploy și site-ul rămâne pe versiunea veche. Rulează `npm run build` înainte de push.
+9. Teste: 110/110 (`npm test`).
+
+## Istoric: ce s-a făcut pe 25 nov (SEO)
 - Cum funcționează potrivirea: Play caută un adversar live timp de 5 secunde. Dacă nu găsește, primești un **ghost** (reluarea unui meci al unui jucător real) sau un **bot**. Ratinguri Glicko-2, ligi Bronze → Legend, clasament doar pentru conturile înregistrate. Guest automat, cu buton de login/register.
 - Monorepo: `server/` (Node, TypeScript, Express, Socket.io, better-sqlite3) și `client/` (React, Vite, Tailwind v4). `seo/` conține pachetul de pagini multilingve.
 - **GitHub:** https://github.com/JocBZN/1v1game (privat), branch `main`.
@@ -22,7 +41,7 @@
    - Paginile englezești existente au acum hreflang (citit din `sitemap-i18n.xml`). Footer-ul, hub-ul `/quiz`, `/trivia` și `/flag-quiz` au linkuri spre paginile noi.
    - Steagurile englezești pentru Europa, Asia, Africa și Oceania rămân la URL-urile vechi `/flag-quiz/<regiune>`. North America și South America sunt pagini noi.
 4. **P4, www → apex:** exista deja în `server/src/security.ts` (redirect 308).
-5. **Teste:** 93/93 trec (`npm test`), iar `npm run typecheck` e curat. Teste noi: `server/test/seo-pack.test.ts` și `server/test/guest-prune.test.ts`.
+5. **Teste (atunci):** 93/93. Teste noi: `server/test/seo-pack.test.ts` și `server/test/guest-prune.test.ts`.
 6. **Deploy:** commit `7be11ab`, deploy din GitHub reușit. Verificat live: toate paginile noi răspund 200, H1-ul e pe `/`, hreflang e prezent, robots e corect, embed-ul poate fi pus în iframe.
 7. **IndexNow:** trimis pentru 204 URL-uri (`npm run indexnow -w server`). Scriptul citește acum ambele sitemap-uri.
 8. Pe Railway, proiectul creat din greșeală la deploy („overflowing-magic”) a fost redenumit **1v1game**. **Trebuie șters** (vezi mai jos).
@@ -34,8 +53,9 @@
 
 ## Ce mai e de făcut, în ordine
 1. **Șterge proiectul Railway „1v1game”** (id `276f51bb-d789-42bf-a550-833449ac8eef`). Are serviciile `server` și `client` (client = CRASHED), fără domeniu și fără volum. E un duplicat creat automat și consumă credit. Site-ul live e în proiectul **duel**; acela NU se șterge. Se face din dashboard: proiect → Settings → Danger → Delete. Ștergerea o confirmă utilizatorul.
-2. **Google Search Console, în fiecare zi câteva minute** (limita e de ~10 cereri pe zi). Request indexing, în ordinea asta:
-   - **întâi** paginile pentru căutări generale, adăugate pe 25 nov seara (commit `72723f5`, live, trimise deja prin IndexNow, 210 URL-uri): `/1v1-games`, `/quiz-games`, `/trivia-games`, `/brain-games`, `/2-player-games`, `/geography-games`;
+2. **Google Search Console, în fiecare zi câteva minute** (limita e de ~10 cereri pe zi; pe 26 nov dimineața cota era încă depășită, deci nimic nou cerut). Request indexing, în ordinea asta:
+   - **întâi** paginile jocurilor noi: `/split-the-shape`, `/color-game`, `/mini-golf`, `/timeline-game`, `/estimation-game`, `/guess-the-year`, `/price-guessing-game`, `/followers-game`;
+   - apoi paginile pentru căutări generale, adăugate pe 25 nov seara (commit `72723f5`, live, trimise deja prin IndexNow, 210 URL-uri): `/1v1-games`, `/quiz-games`, `/trivia-games`, `/brain-games`, `/2-player-games`, `/geography-games`;
    - `/pl/`, `/tr/`, `/quiz/space/`, `/quiz/music/`, `/quiz/art-literature/`, `/quiz-widget/`;
    - hub-urile pe limbi: `/es/quiz/`, `/ro/quiz/` etc.;
    - paginile cu steaguri: `/flag-quiz/north-america/`, `/es/quiz-banderas/` etc.;

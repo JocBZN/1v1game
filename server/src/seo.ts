@@ -139,6 +139,50 @@ export const TOPIC_PAGES: TopicPage[] = [
     faq: [['What kind of events are included?', 'History from the fall of Rome to the euro, video games from Pong to Elden Ring, classic and modern films, and tech launches.']],
   },
   {
+    slug: 'estimation-game',
+    name: 'Opinion',
+    title: 'Estimation Game – Wild Guessing Questions, 1v1 Online',
+    description:
+      'How many tennis balls fit in a room? How many ants live on Earth? Guess, and the closest answer wins. 380+ estimation questions, free 1v1 in your browser.',
+    h1: 'Opinion: the wild estimation game',
+    intro: 'Questions nobody knows the answer to, but everyone has an opinion about. Type or slide your guess: the closer you get, the more points you score.',
+    how: ['Scored by how many times off you are, so the right order of magnitude still pays.', 'The answer and the assumption behind it are shown after each question.', 'Type numbers like 2.5m, 40k or 3 billion.'],
+    faq: [['How are the answers decided?', 'Packing questions are worked out from real sizes with realistic packing; the rest are published estimates and facts.']],
+  },
+  {
+    slug: 'guess-the-year',
+    name: 'Release year',
+    title: 'Guess the Year – Movies, Games and Songs Release Year Quiz',
+    description:
+      'What year did it come out? Guess the release year of films, video games, hit songs and viral moments from 1980 to today. Free 1v1 year guessing game.',
+    h1: 'Guess the release year',
+    intro: 'A film, a game, a song or a viral moment appears. Slide to the year you think it came out: the exact year scores the most.',
+    how: ['Exact year: 1000 points, 3 years off: 750, 12 or more off: 0.', 'From 1980 to today.', 'Five titles per round.'],
+    faq: [['What is included?', 'Classic and recent films, video games from Pac-Man to Baldur’s Gate 3, hit songs and internet moments.']],
+  },
+  {
+    slug: 'price-guessing-game',
+    name: 'The right price',
+    title: 'Price Guessing Game – Guess the Price, 1v1 Online',
+    description:
+      'From a Big Mac to a Bugatti: guess the price of everyday things, gadgets and luxury items. The closest guess wins. Free 1v1 price guessing game.',
+    h1: 'The right price, 1v1',
+    intro: 'An item appears, from a banana to a jumbo jet. Guess its typical price in US dollars. The closer you are, the more points you get.',
+    how: ['Scored by how close you are, not by going over.', 'Typical US prices, launch prices for gadgets.', 'Five items per round.'],
+    faq: [['Which prices are used?', 'Typical US retail or list prices; for consoles and phones, the launch price.']],
+  },
+  {
+    slug: 'followers-game',
+    name: 'Followers',
+    title: 'Followers Game – Guess Subscribers, Views and Players',
+    description:
+      'How many subscribers does MrBeast have? How many views does Despacito have? Guess followers, views and Steam player peaks. Free 1v1 guessing game.',
+    h1: 'Guess the followers',
+    intro: 'A famous channel, account, video or game appears. Guess the number of subscribers, followers, views or players. Close guesses score big.',
+    how: ['A log-scale slider covers everything from thousands to billions.', 'Numbers are approximate and refreshed over time.', 'Five questions per round.'],
+    faq: [['Are the numbers exact?', 'They are rounded, approximate figures (2025), since follower counts change every day.']],
+  },
+  {
     slug: 'flag-quiz',
     name: 'Flags',
     title: 'Flag Quiz Online – Guess the Country, 1v1',
@@ -441,7 +485,7 @@ ${o.bodyHtml}
 </main>
 <footer>
 ${hasPack() ? FOOTER_LANG_LINKS : ''}
-<nav class="foot"><strong>Games</strong> <a href="/trivia">Trivia duel</a> <a href="/chess-puzzles">Chess puzzles</a> <a href="/flag-quiz">Flag quiz</a> <a href="/rubiks-cube">Rubik’s Cube</a> <a href="/split-the-shape">Split the shape</a> <a href="/color-game">Guess the color</a> <a href="/mini-golf">Mini golf</a> <a href="/timeline-game">Timeline</a></nav><p>© ${new Date().getFullYear()} Duel on 1v1game.net · 1v1 brain games in your browser · <a href="/privacy">Privacy</a></p>
+<nav class="foot"><strong>Games</strong> <a href="/trivia">Trivia duel</a> <a href="/chess-puzzles">Chess puzzles</a> <a href="/flag-quiz">Flag quiz</a> <a href="/rubiks-cube">Rubik’s Cube</a> <a href="/split-the-shape">Split the shape</a> <a href="/color-game">Guess the color</a> <a href="/mini-golf">Mini golf</a> <a href="/timeline-game">Timeline</a> <a href="/estimation-game">Estimation game</a> <a href="/guess-the-year">Guess the year</a> <a href="/price-guessing-game">Price game</a> <a href="/followers-game">Followers game</a></nav><p>© ${new Date().getFullYear()} Duel on 1v1game.net · 1v1 brain games in your browser · <a href="/privacy">Privacy</a></p>
 </footer>
 </body>
 </html>`;
