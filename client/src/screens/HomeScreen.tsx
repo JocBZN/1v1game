@@ -1,189 +1,361 @@
-import { motion } from 'motion/react';
-import { ArrowRight, ChevronRight, Crown, Download, LogIn, Trophy, UserPlus, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { ArrowRight, Crown, Download, LogIn, Trophy, UserPlus, Users } from 'lucide-react';
 import type { Route } from '../App';
 import type { Me } from '../lib/api';
-import { DOMAIN_LIST } from '../lib/domains';
+import { DOMAIN_LIST, type DomainMeta } from '../lib/domains';
 import { LEAGUE_META, leagueProgress } from '../lib/leagues';
 import { useInstallPrompt } from '../lib/pwa';
-import { Avatar, LeagueIcon, Progress, TopicIcon, useAnimatedNumber } from '../components/ui';
+import { Avatar, LeagueIcon, TopicIcon, useAnimatedNumber } from '../components/ui';
 import { track } from '../lib/analytics';
 
-/**
- * Home. Two layouts:
- *  - phone: one column, the important things first (who you are, Play), then the games
- *  - PC (md+): one big square panel, you + actions on the left, the 12 games on the right
- * Every button does exactly what it says; game tiles are information, not buttons.
- */
+const PALETTE = ['#00b9be', '#ffb0a3', '#ff6973', '#15788c', '#46425e'];
+
+/** Soft shapes drifting behind everything. */
+function FloatingShapes() {
+  const still = useReducedMotion();
+  const shapes = [
+    { c: PALETTE[0], s: 180, x: '-8%', y: '6%', r: 999, d: 14 },
+    { c: PALETTE[1], s: 120, x: '78%', y: '2%', r: 32, d: 18 },
+    { c: PALETTE[2], s: 70, x: '86%', y: '44%', r: 999, d: 12 },
+    { c: PALETTE[3], s: 90, x: '4%', y: '62%', r: 24, d: 16 },
+    { c: PALETTE[1], s: 150, x: '60%', y: '80%', r: 999, d: 20 },
+  ];
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {shapes.map((p, i) => (
+        <motion.div
+          key={i}
+          className="absolute opacity-[0.16]"
+          style={{ left: p.x, top: p.y, width: p.s, height: p.s, borderRadius: p.r, background: p.c }}
+          animate={still ? undefined : { y: [0, -18, 0], x: [0, 10, 0], rotate: p.r < 100 ? [0, 25, 0] : 0 }}
+          transition={{ duration: p.d, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/** "Beat one person at ___" with the game name rolling. */
+function RollingTitle({ big }: { big?: boolean }) {
+  const [i, setI] = useState(0);
+  const still = useReducedMotion();
+  useEffect(() => {
+    if (still) return;
+    const t = setInterval(() => setI((n) => (n + 1) % DOMAIN_LIST.length), 1800);
+    return () => clearInterval(t);
+  }, [still]);
+  const d = DOMAIN_LIST[i];
+  return (
+    <h1 className={`font-display font-bold leading-[1.05] tracking-tight ${big ? 'text-5xl' : 'text-[2.15rem]'}`}>
+      Beat one person at
+      <span className="relative block h-[1.15em] overflow-hidden">
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.span
+            key={d.id}
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '-100%', opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+            className="absolute left-0 whitespace-nowrap"
+            style={{ color: d.color }}
+          >
+            {d.name.toLowerCase()}.
+          </motion.span>
+        </AnimatePresence>
+      </span>
+    </h1>
+  );
+}
+
+/** You vs the unknown opponent. Tap your side to open your profile. */
+function FaceOff({ me, onProfile }: { me: Me; onProfile: () => void }) {
+  const g = me.ratings.general;
+  const league = LEAGUE_META[me.league.id];
+  const prog = leagueProgress(g.rating);
+  const rating = useAnimatedNumber(g.rating, 900);
+  const still = useReducedMotion();
+  return (
+    <div className="relative flex items-center gap-3">
+      <motion.button
+        onClick={onProfile}
+        whileHover={{ y: -2 }}
+        whileTap={{ scale: 0.97 }}
+        className="flex min-w-0 flex-1 items-center gap-3 rounded-3xl bg-surface/80 p-3 text-left shadow-[0_10px_30px_-18px_rgb(70_66_94/0.5)] backdrop-blur"
+        aria-label="Open your profile"
+      >
+        <Avatar name={me.user.nickname} size={40} ring={league.color} />
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-xs font-semibold text-muted">{me.user.nickname}</div>
+          <div className="font-display text-2xl font-bold tabular-nums leading-none">{rating}</div>
+          <div className="mt-1 flex items-center gap-1 text-[11px] font-semibold" style={{ color: league.color }}>
+            <LeagueIcon league={me.league.id} size={12} /> {league.name}
+            {!prog.next && <Crown size={11} />}
+          </div>
+          {prog.next && (
+            <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-sunken" title={`${prog.toGo} points to ${LEAGUE_META[prog.next].name}`}>
+              <motion.div className="h-full rounded-full" style={{ background: league.color }} initial={{ width: 0 }} animate={{ width: `${prog.pct * 100}%` }} transition={{ duration: 1, delay: 0.3 }} />
+            </div>
+          )}
+        </div>
+      </motion.button>
+
+      <motion.div
+        className="z-10 -mx-5 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red font-display text-base font-bold text-white shadow-[0_8px_20px_-8px_#ff6973]"
+        animate={still ? undefined : { scale: [1, 1.12, 1], rotate: [0, -6, 0] }}
+        transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        VS
+      </motion.div>
+
+      <div className="flex flex-1 items-center justify-end gap-3 rounded-3xl bg-slate p-3 text-cream">
+        <div className="min-w-0 text-right">
+          <div className="text-sm font-bold">Opponent</div>
+          <div className="text-[11px] opacity-70">press Play</div>
+        </div>
+        <span className="relative flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-full bg-cream/15 font-display text-xl font-bold">
+          ?
+          <motion.span
+            aria-hidden
+            className="absolute inset-0 rounded-full border-2 border-dashed border-cream/50"
+            animate={still ? undefined : { rotate: 360 }}
+            transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+          />
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function PlayButton({ onPlay, connected, big }: { onPlay: () => void; connected: boolean; big?: boolean }) {
+  const still = useReducedMotion();
+  return (
+    <motion.button
+      onClick={onPlay}
+      disabled={!connected}
+      whileHover={connected ? { scale: 1.02 } : undefined}
+      whileTap={connected ? { scale: 0.97 } : undefined}
+      className={`group relative w-full overflow-hidden rounded-3xl bg-teal text-left text-cream shadow-[0_14px_30px_-14px_#15788c] disabled:opacity-60 ${big ? 'px-7 py-6' : 'px-6 py-5'}`}
+    >
+      {!still && connected && (
+        <motion.span
+          aria-hidden
+          className="absolute inset-y-0 w-1/3 -skew-x-12 bg-white/15"
+          initial={{ left: '-40%' }}
+          animate={{ left: '130%' }}
+          transition={{ duration: 1.6, repeat: Infinity, repeatDelay: 1.8, ease: 'easeInOut' }}
+        />
+      )}
+      <span className="relative flex items-center justify-between gap-3">
+        <span>
+          <span className={`block font-display font-bold tracking-tight ${big ? 'text-4xl' : 'text-3xl'}`}>{connected ? 'Play' : 'Connecting…'}</span>
+          <span className="block text-sm font-medium opacity-80">3 random games · best of 3</span>
+        </span>
+        <motion.span
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-cream text-teal"
+          animate={still ? undefined : { x: [0, 5, 0] }}
+          transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <ArrowRight size={24} strokeWidth={2.5} />
+        </motion.span>
+      </span>
+    </motion.button>
+  );
+}
+
+function Chip({ d }: { d: DomainMeta }) {
+  return (
+    <span className="flex shrink-0 items-center gap-2 rounded-full py-1.5 pl-1.5 pr-4 text-sm font-semibold" style={{ background: d.soft, color: d.color }}>
+      <TopicIcon domain={d.id} size={28} solid />
+      {d.name}
+    </span>
+  );
+}
+
+/** Two rows of game chips sliding in opposite directions. */
+function GameMarquee() {
+  const still = useReducedMotion();
+  const half = Math.ceil(DOMAIN_LIST.length / 2);
+  const rows = [DOMAIN_LIST.slice(0, half), DOMAIN_LIST.slice(half)];
+  return (
+    <div className="-mx-4 space-y-2.5 overflow-hidden py-1 [mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)] sm:-mx-6">
+      {rows.map((row, r) => (
+        <motion.div
+          key={r}
+          className="flex w-max gap-2.5"
+          animate={still ? undefined : { x: r === 0 ? ['0%', '-50%'] : ['-50%', '0%'] }}
+          transition={{ duration: 26, repeat: Infinity, ease: 'linear' }}
+        >
+          {[...row, ...row].map((d, i) => <Chip key={`${d.id}-${i}`} d={d} />)}
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+/** PC: colourful tiles that pop in one by one and lift on hover. */
+function GameTiles() {
+  return (
+    <ul className="grid grid-cols-3 gap-3">
+      {DOMAIN_LIST.map((d, i) => (
+        <motion.li
+          key={d.id}
+          initial={{ opacity: 0, y: 16, scale: 0.92 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ delay: 0.15 + i * 0.05, type: 'spring', stiffness: 260, damping: 20 }}
+          whileHover={{ y: -4, rotate: i % 2 ? 1.5 : -1.5 }}
+          className="flex cursor-default flex-col gap-2 rounded-3xl p-3.5"
+          style={{ background: d.soft }}
+        >
+          <TopicIcon domain={d.id} size={36} solid />
+          <div className="text-sm font-bold leading-tight" style={{ color: d.color }}>{d.name}</div>
+          <div className="text-[11px] leading-snug text-text/70">{d.tagline}</div>
+        </motion.li>
+      ))}
+    </ul>
+  );
+}
+
 export function HomeScreen({ me, onPlay, onNavigate, connected }: {
   me: Me;
   onPlay: () => void;
   onNavigate: (to: Route) => void;
   connected: boolean;
 }) {
-  const g = me.ratings.general;
-  const league = LEAGUE_META[me.league.id];
-  const prog = leagueProgress(g.rating);
-  const rating = useAnimatedNumber(g.rating, 900);
   const { canInstall, install } = useInstallPrompt();
   const guest = me.user.guest;
-  const winRate = g.games > 0 ? Math.round((g.wins / g.games) * 100) : null;
 
   const account = guest ? (
-    <div className="flex items-center gap-2">
-      <button onClick={() => onNavigate('login')} className="btn btn-ghost h-9 px-2 text-sm">
-        <LogIn size={15} /> Log in
-      </button>
-      <button onClick={() => onNavigate('signup')} className="btn btn-primary h-9 px-3 text-sm">
-        <UserPlus size={15} /> Sign up
-      </button>
+    <div className="flex items-center gap-1.5">
+      <button onClick={() => onNavigate('login')} className="btn btn-ghost h-9 px-2 text-sm"><LogIn size={15} /> Log in</button>
+      <button onClick={() => onNavigate('signup')} className="btn btn-primary h-9 rounded-full px-3.5 text-sm"><UserPlus size={15} /> Sign up</button>
     </div>
   ) : null;
 
-  /** You: tap to open your profile. */
-  const playerCard = (
-    <button
-      onClick={() => onNavigate('profile')}
-      className="card group w-full p-4 text-left transition-colors hover:border-line-strong lg:p-5"
-      aria-label="Open your profile"
-    >
-      <div className="flex items-center gap-3">
-        <Avatar name={me.user.nickname} size={44} />
-        <div className="min-w-0 flex-1">
-          <div className="truncate font-display text-lg font-bold leading-tight">{me.user.nickname}</div>
-          <div className="mt-0.5 flex items-center gap-1.5 text-xs font-semibold" style={{ color: league.color }}>
-            <LeagueIcon league={me.league.id} size={13} /> {league.name}
-            {guest && <span className="font-medium text-muted">· guest</span>}
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="font-display text-3xl font-bold tabular-nums leading-none tracking-tight lg:text-4xl">{rating}</div>
-          <div className="label mt-1">Rating</div>
-        </div>
-      </div>
-      <div className="mt-4">
-        <Progress value={prog.next ? prog.pct : 1} color={league.color} />
-        <div className="mt-2 flex items-center justify-between text-xs text-muted">
-          <span>
-            {prog.next ? <>{prog.toGo} points to {LEAGUE_META[prog.next].name}</> : <span className="inline-flex items-center gap-1"><Crown size={12} /> Top league</span>}
-          </span>
-          <span className="tabular-nums">
-            {g.wins}W {g.losses}L{g.draws ? ` ${g.draws}D` : ''}{winRate !== null ? ` · ${winRate}%` : ''}
-          </span>
-        </div>
-      </div>
-      <div className="mt-3 flex items-center justify-end gap-1 text-xs font-semibold text-teal opacity-80 group-hover:opacity-100">
-        {guest ? 'Your stats' : 'Profile and history'} <ChevronRight size={14} />
-      </div>
-    </button>
-  );
-
-  const actions = (
-    <div className="grid gap-3">
-      <button onClick={onPlay} disabled={!connected} className="btn btn-primary group w-full justify-between rounded-2xl px-5 py-4 text-left md:py-5">
-        <span>
-          <span className="block font-display text-2xl font-bold tracking-tight lg:text-3xl">Play now</span>
-          <span className="block text-sm font-medium opacity-80">{connected ? 'Ranked 1v1 · 3 random games · best of 3' : 'Connecting…'}</span>
-        </span>
-        <ArrowRight size={26} className="shrink-0 transition-transform group-hover:translate-x-1" />
-      </button>
-      <div className="grid grid-cols-2 gap-3">
-        <button onClick={() => onNavigate('friend')} disabled={!connected} className="btn btn-secondary flex-col gap-1 py-3 lg:py-4">
-          <Users size={20} />
-          <span className="text-sm">Play a friend</span>
-          <span className="text-[11px] font-medium text-muted">private room, no rating</span>
-        </button>
-        <button onClick={() => onNavigate('leaderboard')} className="btn btn-secondary flex-col gap-1 py-3 lg:py-4">
-          <Trophy size={20} />
-          <span className="text-sm">Leaderboard</span>
-          <span className="text-[11px] font-medium text-muted">top players, every game</span>
-        </button>
-      </div>
-      {guest && (
-        <button
-          onClick={() => {
-            track('signup_cta', { where: 'home' });
-            onNavigate('signup');
-          }}
-          className="rounded-xl px-1 py-1.5 text-left text-xs text-muted transition-colors hover:text-text"
+  const secondary = (
+    <div className="grid grid-cols-2 gap-3">
+      {[
+        { to: 'friend' as Route, icon: Users, label: 'Play a friend', sub: 'private room, no rating', color: '#ffb0a3', off: !connected },
+        { to: 'leaderboard' as Route, icon: Trophy, label: 'Leaderboard', sub: 'see who’s on top', color: '#00b9be', off: false },
+      ].map((b) => (
+        <motion.button
+          key={b.label}
+          onClick={() => onNavigate(b.to)}
+          disabled={b.off}
+          whileHover={{ y: -3 }}
+          whileTap={{ scale: 0.96 }}
+          className="flex items-center gap-3 rounded-3xl bg-surface/80 p-3 text-left shadow-[0_10px_30px_-20px_rgb(70_66_94/0.5)] backdrop-blur disabled:opacity-50"
         >
-          You’re playing as a guest. <span className="font-semibold text-teal">Create a free account</span> to keep your rating and appear on the leaderboard.
-        </button>
-      )}
-      {canInstall && (
-        <button onClick={install} className="btn btn-ghost h-9 justify-start px-1 text-xs">
-          <Download size={14} /> Install the app on this device
-        </button>
-      )}
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl" style={{ background: b.color }}>
+            <b.icon size={19} className="text-slate" />
+          </span>
+          <span className="min-w-0">
+            <span className="block text-sm font-bold">{b.label}</span>
+            <span className="block truncate text-[11px] text-muted">{b.sub}</span>
+          </span>
+        </motion.button>
+      ))}
     </div>
   );
 
-  const games = (
-    <section aria-labelledby="games-title" className="flex shrink-0 flex-col">
-      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3">
-        <h2 id="games-title" className="whitespace-nowrap font-display text-lg font-bold">The games</h2>
-        <span className="text-xs text-muted">{DOMAIN_LIST.length} games · 3 picked at random each duel</span>
-      </div>
-      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-2 lg:gap-2">
-        {DOMAIN_LIST.map((d) => (
-          <li key={d.id} className="flex items-start gap-2.5 rounded-2xl bg-surface/70 p-2.5 lg:items-center lg:gap-3 lg:bg-sunken/40 lg:p-2.5">
-            <TopicIcon domain={d.id} size={36} />
-            <div className="min-w-0">
-              <div className="text-sm font-semibold leading-tight">{d.name}</div>
-              <div className="mt-0.5 text-[11px] leading-snug text-muted lg:text-xs">{d.tagline}</div>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-
-  const howItWorks = (
-    <section aria-labelledby="how-title" className="shrink-0 rounded-2xl border border-line p-4">
-      <h2 id="how-title" className="font-display text-base font-bold">How a duel works</h2>
-      <ol className="mt-2 grid gap-2 text-sm text-muted sm:grid-cols-3 sm:gap-4">
-        <li><span className="font-semibold text-text">1. Match.</span> A live player in a few seconds, or a recorded player or bot.</li>
-        <li><span className="font-semibold text-text">2. Three rounds.</span> Three different games, the same questions for both of you.</li>
-        <li><span className="font-semibold text-text">3. Rating.</span> Win two rounds. Clear wins and streaks move your rating more.</li>
-      </ol>
-    </section>
-  );
-
-  return (    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.28 }}
-      className="mx-auto flex min-h-full w-full flex-col px-4 pt-4 safe-bottom sm:px-6 lg:items-center lg:justify-center lg:p-8"
+  const guestLine = guest && (
+    <button
+      onClick={() => {
+        track('signup_cta', { where: 'home' });
+        onNavigate('signup');
+      }}
+      className="text-left text-xs text-muted transition-colors hover:text-text"
     >
-      {/* ---------- phone ---------- */}
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 md:max-w-2xl lg:hidden">
-        <header className="flex items-center justify-between">
-          <span className="font-display text-xl font-bold tracking-tight">1v1game</span>
+      Playing as a guest. <span className="font-semibold text-teal underline-offset-2 hover:underline">Make a free account</span> to keep your rating.
+    </button>
+  );
+
+  const install_ = canInstall && (
+    <button onClick={install} className="btn btn-ghost h-8 justify-start px-0 text-xs"><Download size={14} /> Install the app</button>
+  );
+
+  const steps = (
+    <div className="flex items-center justify-between gap-2 text-center text-[11px] font-semibold text-muted">
+      {['Match in seconds', 'Win 2 of 3 rounds', 'Climb the leagues'].map((s, i) => (
+        <motion.span
+          key={s}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 + i * 0.12 }}
+          className="flex flex-1 flex-col items-center gap-1"
+        >
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate font-display text-xs text-cream">{i + 1}</span>
+          {s}
+        </motion.span>
+      ))}
+    </div>
+  );
+
+  const enter = (i: number) => ({
+    initial: { opacity: 0, y: 14 },
+    animate: { opacity: 1, y: 0 },
+    transition: { delay: i * 0.07, type: 'spring' as const, stiffness: 260, damping: 24 },
+  });
+
+  return (
+    <div className="relative min-h-full w-full">
+      <FloatingShapes />
+
+      {/* ---------- phone / tablet ---------- */}
+      <div className="relative mx-auto flex min-h-full w-full max-w-md flex-col gap-5 px-4 pb-8 pt-4 safe-bottom sm:px-6 md:max-w-xl lg:hidden">
+        <motion.header {...enter(0)} className="flex items-center justify-between">
+          <span className="font-display text-xl font-bold tracking-tight">1v1<span className="text-red">game</span></span>
           {account}
-        </header>
-        {playerCard}
-        {actions}
-        <div className="pt-2">{games}</div>
-        <div className="pb-6">{howItWorks}</div>
+        </motion.header>
+        <motion.div {...enter(1)}><RollingTitle /></motion.div>
+        <motion.div {...enter(2)}><FaceOff me={me} onProfile={() => onNavigate('profile')} /></motion.div>
+        <motion.div {...enter(3)}><PlayButton onPlay={onPlay} connected={connected} /></motion.div>
+        <motion.div {...enter(4)}>{secondary}</motion.div>
+        {guestLine}
+        <motion.div {...enter(5)} className="mt-1">
+          <div className="mb-2.5 flex items-baseline justify-between">
+            <span className="font-display text-lg font-bold">{DOMAIN_LIST.length} games</span>
+            <span className="text-xs text-muted">3 random ones each duel</span>
+          </div>
+          <GameMarquee />
+        </motion.div>
+        <motion.div {...enter(6)} className="mt-1">{steps}</motion.div>
+        {install_}
       </div>
 
-      {/* ---------- PC: everything in one square ---------- */}
-      <div className="card hidden aspect-square w-[max(880px,min(94vw,92vh,1040px))] grid-cols-[minmax(0,4fr)_minmax(0,6fr)] gap-7 overflow-hidden p-9 lg:grid">
-        <div className="flex min-h-0 flex-col gap-5">
-          <header className="flex items-center justify-between">
-            <span className="font-display text-2xl font-bold tracking-tight">1v1game</span>
-            {account}
-          </header>
-          <p className="text-sm leading-relaxed text-muted">
-            Duel one opponent in three quick rounds. Win two and you take the match. Live players first; if nobody is online you get a recorded player or a bot.
-          </p>
-          {playerCard}
-          {actions}
-        </div>
-        <div className="flex min-h-0 flex-col gap-5 overflow-y-auto border-l border-line pl-7">
-          {games}
-          <div className="mt-auto">{howItWorks}</div>
-        </div>
+      {/* ---------- PC: one big square ---------- */}
+      <div className="relative hidden min-h-full items-center justify-center p-8 lg:flex">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 24 }}
+          className="grid aspect-square w-[max(820px,min(94vw,92vh,1060px))] grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-10 overflow-hidden rounded-[2.5rem] bg-surface/85 p-10 shadow-[0_40px_80px_-40px_rgb(70_66_94/0.45)] backdrop-blur"
+        >
+          <div className="flex min-h-0 flex-col gap-6">
+            <header className="flex items-center justify-between">
+              <span className="font-display text-2xl font-bold tracking-tight">1v1<span className="text-red">game</span></span>
+              {account}
+            </header>
+            <RollingTitle big />
+            <p className="text-sm leading-relaxed text-muted">
+              Three quick rounds against one opponent: a live player when someone’s online, otherwise a recorded player or a bot. Win two and the match is yours.
+            </p>
+            <FaceOff me={me} onProfile={() => onNavigate('profile')} />
+            <PlayButton onPlay={onPlay} connected={connected} big />
+            {secondary}
+            {guestLine}
+            {install_}
+          </div>
+          <div className="flex min-h-0 flex-col gap-5">
+            <div className="flex items-baseline justify-between">
+              <span className="font-display text-xl font-bold">{DOMAIN_LIST.length} games</span>
+              <span className="text-xs text-muted">3 random ones each duel</span>
+            </div>
+            <GameTiles />
+            <div className="mt-auto">{steps}</div>
+          </div>
+        </motion.div>
       </div>
-    </motion.div>
+    </div>
   );
 }
