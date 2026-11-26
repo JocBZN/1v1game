@@ -195,6 +195,26 @@ function hubPage(): string {
   });
 }
 
+/** Flags people mix up, per continent (same groups as the multilingual pages in seo/data/extras-i18n.mjs). */
+const LOOKALIKES: Record<string, string[][]> = {
+  europe: [['RO', 'MD', 'AD'], ['NL', 'LU'], ['SI', 'SK', 'RU'], ['MC', 'PL'], ['IT', 'IE'], ['NO', 'IS'], ['AT', 'LV'], ['BE', 'DE']],
+  asia: [['ID', 'SG'], ['QA', 'BH'], ['AE', 'KW', 'JO'], ['IQ', 'SY', 'YE'], ['BD', 'JP']],
+  africa: [['ML', 'GN', 'SN'], ['CI', 'NE'], ['EG', 'SD'], ['GH', 'CM']],
+  americas: [['HN', 'NI', 'SV', 'GT'], ['CO', 'EC', 'VE'], ['AR', 'UY'], ['DO', 'PA']],
+  oceania: [['AU', 'NZ'], ['FJ', 'TV']],
+};
+
+function flagStudyHtml(id: string, regionName: string): string {
+  const byCode = new Map(loadCountries().map((c) => [c.code, c.name]));
+  const groups = (LOOKALIKES[id] ?? []).map((g) => g.filter((c) => byCode.has(c))).filter((g) => g.length > 1);
+  const flag = (c: string) => `<img class="flag" src="/flags/${c.toLowerCase()}.svg" alt="Flag of ${esc(byCode.get(c)!)}" width="44" height="33" loading="lazy">`;
+  return `${groups.length ? `<h2>Flags of ${esc(regionName)} that are easy to mix up</h2>
+<p>Some of these flags look almost the same at first sight. Check the details: the order of the colors, the exact shade, and the emblem, star or crest.</p>
+<div class="flags">${groups.map((g) => `<div style="grid-column:1/-1;flex-wrap:wrap">${g.map((c) => `${flag(c)}${esc(byCode.get(c)!)}`).join(' · ')}</div>`).join('')}</div>` : ''}
+<h2>How to learn the flags faster</h2>
+<ul><li>Learn the look-alike flags as groups: the small difference is what sticks.</li><li>Sort flags by layout: vertical stripes, horizontal stripes, crosses, stars and emblems.</li><li>Test yourself for a few minutes a day, then play a 1v1 flag duel: 8 flags, 6 seconds each, with wrong options from the same region.</li></ul>`;
+}
+
 function flagRegionPage(id: string): string | null {
   const region = FLAG_REGIONS.find((r) => r.id === id);
   if (!region) return null;
@@ -212,6 +232,7 @@ function flagRegionPage(id: string): string | null {
 <a class="cta" href="/">Play the flag quiz 1v1</a>
 <h2>${n} flags of ${esc(region.name)}</h2>
 <div class="flags">${countries.map((c) => `<div><img class="flag" src="/flags/${c.code.toLowerCase()}.svg" alt="Flag of ${esc(c.name)}" width="44" height="33" loading="lazy">${esc(c.name)}</div>`).join('')}</div>
+${flagStudyHtml(id, name)}
 <h2>Flags of other continents</h2>
 <nav class="topics">${others.map((r) => `<a href="/flag-quiz/${r.id}">Flags of ${esc(r.name.replace(/^the /, ''))}</a>`).join('')}<a href="/quiz/geography">Geography quiz</a></nav>`;
   return shell({

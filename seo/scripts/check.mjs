@@ -10,7 +10,7 @@ const files = [];
 (function walk(d) { for (const f of readdirSync(d)) { const p = join(d, f); statSync(p).isDirectory() ? (f !== 'embed' && walk(p)) : p.endsWith('.html') && files.push(p); } })(OUT); // embed/ = noindex iframe pages
 
 const urlOf = (f) => '/' + relative(OUT, f).split(sep).join('/').replace(/index\.html$/, '');
-const LIVE = new Set(['/', '/quiz', '/quiz/geography', '/quiz/history', '/quiz/science', '/quiz/sports', '/quiz/movies-music', '/flag-quiz', '/chess-puzzles', '/mental-math', '/rubiks-cube', '/trivia', '/how-to-play', '/flag-quiz/europe', '/flag-quiz/asia', '/flag-quiz/africa', '/flag-quiz/oceania', '/quiz/general-knowledge', '/quiz/football', '/quiz/tv-shows', '/quiz/medical', '/quiz/math', '/quiz/technology', '/quiz/beauty', '/quiz/celebrities']);
+const LIVE = new Set(['/', '/quiz', '/quiz/geography', '/quiz/history', '/quiz/science', '/quiz/sports', '/quiz/movies-music', '/flag-quiz', '/chess-puzzles', '/rubiks-cube', '/1v1-games', '/mini-golf', '/timeline-game', '/estimation-game', '/trivia', '/how-to-play', '/flag-quiz/europe', '/flag-quiz/asia', '/flag-quiz/africa', '/flag-quiz/oceania', '/quiz/general-knowledge', '/quiz/football', '/quiz/tv-shows', '/quiz/medical', '/quiz/math', '/quiz/technology', '/quiz/beauty', '/quiz/celebrities']);
 const exists = (u) => LIVE.has(u) || existsSync(join(OUT, u.replace(/^\//, ''), u.endsWith('/') ? 'index.html' : '')) ;
 const problems = []; const titles = new Map(); const hreflangMap = new Map();
 const decode = (s) => s.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
@@ -22,7 +22,7 @@ for (const f of files) {
   const canon = (h.match(/<link rel="canonical" href="([^"]+)"/) || [])[1];
   if (!title) problems.push(`${url}: missing title`);
   if (title.length > 70) problems.push(`${url}: title ${title.length} chars (may truncate): ${title}`);
-  if (desc.length < 70 || desc.length > 170) problems.push(`${url}: description ${desc.length} chars`);
+  if (desc.length < 70 || desc.length > 165) problems.push(`${url}: description ${desc.length} chars`);
   if (canon !== ORIGIN + url) problems.push(`${url}: canonical ${canon}`);
   if ((h.match(/<h1[ >]/g) || []).length !== 1) problems.push(`${url}: h1 count != 1`);
   titles.set(title, [...(titles.get(title) || []), url]);

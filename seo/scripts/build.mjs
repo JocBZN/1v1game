@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 import { randomBytes } from 'node:crypto';
 import { SITE, LANGS, CAT_KEYS, FEATURES } from '../data/i18n.mjs';
 import { QUESTIONS } from '../data/questions.mjs';
-import { X, CONTINENTS, CONT_KEYS } from '../data/extras-i18n.mjs';
+import { X, CONTINENTS, CONT_KEYS, LOOKALIKES, FLAG_STUDY } from '../data/extras-i18n.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'public');
@@ -38,7 +38,10 @@ export const EN_EXISTING = {
   // other live English pages, used for internal links and llms.txt
   other: {
     '/trivia': '1v1 trivia duels', '/flag-quiz': 'Flag quiz (194 countries)', '/chess-puzzles': 'Chess puzzles',
-    '/mental-math': 'Mental math game', '/rubiks-cube': 'Rubik’s Cube online (3D)', '/how-to-play': 'How to play',
+    '/1v1-games': '12 brain games as 1v1 duels', '/split-the-shape': 'Split the shape 50/50', '/color-game': 'Guess the color (RGB)',
+    '/mini-golf': 'One-shot mini golf', '/timeline-game': 'Timeline game', '/estimation-game': 'Estimation game',
+    '/guess-the-year': 'Guess the release year', '/price-guessing-game': 'Price guessing game', '/followers-game': 'Followers guessing game',
+    '/rubiks-cube': 'Rubik’s Cube online (3D)', '/how-to-play': 'How to play',
     '/quiz/general-knowledge': 'General knowledge quiz', '/quiz/football': 'Football quiz', '/quiz/tv-shows': 'TV shows quiz',
     '/quiz/medical': 'Medical quiz', '/quiz/math': 'Math quiz', '/quiz/technology': 'Technology quiz',
     '/quiz/beauty': 'Beauty quiz', '/quiz/celebrities': 'Celebrities quiz',
@@ -50,7 +53,7 @@ const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 const abs = (p) => SITE.origin + p;
 const ans = (a, l) => (typeof a === 'string' ? a : a[l] ?? a.en);
 const write = (rel, content) => { const f = join(OUT, rel); mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, content); };
-const fitTitle = (t) => (t.length > 68 ? t.replace(/ \| 1v1game$/, '') : t); // Google cuts ~600px
+const fitTitle = (t) => (t.length > 60 ? t.replace(/ \| 1v1game$/, '') : t); // Google shows ~60 characters: drop the brand when it doesn't fit
 const jsonld = (obj) => `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, '\\u003c')}</script>`;
 
 const paths = {
@@ -112,7 +115,7 @@ ${hreflangTags(alts)}
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(desc)}">
 <meta name="twitter:image" content="${abs(SITE.ogImage)}">
-<meta name="theme-color" content="#fff1d1">
+<meta name="theme-color" content="#ffeecc">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -120,15 +123,16 @@ ${hreflangTags(alts)}
 ${extra}`;
 }
 
-// Light, warm theme matching the site's theme-color (#fff1d1). Adjust the variables to the real palette.
-const CSS = `:root{--bg:#fff8ea;--card:#fff;--line:#eedcb3;--text:#2b2118;--muted:#6f5f4d;--accent:#df301c;--link:#007f8f}
+// The game's palette (cream, slate, teal, coral), so the pages and the app look like one site.
+const CSS = `:root{--bg:#ffeecc;--card:#fff8e6;--line:#ecd9b4;--text:#46425e;--muted:#67637d;--accent:#ff6973;--link:#15788c;--btn:#15788c}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text)}
 a{color:var(--link)}.wrap{max-width:860px;margin:0 auto;padding:0 20px}
-header{background:#fff1d1;border-bottom:1px solid var(--line)}header .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:12px}
+header{background:var(--card);border-bottom:1px solid var(--line)}header .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:12px}
 .logo{font-weight:800;font-size:20px;color:var(--text);text-decoration:none}.logo b{color:var(--accent)}
 nav a{color:var(--muted);text-decoration:none;margin-left:16px;font-size:15px}
-.btn{display:inline-block;background:var(--accent);color:#fff;font-weight:700;text-decoration:none;padding:12px 22px;border-radius:12px}
-.btn.sm{padding:8px 14px;font-size:14px;color:#fff}
+.btn{display:inline-block;background:var(--btn);color:#ffeecc;font-weight:700;text-decoration:none;padding:12px 22px;border-radius:12px}
+.btn.sm{padding:8px 14px;font-size:14px;color:#ffeecc}
+ul.look{padding-left:0;list-style:none}ul.look li{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:8px 0}
 .crumbs{font-size:14px;color:var(--muted);margin:18px 0 0}.crumbs a{color:var(--muted)}
 h1{font-size:clamp(28px,5vw,40px);line-height:1.15;margin:18px 0 12px}h2{font-size:24px;margin:40px 0 12px}
 .lead{font-size:18px;color:var(--muted)}.cta{display:flex;gap:12px;flex-wrap:wrap;margin:22px 0}
@@ -151,7 +155,7 @@ details p{margin:10px 0 0;color:var(--link);font-weight:700}
 .grid a{display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;color:var(--text);text-decoration:none;font-weight:600}
 .grid a:hover,.grid a[aria-current]{border-color:var(--accent)}
 .feat{padding-left:20px}.feat li{margin:6px 0}.faq dt{font-weight:700;margin-top:16px}.faq dd{margin:4px 0 0;color:var(--muted)}
-.box{background:#fff1d1;border:1px solid var(--line);border-radius:16px;padding:24px;margin:40px 0;text-align:center}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;margin:40px 0;text-align:center}
 footer{border-top:1px solid var(--line);margin-top:48px;padding:24px 0;color:var(--muted);font-size:14px}footer a{color:var(--muted);margin-right:12px;display:inline-block}`;
 
 function page({ l, headHtml, body, alts }) {
@@ -173,7 +177,7 @@ ${body}
 <p><strong>${esc(L.ui.quizzes)}:</strong> ${catLinks}</p>
 <p><a href="${xp.gk(l)}">${esc(X[l].gk.nav)}</a><a href="${xp.daily(l)}">${esc(X[l].daily.h1)}</a><a href="${xp.flagHub(l)}">${esc(X[l].flags.hubName)}</a><a href="${xp.widget(l)}">${esc(X[l].widget.nav)}</a></p>
 <p><strong>${esc(L.ui.langs)}:</strong> ${langLinks}</p>
-<p><a href="/flag-quiz">Flag quiz</a><a href="/chess-puzzles">Chess puzzles</a><a href="/mental-math">Mental math</a><a href="/rubiks-cube">Rubik’s Cube</a> · © ${new Date().getFullYear()} 1v1game.net</p>
+<p><a href="/1v1-games">1v1 games</a><a href="/trivia">Trivia</a><a href="/flag-quiz">Flag quiz</a><a href="/chess-puzzles">Chess puzzles</a><a href="/rubiks-cube">Rubik’s Cube</a><a href="/mini-golf">Mini golf</a><a href="/timeline-game">Timeline</a><a href="/estimation-game">Estimation game</a> · © ${new Date().getFullYear()} 1v1game.net</p>
 </div></footer>
 </body>
 </html>
@@ -239,7 +243,7 @@ function buildHub(l) {
 ${catGrid(l)}
 ${readyBox(l)}
 ${faqHtml(l)}`;
-  write(path.slice(1) + 'index.html', page({ l, alts, body, headHtml: head({ l, title: L.hub.title, desc: L.hub.desc, path, alts, extra: ld }) }));
+  write(path.slice(1) + 'index.html', page({ l, alts, body, headHtml: head({ l, title: fitTitle(L.hub.title), desc: L.hub.desc, path, alts, extra: ld }) }));
 }
 
 function buildLanding(l) {
@@ -256,7 +260,7 @@ ${H.paras.map((p) => `<p>${esc(p)}</p>`).join('\n')}
 ${catGrid(l)}
 ${faqHtml(l)}
 ${readyBox(l)}`;
-  write(path.slice(1) + 'index.html', page({ l, alts, body, headHtml: head({ l, title: H.title, desc: H.desc, path, alts, extra: ld }) }));
+  write(path.slice(1) + 'index.html', page({ l, alts, body, headHtml: head({ l, title: fitTitle(H.title), desc: H.desc, path, alts, extra: ld }) }));
 }
 
 // ---- Q&A list: "general knowledge questions and answers" (all categories on one page) ----
@@ -294,6 +298,19 @@ function copyFlags() {
 const contItems = (l, k) => { const dn = new Intl.DisplayNames([l], { type: 'region' }); return CONTINENTS[k].map((c) => ({ cc: c.toLowerCase(), name: dn.of(c) })); };
 const contGrid = (l, current) => `<ul class="grid">${CONT_KEYS.map((k) => `<li><a href="${xp.flag(l, k)}"${k === current ? ' aria-current="page"' : ''}>${esc(cont(l, k).name)} (${CONTINENTS[k].length})</a></li>`).join('')}</ul>`;
 
+/** Look-alike flags of a continent (names localized) + study tips: useful text on otherwise image-only pages. */
+const smallFlag = (cc, alt) => `<img src="/flags/${cc}.svg" width="40" height="30" alt="${esc(alt)}" loading="lazy" decoding="async" style="vertical-align:middle;border-radius:3px;margin-right:6px">`;
+function flagStudyHtml(l, k) {
+  const T = FLAG_STUDY[l]; const dn = new Intl.DisplayNames([l], { type: 'region' });
+  const groups = k ? LOOKALIKES[k] ?? [] : CONT_KEYS.flatMap((c) => (LOOKALIKES[c] ?? []).slice(0, 1));
+  const look = groups.length ? `<h2>${esc(T.lookH)}</h2>
+<p>${esc(T.look(k ? cont(l, k) : { name: X[l].flags.hubName, of: X[l].flags.hubName }))}</p>
+<ul class="look">${groups.map((g) => `<li>${g.map((cc) => `${smallFlag(cc.toLowerCase(), dn.of(cc))}${esc(dn.of(cc))}`).join(' · ')}</li>`).join('')}</ul>` : '';
+  return `${look}
+<h2>${esc(T.tipsH)}</h2>
+<ul>${T.tips.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>`;
+}
+
 function buildFlagContinent(l, k) {
   const L = LANGS[l]; const F = X[l].flags; const c = cont(l, k); const items = contItems(l, k); const n = items.length;
   const path = xp.flag(l, k); const alts = alternates((x) => xp.flag(x, k));
@@ -308,6 +325,7 @@ function buildFlagContinent(l, k) {
 <ol class="flags">
 ${items.map((it) => `<li><details><summary>${flagImg(it.cc, it.name)}</summary><p><strong>${esc(it.name)}</strong></p></details></li>`).join('\n')}
 </ol>
+${flagStudyHtml(l, k)}
 ${readyBox(l)}
 <h2>${esc(L.ui.more)}</h2>
 ${contGrid(l, k)}`;
@@ -324,8 +342,9 @@ function buildFlagHub(l) { // not for English: /flag-quiz already exists on the 
 <p class="lead">${esc(F.hubIntro)}</p>
 ${contGrid(l)}
 <ul class="flags" style="margin-top:20px">${CONT_KEYS.map((k) => { const it = contItems(l, k)[0]; return `<li><a href="${xp.flag(l, k)}">${flagImg(it.cc, it.name)}</a></li>`; }).join('')}</ul>
+${flagStudyHtml(l, null)}
 ${readyBox(l)}`;
-  write(path.slice(1) + 'index.html', page({ l, alts, body, headHtml: head({ l, title: F.hubTitle, desc: F.hubDesc, path, alts, extra: ld }) }));
+  write(path.slice(1) + 'index.html', page({ l, alts, body, headHtml: head({ l, title: fitTitle(F.hubTitle), desc: F.hubDesc, path, alts, extra: ld }) }));
 }
 
 // ---- quiz of the day: static set for crawlers + client-side daily rotation, score and share grid ----
@@ -386,13 +405,13 @@ function buildEmbed(l) {
   write(`embed/${l}.html`, `<!doctype html>
 <html lang="${l}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, follow"><title>1v1game quiz</title>
-<style>*{box-sizing:border-box}html,body{margin:0;height:100%}body{font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#2b2118;background:#fff8ea}
-.w{min-height:100%;display:flex;flex-direction:column;gap:10px;padding:16px;border:1px solid #eedcb3;border-radius:12px}
+<style>*{box-sizing:border-box}html,body{margin:0;height:100%}body{font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#46425e;background:#fff8ea}
+.w{min-height:100%;display:flex;flex-direction:column;gap:10px;padding:16px;border:1px solid #ecd9b4;border-radius:12px}
 .top{display:flex;justify-content:space-between;font-size:12px;color:#6f5f4d;text-transform:uppercase;letter-spacing:.04em}
-.q{font-size:18px;font-weight:700;margin:0}.a{color:#007f8f;font-weight:800;font-size:18px;margin:0}
-button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:10px 14px;cursor:pointer;background:#df301c;color:#fff;align-self:flex-start}
-button.n{background:#fff;color:#2b2118;border:1px solid #eedcb3}.sp{flex:1}
-.play{font-size:13px;color:#007f8f;font-weight:700;text-decoration:none}</style></head>
+.q{font-size:18px;font-weight:700;margin:0}.a{color:#15788c;font-weight:800;font-size:18px;margin:0}
+button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:10px 14px;cursor:pointer;background:#15788c;color:#ffeecc;align-self:flex-start}
+button.n{background:#fff;color:#46425e;border:1px solid #ecd9b4}.sp{flex:1}
+.play{font-size:13px;color:#15788c;font-weight:700;text-decoration:none}</style></head>
 <body><div class="w"><div class="top"><span id="c"></span><span>1v1game</span></div>
 <p class="q" id="q"></p><button id="rv" type="button">${esc(L.ui.show)}</button><p class="a" id="a" hidden></p>
 <button class="n" id="nx" type="button" hidden>${esc(W.next)} →</button><div class="sp"></div>

@@ -6,6 +6,24 @@
 ## Proiectul pe scurt
 - **1v1game.net** („Duel”): duel 1v1 în browser, 3 runde pe jocuri alese la întâmplare din **12**: trivia, steaguri, șah, cub Rubik, Split the shape, Guess the color, One-shot golf, Timeline, Opinion, Release year, The right price, Followers. Câștigi 2 din 3.
 
+## 26 nov, după-amiaza: SEO terminat pe partea de cod
+- **Audit cu crawler pe toate cele 217 URL-uri din sitemap-uri:** toate răspund 200, canonical corect, hreflang reciproc, JSON-LD valid, `alt` la toate imaginile. Problemele au scăzut de la 139 la ~30, iar cele rămase sunt minore: pagini-unealtă cu 200–240 de cuvinte și câteva titluri traduse de 61–68 de caractere.
+- **Paginile englezești ale jocurilor** (`server/src/seo.ts`):
+  - textele învechite au fost scoase: „Math”, „five games”, „friend invites coming soon”;
+  - punctajele sunt cele reale (trivia pe stele, cub 2.000 + 1.500);
+  - fiecare pagină are acum secțiunile „About”, „Tips to win” și 4–5 întrebări frecvente (și în JSON-LD FAQ), cu ~500–750 de cuvinte în loc de ~220;
+  - lista celor 12 jocuri e într-o singură constantă, `GAMES_SENTENCE`;
+  - brandul „ | 1v1game” se adaugă în titlu doar dacă titlul rămâne sub 60 de caractere;
+  - paleta e cea nouă.
+- **Paginile cu steaguri** (EN și cele 9 limbi): secțiunile „Flags that are easy to mix up” (grupurile din `LOOKALIKES`, cu nume traduse prin `Intl.DisplayNames`) și „How to learn the flags faster”. Textele traduse sunt în `seo/data/extras-i18n.mjs` → `FLAG_STUDY`.
+- **Pachetul `seo/`:**
+  - footer-ul nu mai trimite la `/mental-math`;
+  - `llms.txt` conține cele 12 jocuri;
+  - 7 descrieri au fost scurtate, iar `check.mjs` acceptă acum maximum 165 de caractere;
+  - paleta e cea nouă, inclusiv în widget-ul pentru alte site-uri.
+- **Homepage:** titlul e acum „1v1game – Free 1v1 Games Online: Trivia, Flags & Chess”.
+- **Rămas intenționat:** paginile englezești existente apar și în `sitemap.xml`, și în `sitemap-i18n.xml`. E necesar pentru hreflang, iar Google acceptă.
+
 ## Ce s-a făcut pe 25–26 nov (totul e live, commit `1d44196` + cel de după)
 1. **Redesign minimalist:** paleta „curiosities” (`#46425e` slate, `#15788c` teal, `#00b9be` cyan, `#ffeecc` cream, `#ffb0a3` peach, `#ff6973` coral), butoane și carduri plate, fără emoji nicăieri (iconițe lucide, steaguri SVG). Play e un buton lat teal, rating-ul e o linie simplă.
 2. **Calcul mental scos de tot.** `/mental-math` face 301 spre `/1v1-games`. Textele SEO (toate cele 9 limbi) nu-l mai menționează.

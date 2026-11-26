@@ -274,7 +274,7 @@ export const LANGS = {
     home: {
       modes: 'E in più: quiz sulle bandiere con 194 paesi, problemi di scacchi, un vero cubo di Rubik in 3D, minigolf e un gioco sulla linea del tempo.',
       title: 'Quiz 1 contro 1 online – Sfida di cultura generale | 1v1game',
-      desc: 'Quiz 1 contro 1 gratis nel browser: sfide di cultura generale con oltre 1.200 domande, quiz sulle bandiere, scacchi, minigolf e altro. Senza download né registrazione.',
+      desc: 'Quiz 1 contro 1 gratis nel browser: sfide di cultura generale con oltre 1.200 domande, bandiere, scacchi, minigolf e altro. Senza download né registrazione.',
       h1: 'Quiz di cultura generale: sfida 1 contro 1',
       lead: 'Dimostra chi ne sa di più. Inizia una sfida a quiz gratis in pochi secondi, rispondi a domande di cultura generale contro il tempo e vinci al meglio delle tre.',
       paras: [
