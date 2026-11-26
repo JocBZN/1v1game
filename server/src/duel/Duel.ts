@@ -109,6 +109,8 @@ export class Duel {
   readonly outcomes: RoundOutcome[] = [];
   readonly summaries: RoundSummary[] = [];
   private phaseEndsAt = 0;
+  /** Per slot: plays a bot/ghost's remaining scripted answers right away (set by playScript). */
+  private fastForward: [(() => void) | null, (() => void) | null] = [null, null];
   private timers = new Set<NodeJS.Timeout>();
   private disconnectTimers: [NodeJS.Timeout | null, NodeJS.Timeout | null] = [null, null];
   private now: () => number;
@@ -307,17 +309,30 @@ export class Duel {
     const round = this.round!;
     const pr = round.players[slot];
     pr.index = 0;
+    const pending = new Set<ReplayEvent>();
+    const apply = (ev: ReplayEvent) => {
+      if (this.round !== round || round.ended || !pending.has(ev)) return;
+      pending.delete(ev);
+      if (ev.points !== 0 || ev.done) pr.results.push({ points: ev.points });
+      pr.score = round.mode.scoreRound(pr.results);
+      pr.events.push(ev);
+      pr.index = ev.done ? ev.item + 1 : ev.item;
+      this.emitScores();
+    };
     for (const ev of script.events) {
       if (ev.t > round.mode.timeLimit) continue;
-      this.later(ev.t, () => {
-        if (this.round !== round || round.ended) return;
-        if (ev.points !== 0 || ev.done) pr.results.push({ points: ev.points });
-        pr.score = round.mode.scoreRound(pr.results);
-        pr.events.push(ev);
-        pr.index = ev.done ? ev.item + 1 : ev.item;
-        this.emitScores();
-      });
+      pending.add(ev);
+      this.later(ev.t, () => apply(ev));
     }
+    // When the human finishes first, the bot/ghost plays out the rest of its (unchanged) answers
+    // quickly instead of making them wait for its original timing.
+    this.fastForward[slot] = () => {
+      const rest = [...pending];
+      rest.forEach((ev, i) => this.later(200 + i * 150, () => apply(ev)));
+      this.later(250 + rest.length * 150, () => {
+        if (this.round === round && !round.ended) this.finishPlayer(slot);
+      });
+    };
     const end = Math.min(script.durationMs, round.mode.timeLimit);
     this.later(end, () => {
       if (this.round === round && !round.ended) this.finishPlayer(slot);
@@ -332,6 +347,12 @@ export class Duel {
     pr.finishedAt = this.now();
     this.send(slot, 'round:wait', { round: round.index });
     this.emitScores();
+    const other = (1 - slot) as Slot;
+    if (this.slots[slot].kind === 'human' && this.slots[other].kind !== 'human' && !round.players[other].finished) {
+      const ff = this.fastForward[other];
+      this.fastForward[other] = null;
+      ff?.();
+    }
     if (round.players.every((p) => p.finished)) {
       // Short beat so the last feedback is visible before the round result.
       this.later(700, () => this.endRound());
