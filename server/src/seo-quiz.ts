@@ -46,6 +46,7 @@ function quizLd(name: string, path: string, qs: Question[], about: string) {
     name,
     url: `${publicUrl()}${path}`,
     about: { '@type': 'Thing', name: about },
+    educationalAlignment: { '@type': 'AlignmentObject', alignmentType: 'educationalSubject', targetName: about },
     educationalLevel: 'beginner to advanced',
     inLanguage: 'en',
     isAccessibleForFree: true,

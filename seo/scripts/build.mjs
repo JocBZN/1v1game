@@ -196,6 +196,13 @@ const gameLd = (l) => ({
   publisher: { '@type': 'Organization', name: '1v1game', url: abs('/') },
 });
 
+// Education Q&A (Quiz) fields Google asks for: `about` and `educationalAlignment`.
+const edu = (about, subject = about) => ({
+  about: { '@type': 'Thing', name: about },
+  educationalAlignment: { '@type': 'AlignmentObject', alignmentType: 'educationalSubject', targetName: subject },
+  isAccessibleForFree: true,
+});
+
 // ---------- builders ----------
 const sitemap = []; // { loc, alts }
 
@@ -204,7 +211,7 @@ function buildCategory(l, k) {
   const path = paths.cat(l, k); const alts = alternates((x) => paths.cat(x, k));
   const crumbs = [{ name: L.ui.home, path: paths.home(l) }, { name: L.ui.quizzes, path: paths.hub(l) }, { name, path }];
   const quizLd = {
-    '@type': 'Quiz', name: kw, about: { '@type': 'Thing', name }, inLanguage: l, url: abs(path), educationalLevel: 'beginner',
+    '@type': 'Quiz', name: kw, ...edu(name), inLanguage: l, url: abs(path), educationalLevel: 'beginner',
     hasPart: qs.map((q) => ({ '@type': 'Question', eduQuestionType: 'Flashcard', text: q.q[l], acceptedAnswer: { '@type': 'Answer', text: ans(q.a, l) } })),
   };
   const ld = jsonld({ '@context': 'https://schema.org', '@graph': [crumbsLd(crumbs), quizLd] });
@@ -259,7 +266,7 @@ function buildGk(l) {
   const list = CAT_KEYS.flatMap((k) => pick(k).map((q) => ({ k, q })));
   const L = LANGS[l]; const G = X[l].gk; const n = list.length; const path = xp.gk(l); const alts = alternates(xp.gk);
   const crumbs = [{ name: L.ui.home, path: paths.home(l) }, { name: L.ui.quizzes, path: paths.hub(l) }, { name: G.h1, path }];
-  const quizLd = { '@type': 'Quiz', name: G.h1, inLanguage: l, url: abs(path), educationalLevel: 'beginner',
+  const quizLd = { '@type': 'Quiz', name: G.h1, ...edu(G.h1), inLanguage: l, url: abs(path), educationalLevel: 'beginner',
     hasPart: list.map(({ q }) => ({ '@type': 'Question', eduQuestionType: 'Flashcard', text: q.q[l], acceptedAnswer: { '@type': 'Answer', text: ans(q.a, l) } })) };
   const ld = jsonld({ '@context': 'https://schema.org', '@graph': [crumbsLd(crumbs), quizLd] });
   const sections = CAT_KEYS.map((k) => `<h2 id="${k}">${esc(L.cats[k][0])}</h2>
@@ -291,7 +298,7 @@ function buildFlagContinent(l, k) {
   const L = LANGS[l]; const F = X[l].flags; const c = cont(l, k); const items = contItems(l, k); const n = items.length;
   const path = xp.flag(l, k); const alts = alternates((x) => xp.flag(x, k));
   const crumbs = [{ name: L.ui.home, path: paths.home(l) }, { name: F.hubName, path: xp.flagHub(l) }, { name: c.name, path }];
-  const quizLd = { '@type': 'Quiz', name: F.h1(c), inLanguage: l, url: abs(path), educationalLevel: 'beginner',
+  const quizLd = { '@type': 'Quiz', name: F.h1(c), ...edu(c.name, F.hubName), inLanguage: l, url: abs(path), educationalLevel: 'beginner',
     hasPart: items.map((it) => ({ '@type': 'Question', eduQuestionType: 'Flashcard', text: F.q, image: abs(`/flags/${it.cc}.svg`), acceptedAnswer: { '@type': 'Answer', text: it.name } })) };
   const ld = jsonld({ '@context': 'https://schema.org', '@graph': [crumbsLd(crumbs), quizLd] });
   const body = `${crumbsHtml(crumbs)}
@@ -327,7 +334,7 @@ function buildDaily(l) {
   const data = ALLQ.map(({ q }) => [q.q[l], ans(q.a, l)]);
   const ids = pickDaily(10, data.length, Math.floor(Date.now() / 864e5));
   const crumbs = [{ name: L.ui.home, path: paths.home(l) }, { name: L.ui.quizzes, path: paths.hub(l) }, { name: D.h1, path }];
-  const ld = jsonld({ '@context': 'https://schema.org', '@graph': [crumbsLd(crumbs), { '@type': 'Quiz', name: D.h1, inLanguage: l, url: abs(path), educationalLevel: 'beginner' }] });
+  const ld = jsonld({ '@context': 'https://schema.org', '@graph': [crumbsLd(crumbs), { '@type': 'Quiz', name: D.h1, ...edu(D.h1), inLanguage: l, url: abs(path), educationalLevel: 'beginner' }] });
   const T = { reveal: D.reveal, got: D.got, missed: D.missed, score: D.score, copied: D.copied, share: D.shareText('{d}', '{k}', '{n}') };
   const body = `${crumbsHtml(crumbs)}
 <h1>${esc(D.h1)}</h1>
