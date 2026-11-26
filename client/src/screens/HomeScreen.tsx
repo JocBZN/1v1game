@@ -3,38 +3,12 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, Crown, Download, LogIn, Trophy, UserPlus, Users } from 'lucide-react';
 import type { Route } from '../App';
 import type { Me } from '../lib/api';
-import { DOMAIN_LIST, type DomainMeta } from '../lib/domains';
+import { DOMAIN_LIST } from '../lib/domains';
 import { LEAGUE_META, leagueProgress } from '../lib/leagues';
 import { useInstallPrompt } from '../lib/pwa';
 import { Avatar, LeagueIcon, TopicIcon, useAnimatedNumber } from '../components/ui';
+import { FloatingShapes, GameMarquee, MysteryAvatar, VsBubble } from '../components/Fun';
 import { track } from '../lib/analytics';
-
-const PALETTE = ['#00b9be', '#ffb0a3', '#ff6973', '#15788c', '#46425e'];
-
-/** Soft shapes drifting behind everything. */
-function FloatingShapes() {
-  const still = useReducedMotion();
-  const shapes = [
-    { c: PALETTE[0], s: 180, x: '-8%', y: '6%', r: 999, d: 14 },
-    { c: PALETTE[1], s: 120, x: '78%', y: '2%', r: 32, d: 18 },
-    { c: PALETTE[2], s: 70, x: '86%', y: '44%', r: 999, d: 12 },
-    { c: PALETTE[3], s: 90, x: '4%', y: '62%', r: 24, d: 16 },
-    { c: PALETTE[1], s: 150, x: '60%', y: '80%', r: 999, d: 20 },
-  ];
-  return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      {shapes.map((p, i) => (
-        <motion.div
-          key={i}
-          className="absolute opacity-[0.16]"
-          style={{ left: p.x, top: p.y, width: p.s, height: p.s, borderRadius: p.r, background: p.c }}
-          animate={still ? undefined : { y: [0, -18, 0], x: [0, 10, 0], rotate: p.r < 100 ? [0, 25, 0] : 0 }}
-          transition={{ duration: p.d, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      ))}
-    </div>
-  );
-}
 
 /** "Beat one person at ___" with the game name rolling. */
 function RollingTitle({ big }: { big?: boolean }) {
@@ -100,28 +74,14 @@ function FaceOff({ me, onProfile }: { me: Me; onProfile: () => void }) {
         </div>
       </motion.button>
 
-      <motion.div
-        className="z-10 -mx-5 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red font-display text-base font-bold text-white shadow-[0_8px_20px_-8px_#ff6973]"
-        animate={still ? undefined : { scale: [1, 1.12, 1], rotate: [0, -6, 0] }}
-        transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-      >
-        VS
-      </motion.div>
+      <div className="-mx-5"><VsBubble /></div>
 
       <div className="flex flex-1 items-center justify-end gap-3 rounded-3xl bg-slate p-3 text-cream">
         <div className="min-w-0 text-right">
           <div className="text-sm font-bold">Opponent</div>
           <div className="text-[11px] opacity-70">press Play</div>
         </div>
-        <span className="relative flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-full bg-cream/15 font-display text-xl font-bold">
-          ?
-          <motion.span
-            aria-hidden
-            className="absolute inset-0 rounded-full border-2 border-dashed border-cream/50"
-            animate={still ? undefined : { rotate: 360 }}
-            transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-          />
-        </span>
+        <MysteryAvatar size={40} />
       </div>
     </div>
   );
@@ -160,36 +120,6 @@ function PlayButton({ onPlay, connected, big }: { onPlay: () => void; connected:
         </motion.span>
       </span>
     </motion.button>
-  );
-}
-
-function Chip({ d }: { d: DomainMeta }) {
-  return (
-    <span className="flex shrink-0 items-center gap-2 rounded-full py-1.5 pl-1.5 pr-4 text-sm font-semibold" style={{ background: d.soft, color: d.color }}>
-      <TopicIcon domain={d.id} size={28} solid />
-      {d.name}
-    </span>
-  );
-}
-
-/** Two rows of game chips sliding in opposite directions. */
-function GameMarquee() {
-  const still = useReducedMotion();
-  const half = Math.ceil(DOMAIN_LIST.length / 2);
-  const rows = [DOMAIN_LIST.slice(0, half), DOMAIN_LIST.slice(half)];
-  return (
-    <div className="-mx-4 space-y-2.5 overflow-hidden py-1 [mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)] sm:-mx-6">
-      {rows.map((row, r) => (
-        <motion.div
-          key={r}
-          className="flex w-max gap-2.5"
-          animate={still ? undefined : { x: r === 0 ? ['0%', '-50%'] : ['-50%', '0%'] }}
-          transition={{ duration: 26, repeat: Infinity, ease: 'linear' }}
-        >
-          {[...row, ...row].map((d, i) => <Chip key={`${d.id}-${i}`} d={d} />)}
-        </motion.div>
-      ))}
-    </div>
   );
 }
 
@@ -317,7 +247,7 @@ export function HomeScreen({ me, onPlay, onNavigate, connected }: {
             <span className="font-display text-lg font-bold">{DOMAIN_LIST.length} games</span>
             <span className="text-xs text-muted">3 random ones each duel</span>
           </div>
-          <GameMarquee />
+          <GameMarquee className="-mx-4 sm:-mx-6" />
         </motion.div>
         <motion.div {...enter(6)} className="mt-1">{steps}</motion.div>
         {install_}
