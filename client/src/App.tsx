@@ -13,13 +13,14 @@ import { ResultScreen } from './screens/ResultScreen';
 import { LeaderboardScreen } from './screens/LeaderboardScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
 import { FriendScreen, RoomScreen } from './screens/FriendScreen';
+import { SelectGameScreen } from './screens/SelectGameScreen';
 import { IntroSplash, shouldShowIntro } from './components/IntroSplash';
 import { ConsentBanner } from './components/ConsentBanner';
 import { pageview, track, identifyUser, resetUser } from './lib/analytics';
 
-export type Route = 'home' | 'leaderboard' | 'profile' | 'signup' | 'login' | 'friend';
+export type Route = 'home' | 'leaderboard' | 'profile' | 'signup' | 'login' | 'friend' | 'games';
 
-const HASH: Record<Route, string> = { home: '/', leaderboard: '/clasament', profile: '/profil', signup: '/signup', login: '/login', friend: '/friend' };
+const HASH: Record<Route, string> = { home: '/', leaderboard: '/clasament', profile: '/profil', signup: '/signup', login: '/login', friend: '/friend', games: '/select-game' };
 
 function routeFromHash(): Route {
   const h = location.hash.replace(/^#\/?/, '');
@@ -28,6 +29,7 @@ function routeFromHash(): Route {
   if (h.startsWith('signup')) return 'signup';
   if (h.startsWith('login')) return 'login';
   if (h.startsWith('friend')) return 'friend';
+  if (h.startsWith('select-game')) return 'games';
   return 'home';
 }
 
@@ -67,6 +69,11 @@ function Game({ me, refreshMe, onAuthDone, onLogout }: {
   useEffect(() => {
     if (duel.roomError && route !== 'friend' && state.phase === 'idle') go('friend');
   }, [duel.roomError, route, state.phase, go]);
+
+  // "Select game" is a link in the footer below the app: bring the app back into view.
+  useEffect(() => {
+    if (route === 'games') window.scrollTo({ top: 0 });
+  }, [route]);
 
   // Refresh ratings when a duel ends.
   useEffect(() => {
@@ -132,6 +139,7 @@ function Game({ me, refreshMe, onAuthDone, onLogout }: {
           room={state.result.friendly ? duel.room : null}
           onAgain={() => {
             track('result_action', { action: 'again', result: state.result!.result });
+            if (state.result!.practice) return duel.practice(state.result!.practice);
             return state.result!.friendly && duel.room ? duel.rematch() : duel.play();
           }}
           onLeaderboard={() => {
@@ -141,7 +149,7 @@ function Game({ me, refreshMe, onAuthDone, onLogout }: {
           }}
           onHome={() => {
             track('result_action', { action: 'home', result: state.result!.result });
-            if (state.result!.friendly) duel.leaveRoom();
+            if (state.result!.friendly && !state.result!.practice) duel.leaveRoom();
             duel.reset();
             go('home');
           }}
@@ -162,6 +170,18 @@ function Game({ me, refreshMe, onAuthDone, onLogout }: {
           duel.leaveRoom();
           go('home');
         }}
+      />
+    );
+  }
+  if (route === 'games') {
+    return (
+      <SelectGameScreen
+        connected={state.connected}
+        onPick={(d) => {
+          track('practice_start', { topic: d });
+          duel.practice(d);
+        }}
+        onBack={() => go('home')}
       />
     );
   }

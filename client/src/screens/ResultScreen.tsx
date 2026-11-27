@@ -253,13 +253,13 @@ export function ResultScreen({ me, found, result, room, onAgain, onLeaderboard, 
               <Users size={16} strokeWidth={2.4} /> Room score <span className="font-bold text-me">{room.score[0]}</span> – <span className="font-bold text-red">{room.score[1]}</span>
             </div>
           )}
-          Friend duel · no rating change
+          {result.practice ? 'Practice vs bot' : 'Friend duel'} · no rating change
         </SoftPanel>
       )}
     </>
   );
 
-  const againLabel = result.friendly && room
+  const againLabel = result.practice ? 'Play again' : result.friendly && room
     ? room.guest && (room.you === 'host' ? room.guest.ready : room.host.ready)
       ? `${result.opponent.name} wants a rematch`
       : 'Rematch'
@@ -285,7 +285,7 @@ export function ResultScreen({ me, found, result, room, onAgain, onLeaderboard, 
         <span className="relative flex items-center justify-between gap-3">
           <span className="min-w-0">
             <span className="block truncate font-display text-3xl font-bold tracking-tight">{againLabel}</span>
-            <span className="block text-sm font-medium opacity-80">{result.friendly ? 'same room, new games' : '3 new random games'}</span>
+            <span className="block text-sm font-medium opacity-80">{result.practice ? `${DOMAINS[result.practice].name} vs bot` : result.friendly ? 'same room, new games' : '3 new random games'}</span>
           </span>
           <motion.span
             className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-cream text-teal"

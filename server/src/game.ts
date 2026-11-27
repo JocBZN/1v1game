@@ -1,14 +1,14 @@
 import crypto from 'node:crypto';
 import type { Server } from 'socket.io';
 import { db, getQuestionStats, getRating, getRatings, getRecentResults, getUserById, recordQuestionAnswer, saveDuel, saveRating, type DuelPlayerRecord, type User } from './db';
-import { RATING_TRACKS, type RatingTrack } from './domains';
+import { RATING_TRACKS, isDomain, type DomainId, type RatingTrack } from './domains';
 import { Duel, type DuelSummary, type RatingSnap, type RoundPlan, type Slot, type SlotInit } from './duel/Duel';
 import { computeRatingUpdates } from './duel/results';
 import { buildBotDuel, buildGhostDuel, recordRound } from './ghost';
 import { leagueFor } from './leagues';
 import { capture } from './analytics';
 import { Matchmaker, type QueueEntry } from './matchmaking';
-import { getMode, pickDomains } from './modes';
+import { availableDomains, getMode, pickDomains } from './modes';
 import { createRng } from './rng';
 import { starsFromRate } from './modes/scoring';
 import { setLiveStars, type TriviaContent } from './modes/trivia';
@@ -33,13 +33,15 @@ function snapshot(userId: number): Record<RatingTrack, RatingSnap> {
 
 /** How a duel came about, for analytics. */
 interface DuelMeta {
-  mode: 'live' | 'ghost' | 'bot' | 'friend';
+  mode: 'live' | 'ghost' | 'bot' | 'friend' | 'practice';
   /** ms each human spent in the queue (ranked duels) */
   waitMs?: Record<number, number>;
 }
 
 type DuelExtra = {
   friendly?: boolean;
+  /** Practice duel against a bot on one chosen game. */
+  practice?: DomainId;
   ratingChanges?: Record<string, { before: number; after: number }>;
   league?: { before: string; after: string };
   ratingFactors?: { streak: number };
@@ -134,6 +136,18 @@ export class GameServer {
     this.rooms.leave(user.id);
   }
 
+  /** "Select game": a duel against a bot where every round is the chosen game. Never rated. */
+  practice(user: User, domain: unknown) {
+    if (this.duels.has(user.id)) return this.duels.get(user.id)!.reconnected(user.id);
+    if (!isDomain(domain) || !availableDomains().includes(domain)) return this.emit(user.id, 'duel:none');
+    this.mm.leave(user.id);
+    this.rooms.leave(user.id);
+    const rng = createRng();
+    const me = this.humanSlot(user.id);
+    const { opponent, plans } = buildBotDuel(me.ratings.general.rating, rng, [domain, domain, domain]);
+    this.launch([me, opponent], plans, { mode: 'practice' }, { rated: false, practice: domain });
+  }
+
   forfeit(user: User) {
     const duel = this.duels.get(user.id);
     if (duel) capture(user.id, 'duel_forfeit_clicked');
@@ -202,7 +216,7 @@ export class GameServer {
     return extras;
   }
 
-  private launch(slots: [SlotInit, SlotInit], plans: RoundPlan[], meta: DuelMeta, opts: { rated?: boolean; onEnd?: (s: DuelSummary) => void } = {}) {
+  private launch(slots: [SlotInit, SlotInit], plans: RoundPlan[], meta: DuelMeta, opts: { rated?: boolean; practice?: DomainId; onEnd?: (s: DuelSummary) => void } = {}) {
     const rated = opts.rated ?? true;
     const id = crypto.randomUUID();
     const humans = slots.filter((s) => s.kind === 'human').map((s) => s.userId!);
@@ -247,6 +261,7 @@ export class GameServer {
       onFinish: (summary) => {
         try {
           const extras = this.finalize(slots, summary, rated);
+          if (opts.practice) for (const e of extras as DuelExtra[]) if (e) e.practice = opts.practice;
           try {
             this.trackFinish(id, slots, summary, extras as [DuelExtra, DuelExtra], meta, Date.now() - startedAt);
           } catch (e) {

@@ -63,6 +63,10 @@ export function attachSockets(server: http.Server) {
       takeOver();
       game.joinRoom(user, payload?.code);
     });
+    socket.on('practice:start', (payload) => {
+      takeOver();
+      game.practice(user, payload?.domain);
+    });
     socket.on('room:rematch', () => game.rematch(user));
     socket.on('room:leave', () => game.leaveRoom(user));
     socket.on('queue:leave', () => game.leaveQueue(user));

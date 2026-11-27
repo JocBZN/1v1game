@@ -70,6 +70,8 @@ export interface DuelResult {
   league?: { before: League['id']; after: League['id'] };
   /** Played in a private room: no rating change. */
   friendly?: boolean;
+  /** Practice duel against a bot on one chosen game ("Select game"). */
+  practice?: DomainId;
 }
 
 export interface RoomMember {
@@ -246,6 +248,8 @@ interface DuelApi {
   /** True while joining from a /c/<code> link. */
   joining: boolean;
   createRoom(): void;
+  /** Duel against a bot where every round is `domain`. */
+  practice(domain: DomainId): void;
   joinRoom(code: string): void;
   rematch(): void;
   leaveRoom(): void;
@@ -337,6 +341,9 @@ export function DuelProvider({ children }: { children: ReactNode }) {
     joinRoom: (code) => {
       setRoomError(null);
       getSocket().emit('room:join', { code });
+    },
+    practice: (domain) => {
+      getSocket().emit('practice:start', { domain });
     },
     rematch: () => {
       dispatch({ type: 'reset' });

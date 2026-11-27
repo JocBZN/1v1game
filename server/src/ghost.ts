@@ -41,10 +41,10 @@ function uniformRatings(rating: number, rd: number): Record<RatingTrack, RatingS
 }
 
 /** Pure bot opponent: rating close to the player's, accuracy/speed derived from it. */
-export function buildBotDuel(myGeneral: number, rng: Rng): { opponent: SlotInit; plans: RoundPlan[] } {
+export function buildBotDuel(myGeneral: number, rng: Rng, domains?: DomainId[]): { opponent: SlotInit; plans: RoundPlan[] } {
   const rating = Math.round(myGeneral + rng.int(-60, 60));
   const opponent: SlotInit = { kind: 'bot', userId: null, name: rng.pick(BOT_NAMES), ratings: uniformRatings(rating, 150) };
-  const plans = pickDomains(rng).map((domain) => {
+  const plans = (domains ?? pickDomains(rng)).map((domain) => {
     const mode = getMode(domain);
     const content = mode.generateRound(rng);
     return { domain, content, scripts: [null, mode.simulateBot(content, rating, rng)] as RoundPlan['scripts'] };
