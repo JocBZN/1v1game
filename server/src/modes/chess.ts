@@ -7,11 +7,11 @@ import { botAccuracy, botSpeedFactor, sumScore, type GameMode, type ReplayEvent,
 
 export type ChessContent = RoundContent<Puzzle>;
 
-export const CHESS_PUZZLES_PER_ROUND = 20; // more than anyone solves in 90 s
+export const CHESS_PUZZLES_PER_ROUND = 20; // more than anyone solves in 45 s
 export const CHESS_SOLVE_POINTS = 1000;
-/** Small speed bonus (max 100, over 30 s) — only a tie-breaker; puzzles solved is what counts. */
+/** Small speed bonus (max 100, over 15 s) — only a tie-breaker; puzzles solved is what counts. */
 export const CHESS_SPEED_BONUS = 100;
-export const CHESS_BONUS_WINDOW_MS = 30_000;
+export const CHESS_BONUS_WINDOW_MS = 15_000;
 
 export function chessPoints(elapsedMs: number): number {
   return CHESS_SOLVE_POINTS + Math.round(CHESS_SPEED_BONUS * Math.max(0, 1 - elapsedMs / CHESS_BONUS_WINDOW_MS));
@@ -32,7 +32,7 @@ export function loadPuzzles(): Puzzle[] {
 export const chessMode: GameMode<ChessContent> = {
   id: 'chess',
   name: 'Chess puzzles',
-  timeLimit: 90_000,
+  timeLimit: 45_000,
   feedbackDelay: 1_100,
 
   generateRound(rng) {

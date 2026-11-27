@@ -108,10 +108,10 @@ export const TOPIC_PAGES: TopicPage[] = [
     name: 'Chess puzzles',
     title: 'Chess Puzzles Online – 1v1 Mate in 1 and 2 Races',
     description:
-      'Race an opponent on chess puzzles: mate in 1, mate in 2 and winning material. 90 seconds, one wrong move loses the puzzle. Free in your browser.',
+      'Race an opponent on chess puzzles: mate in 1, mate in 2 and winning material. 45 seconds, one wrong move loses the puzzle. Free in your browser.',
     h1: 'Chess puzzle races, 1v1',
     intro:
-      'Solve as many chess puzzles as you can in 90 seconds while your opponent works through the same puzzles. Every move is checked on the server, so the board is always fair and nobody can use an engine in another tab to gain time.',
+      'Solve as many chess puzzles as you can in 45 seconds while your opponent works through the same puzzles. Every move is checked on the server, so the board is always fair and nobody can use an engine in another tab to gain time.',
     how: [
       'Puzzles are mate in 1, mate in 2 and short tactics that win material.',
       'Each solved puzzle is worth 1,000 points plus a small speed bonus of up to 100.',
@@ -511,7 +511,7 @@ export const KEYWORD_PAGES: TopicPage[] = [
     how: [
       'Both players get exactly the same content in each round, so the faster and more accurate player wins.',
       'Scores update live on both screens during the round.',
-      'Rounds are short: 10 seconds per trivia question, 6 seconds per flag, 90 seconds of chess puzzles, 3 minutes for the cube.',
+      'Rounds are short: 10 seconds per trivia question, 6 seconds per flag, 45 seconds of chess puzzles, 3 minutes for the cube.',
       'Play a friend in a private room: send a 5-character code or a link, and they can join without signing up.',
       'If nobody else is online, you play a recorded duel of a real player, so you never wait.',
     ],
