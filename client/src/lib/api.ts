@@ -16,7 +16,7 @@ export interface League {
 }
 
 export interface Me {
-  user: { id: number; nickname: string; guest: boolean };
+  user: { id: number; nickname: string; guest: boolean; avatar?: string | null };
   ratings: Record<RatingTrack, TrackStats>;
   league: League;
 }
@@ -93,12 +93,19 @@ export const api = {
   me: () => request<Me>('/me'),
   leaderboard: (track: RatingTrack) => request<LeaderboardResponse>(`/leaderboard/${track}`),
   profile: (id: number | 'me') => request<ProfileResponse>(`/profile/${id}`),
+  /** Upload an already cropped/resized photo. */
+  uploadAvatar: (photo: Blob) =>
+    request<{ avatar: string }>('/avatar', { method: 'POST', body: photo, headers: { 'Content-Type': photo.type } }),
+  deleteAvatar: () => request<{ avatar: null }>('/avatar', { method: 'DELETE' }),
+  changePassword: (current: string, next: string) =>
+    request<Me & { token: string }>('/password', { method: 'POST', body: JSON.stringify({ current, next }) }),
 };
 
 export interface LeaderboardEntry {
   rank: number;
   userId: number;
   nickname: string;
+  avatar?: string | null;
   rating: number;
   wins: number;
   losses: number;

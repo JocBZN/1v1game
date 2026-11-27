@@ -22,6 +22,8 @@ export interface SlotInit {
   kind: SlotKind;
   userId: number | null;
   name: string;
+  /** Profile photo URL (humans and ghosts of registered players). */
+  avatar?: string | null;
   /** Snapshot at duel start (humans) or fixed rating (ghost/bot). */
   ratings: Record<RatingTrack, RatingSnap>;
 }
@@ -159,7 +161,7 @@ export class Duel {
   private publicPlayer(slot: Slot) {
     const s = this.slots[slot];
     const r = s.ratings.general.rating;
-    return { name: s.name, rating: Math.round(r), league: leagueFor(r).id, async: s.kind !== 'human' };
+    return { name: s.name, avatar: s.avatar ?? null, rating: Math.round(r), league: leagueFor(r).id, async: s.kind !== 'human' };
   }
 
   private roundWinsFor(slot: Slot): [number, number] {

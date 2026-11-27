@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { createUser, getUserByNickname, getUserByToken, upgradeUser, type User } from './db';
+import { createUser, getUserByNickname, getUserByToken, setPassword, upgradeUser, type User } from './db';
 
 export const NICK_MIN = 3;
 export const NICK_MAX = 16;
@@ -10,7 +10,7 @@ const NICK_RE = /^[\p{L}\p{N}_.-]+$/u;
 
 export type AuthError =
   | 'too_short' | 'too_long' | 'invalid_chars' | 'taken' | 'reserved'
-  | 'weak_password' | 'bad_credentials' | 'already_registered';
+  | 'weak_password' | 'bad_credentials' | 'already_registered' | 'not_registered' | 'same_password';
 
 export function validateNickname(raw: unknown): { ok: true; nickname: string } | { ok: false; error: AuthError } {
   const nickname = typeof raw === 'string' ? raw.trim() : '';
@@ -97,6 +97,25 @@ export function login(rawNick: unknown, rawPass: unknown): { ok: true; user: Use
   const ok = verifyPassword(typeof rawPass === 'string' ? rawPass : '', user?.pass_hash ?? hashPassword('x'));
   if (!user || !user.pass_hash || !ok) return { ok: false, error: 'bad_credentials' };
   return { ok: true, user };
+}
+
+/**
+ * Change the password of a registered account. The current password is required, and the session
+ * token is replaced, so every other device has to log in again with the new password.
+ */
+export function changePassword(
+  user: User,
+  rawCurrent: unknown,
+  rawNext: unknown,
+): { ok: true; user: User } | { ok: false; error: AuthError } {
+  if (user.is_guest || !user.pass_hash) return { ok: false, error: 'not_registered' };
+  if (!verifyPassword(typeof rawCurrent === 'string' ? rawCurrent : '', user.pass_hash)) return { ok: false, error: 'bad_credentials' };
+  if (!validPassword(rawNext)) return { ok: false, error: 'weak_password' };
+  if (rawNext === rawCurrent) return { ok: false, error: 'same_password' };
+  const passHash = hashPassword(rawNext);
+  const token = newToken();
+  setPassword(user.id, passHash, token);
+  return { ok: true, user: { ...user, pass_hash: passHash, token } };
 }
 
 export function authenticate(token: unknown): User | undefined {

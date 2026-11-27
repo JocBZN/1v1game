@@ -64,7 +64,21 @@ const AVATAR_GRADIENTS: [string, string, string][] = [
   ['#ffe1de', '#ff6973', '#46425e'],
 ];
 
-export function Avatar({ name, size = 44, ring }: { name: string; size?: number; ring?: string }) {
+export function Avatar({ name, size = 44, ring, src }: { name: string; size?: number; ring?: string; src?: string | null }) {
+  const ringShadow = ring ? `0 0 0 2px var(--color-bg), 0 0 0 4px ${ring}` : undefined;
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt=""
+        width={size}
+        height={size}
+        draggable={false}
+        className="shrink-0 rounded-full bg-sunken object-cover"
+        style={{ width: size, height: size, boxShadow: ringShadow }}
+      />
+    );
+  }
   let h = 0;
   for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
   const [a, b, fg] = AVATAR_GRADIENTS[h % AVATAR_GRADIENTS.length];

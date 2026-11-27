@@ -1,11 +1,19 @@
 import { capture } from './analytics';
 import express, { type Request, type Response, type NextFunction } from 'express';
-import { authenticate, createGuest, login, register } from './auth';
-import { getLeaderboard, getRank, getRatings, getRecentDuels, getUserById, type User } from './db';
+import { authenticate, changePassword, createGuest, login, register } from './auth';
+import { getLeaderboard, getRank, getRatings, getRecentDuels, getUserById, type User, avatarUrl, deleteAvatar, getAvatar, setAvatar } from './db';
 import { RATING_TRACKS, isRatingTrack, type RatingTrack } from './domains';
 import { leagueFor } from './leagues';
 
 type AuthedRequest = Request & { user?: User };
+
+/** Image type from the file's first bytes (the declared Content-Type is not trusted). */
+export function imageMime(b: Buffer): 'image/jpeg' | 'image/png' | 'image/webp' | null {
+  if (b.length > 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'image/jpeg';
+  if (b.length > 8 && b.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'image/png';
+  if (b.length > 12 && b.toString('ascii', 0, 4) === 'RIFF' && b.toString('ascii', 8, 12) === 'WEBP') return 'image/webp';
+  return null;
+}
 
 function bearer(req: Request): string | undefined {
   const h = req.headers.authorization;
@@ -32,7 +40,7 @@ export function publicRatings(userId: number) {
 function me(user: User) {
   const ratings = publicRatings(user.id);
   return {
-    user: { id: user.id, nickname: user.nickname, guest: !!user.is_guest },
+    user: { id: user.id, nickname: user.nickname, guest: !!user.is_guest, avatar: avatarUrl(user.id, user.avatar_v) },
     ratings,
     league: leagueFor(ratings.general.rating),
   };
@@ -97,6 +105,7 @@ export function createApi() {
       rank: i + 1,
       userId: r.user_id,
       nickname: r.nickname,
+      avatar: avatarUrl(r.user_id, r.avatar_v),
       rating: Math.round(r.rating),
       wins: r.wins,
       losses: r.losses,
@@ -111,12 +120,54 @@ export function createApi() {
           rank: getRank(track, mine.rating),
           userId: req.user!.id,
           nickname: req.user!.nickname,
+          avatar: avatarUrl(req.user!.id, req.user!.avatar_v),
           rating: Math.round(mine.rating),
           wins: mine.wins, losses: mine.losses, draws: mine.draws, games: mine.games,
           league: leagueFor(mine.rating).id,
         }
       : null;
     res.json({ track, rows, me: myEntry, guest: !!req.user!.is_guest });
+  });
+
+  // ---- profile photo ----
+  // The browser crops and shrinks the photo to 256×256 before sending it, so 300 KB is plenty.
+  api.post(
+    '/avatar',
+    rateLimit(20, 10 * 60_000),
+    requireAuth,
+    express.raw({ type: ['image/jpeg', 'image/png', 'image/webp'], limit: '300kb' }),
+    (req: AuthedRequest, res) => {
+      if (req.user!.is_guest) return res.status(403).json({ error: 'not_registered' });
+      const data = Buffer.isBuffer(req.body) ? req.body : null;
+      const mime = data ? imageMime(data) : null;
+      if (!data || !mime) return res.status(400).json({ error: 'bad_image' });
+      const v = setAvatar(req.user!.id, mime, data);
+      res.json({ avatar: avatarUrl(req.user!.id, v) });
+    },
+  );
+
+  api.delete('/avatar', requireAuth, (req: AuthedRequest, res) => {
+    deleteAvatar(req.user!.id);
+    res.json({ avatar: null });
+  });
+
+  // Public: photos appear on the leaderboard and in duels. The ?v= in the URL changes on every upload.
+  api.get('/avatar/:id', (req, res) => {
+    const id = Number(req.params.id);
+    const a = Number.isInteger(id) ? getAvatar(id) : undefined;
+    if (!a) return res.status(404).end();
+    res.setHeader('Content-Type', a.mime);
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+    res.send(a.data);
+  });
+
+  // ---- password ----
+  api.post('/password', rateLimit(10, 10 * 60_000), requireAuth, (req: AuthedRequest, res) => {
+    const r = changePassword(req.user!, req.body?.current, req.body?.next);
+    if (!r.ok) return res.status(r.error === 'bad_credentials' ? 401 : 400).json({ error: r.error });
+    res.json({ token: r.user.token, ...me(r.user) });
   });
 
   api.get('/profile/:id', requireAuth, (req: AuthedRequest, res) => {

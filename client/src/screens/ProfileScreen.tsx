@@ -4,6 +4,7 @@ import { api, type Me, type ProfileResponse } from '../lib/api';
 import { DOMAINS, DOMAIN_LIST, type DomainId } from '../lib/domains';
 import { AsyncTag, Avatar, LeagueBadge, PageHeader, Screen, TopicIcon } from '../components/ui';
 import { SignupPrompt } from '../components/SignupPrompt';
+import { PasswordCard, PhotoPicker } from '../components/ProfileSettings';
 
 function timeAgo(ts: number): string {
   const s = Math.floor((Date.now() - ts) / 1000);
@@ -27,8 +28,9 @@ function Stat({ value, label }: { value: React.ReactNode; label: string }) {
   );
 }
 
-export function ProfileScreen({ me, onBack, onSignup, onLogin, onLogout }: {
+export function ProfileScreen({ me, onBack, onSignup, onLogin, onLogout, onMeChange }: {
   me: Me;
+  onMeChange: (me: Me) => void;
   onBack: () => void;
   onSignup: () => void;
   onLogin: () => void;
@@ -52,7 +54,7 @@ export function ProfileScreen({ me, onBack, onSignup, onLogin, onLogout }: {
 
       <section className="card mt-4 p-5 animate-rise">
         <div className="flex items-center gap-4">
-          <Avatar name={data.user.nickname} size={56} />
+          <PhotoPicker me={me} onChange={(avatar) => onMeChange({ ...me, user: { ...me.user, avatar } })} />
           <div className="min-w-0">
             <div className="truncate text-xl font-semibold">{data.user.nickname}</div>
             <div className="mt-0.5">
@@ -86,6 +88,13 @@ export function ProfileScreen({ me, onBack, onSignup, onLogin, onLogout }: {
             onLogin={onLogin}
           />
         </div>
+      )}
+
+      {!me.user.guest && (
+        <>
+          <h2 className="label mt-7 mb-2">Account</h2>
+          <PasswordCard onChanged={onMeChange} />
+        </>
       )}
 
       <h2 className="label mt-7 mb-2">By topic</h2>

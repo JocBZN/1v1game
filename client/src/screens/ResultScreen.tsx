@@ -49,7 +49,7 @@ function celebrate() {
 }
 
 /** One side of the final score: light panel for you, dark slate for the opponent (same as the home face-off). */
-function Side({ name, wins, side, won, extra }: { name: string; wins: number; side: 'me' | 'foe'; won: boolean; extra?: ReactNode }) {
+function Side({ name, avatar, wins, side, won, extra }: { name: string; avatar?: string | null; wins: number; side: 'me' | 'foe'; won: boolean; extra?: ReactNode }) {
   const me = side === 'me';
   return (
     <motion.div
@@ -68,7 +68,7 @@ function Side({ name, wins, side, won, extra }: { name: string; wins: number; si
           <Crown size={15} strokeWidth={2.6} />
         </motion.span>
       )}
-      <Avatar name={name} size={52} ring={me ? 'var(--color-teal)' : 'var(--color-red)'} />
+      <Avatar name={name} src={avatar} size={52} ring={me ? 'var(--color-teal)' : 'var(--color-red)'} />
       <div className="max-w-full truncate text-sm font-bold">{name}</div>
       <div className={`font-display text-5xl font-bold leading-none tabular-nums ${me ? 'text-me' : 'text-red'}`}>{wins}</div>
       <div className={`text-[11px] font-semibold ${me ? 'text-muted' : 'opacity-70'}`}>rounds won</div>
@@ -151,10 +151,11 @@ export function ResultScreen({ me, found, result, room, onAgain, onLeaderboard, 
 
   const faceOff = (
     <div className="flex items-stretch gap-2 sm:gap-3">
-      <Side name={found?.you.name ?? 'You'} wins={result.roundWins[0]} side="me" won={win} />
+      <Side name={found?.you.name ?? 'You'} avatar={found?.you.avatar} wins={result.roundWins[0]} side="me" won={win} />
       <div className="relative z-10 shrink-0 self-center"><VsBubble size={52} /></div>
       <Side
         name={result.opponent.name}
+        avatar={result.opponent.avatar}
         wins={result.roundWins[1]}
         side="foe"
         won={loss}

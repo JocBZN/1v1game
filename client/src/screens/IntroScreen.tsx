@@ -54,7 +54,7 @@ function Reel({ domain }: { domain: DomainId }) {
   );
 }
 
-function Fighter({ name, league, side }: { name: string; league: Found['you']['league']; side: 'me' | 'foe' }) {
+function Fighter({ name, avatar, league, side }: { name: string; avatar?: string | null; league: Found['you']['league']; side: 'me' | 'foe' }) {
   return (
     <motion.div
       initial={{ x: side === 'me' ? -60 : 60, opacity: 0 }}
@@ -62,7 +62,7 @@ function Fighter({ name, league, side }: { name: string; league: Found['you']['l
       transition={{ type: 'spring', stiffness: 220, damping: 20 }}
       className={`flex min-w-0 flex-1 flex-col items-center gap-2 rounded-3xl px-3 py-4 ${side === 'me' ? 'bg-surface/85 shadow-[0_10px_30px_-18px_rgb(70_66_94/0.5)]' : 'bg-slate text-cream'}`}
     >
-      <Avatar name={name} size={60} ring={side === 'me' ? 'var(--color-teal)' : 'var(--color-red)'} />
+      <Avatar name={name} src={avatar} size={60} ring={side === 'me' ? 'var(--color-teal)' : 'var(--color-red)'} />
       <div className="max-w-full truncate font-display text-lg font-bold">{name}</div>
       <span className={side === 'foe' ? 'rounded-full bg-cream/90' : ''}><LeagueBadge league={league} small /></span>
     </motion.div>
@@ -72,7 +72,7 @@ function Fighter({ name, league, side }: { name: string; league: Found['you']['l
 export function VsHeader({ found, roundWins }: { found: Found; roundWins: [number, number] }) {
   return (
     <div className="flex items-center justify-between gap-2 sm:gap-3">
-      <Fighter name={found.you.name} league={found.you.league} side="me" />
+      <Fighter name={found.you.name} avatar={found.you.avatar} league={found.you.league} side="me" />
       <motion.div
         initial={{ scale: 2.2, opacity: 0, rotate: -12 }}
         animate={{ scale: 1, opacity: 1, rotate: 0 }}
@@ -83,7 +83,7 @@ export function VsHeader({ found, roundWins }: { found: Found; roundWins: [numbe
           <span className="mt-1 text-[13px] tabular-nums opacity-90">{roundWins[0]}:{roundWins[1]}</span>
         </VsBubble>
       </motion.div>
-      <Fighter name={found.opponent.name} league={found.opponent.league} side="foe" />
+      <Fighter name={found.opponent.name} avatar={found.opponent.avatar} league={found.opponent.league} side="foe" />
     </div>
   );
 }

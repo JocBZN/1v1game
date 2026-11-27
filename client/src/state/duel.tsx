@@ -5,6 +5,7 @@ import { getSocket } from '../lib/socket';
 
 export interface PlayerInfo {
   name: string;
+  avatar?: string | null;
   rating: number;
   league: League['id'];
   async: boolean;

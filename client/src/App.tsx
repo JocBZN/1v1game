@@ -219,7 +219,7 @@ function Game({ me, refreshMe, onAuthDone, onLogout }: {
     );
   }
   if (route === 'leaderboard') return <LeaderboardScreen me={me} onBack={() => go('home')} onSignup={toSignup} onLogin={toLogin} />;
-  if (route === 'profile') return <ProfileScreen me={me} onBack={() => go('home')} onSignup={toSignup} onLogin={toLogin} onLogout={onLogout} />;
+  if (route === 'profile') return <ProfileScreen me={me} onBack={() => go('home')} onSignup={toSignup} onLogin={toLogin} onLogout={onLogout} onMeChange={onAuthDone} />;
   return <HomeScreen me={me} connected={state.connected} onPlay={duel.play} onNavigate={go} />;
 }
 

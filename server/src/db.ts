@@ -116,6 +116,15 @@ addColumn('round_recordings', 'content_version', 'INTEGER NOT NULL DEFAULT 1');
 // accounts (no password, not guests) keep working and can set a password by registering.
 addColumn('users', 'is_guest', 'INTEGER NOT NULL DEFAULT 0');
 addColumn('users', 'pass_hash', 'TEXT');
+// Profile photo version (ms timestamp of the last upload), null = no photo. Part of the photo URL, so
+// browsers can cache a photo forever and still see a new one right away.
+addColumn('users', 'avatar_v', 'INTEGER');
+db.exec(`
+CREATE TABLE IF NOT EXISTS avatars (
+  user_id  INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  mime     TEXT NOT NULL,
+  data     BLOB NOT NULL
+);`);
 
 // ---------- users ----------
 
@@ -126,6 +135,7 @@ export interface User {
   created_at: number;
   is_guest: number;
   pass_hash: string | null;
+  avatar_v?: number | null;
 }
 
 const stmtInsertUser = db.prepare('INSERT INTO users (nickname, token, created_at, is_guest, pass_hash) VALUES (?, ?, ?, ?, ?)');
@@ -168,6 +178,35 @@ const stmtUserByNick = db.prepare('SELECT * FROM users WHERE nickname = ?');
 export const getUserByToken = (token: string) => stmtUserByToken.get(token) as User | undefined;
 export const getUserById = (id: number) => stmtUserById.get(id) as User | undefined;
 export const getUserByNickname = (nick: string) => stmtUserByNick.get(nick) as User | undefined;
+
+// ---------- profile photo + password ----------
+
+/** Public URL of a user's photo, or null. */
+export const avatarUrl = (userId: number, v: number | null | undefined) => (v ? `/api/avatar/${userId}?v=${v}` : null);
+
+const stmtPutAvatar = db.prepare('INSERT INTO avatars (user_id, mime, data) VALUES (?, ?, ?) ON CONFLICT(user_id) DO UPDATE SET mime = excluded.mime, data = excluded.data');
+const stmtAvatarV = db.prepare('UPDATE users SET avatar_v = ? WHERE id = ?');
+const stmtDelAvatar = db.prepare('DELETE FROM avatars WHERE user_id = ?');
+const stmtGetAvatar = db.prepare('SELECT mime, data FROM avatars WHERE user_id = ?');
+
+/** Store a photo; returns its new version. */
+export const setAvatar = db.transaction((userId: number, mime: string, data: Buffer): number => {
+  const v = Date.now();
+  stmtPutAvatar.run(userId, mime, data);
+  stmtAvatarV.run(v, userId);
+  return v;
+});
+export const deleteAvatar = db.transaction((userId: number) => {
+  stmtDelAvatar.run(userId);
+  stmtAvatarV.run(null, userId);
+});
+export const getAvatar = (userId: number) => stmtGetAvatar.get(userId) as { mime: string; data: Buffer } | undefined;
+
+const stmtSetPassword = db.prepare('UPDATE users SET pass_hash = ?, token = ? WHERE id = ?');
+/** New password and a new session token (other devices are signed out). */
+export function setPassword(userId: number, passHash: string, token: string) {
+  stmtSetPassword.run(passHash, token, userId);
+}
 
 // ---------- ratings ----------
 
@@ -223,6 +262,7 @@ export function saveRating(row: RatingRow) {
 export interface LeaderboardRow {
   user_id: number;
   nickname: string;
+  avatar_v: number | null;
   rating: number;
   wins: number;
   losses: number;
@@ -231,7 +271,7 @@ export interface LeaderboardRow {
 }
 
 const stmtTop = db.prepare(`
-  SELECT r.user_id, u.nickname, r.rating, r.wins, r.losses, r.draws, r.games
+  SELECT r.user_id, u.nickname, u.avatar_v, r.rating, r.wins, r.losses, r.draws, r.games
   FROM ratings r JOIN users u ON u.id = r.user_id
   WHERE r.track = ? AND r.games > 0 AND u.is_guest = 0
   ORDER BY r.rating DESC, r.games DESC, u.id ASC

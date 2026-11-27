@@ -5,7 +5,7 @@ import { useDuel } from '../state/duel';
 import { AsyncTag, Avatar, SecondsLeft, TopicIcon, useAnimatedNumber, useNow } from '../components/ui';
 import { FloatingShapes, VsBubble } from '../components/Fun';
 
-function LiveScore({ name, score, side, async: isAsync, sub }: { name: string; score: number; side: 'me' | 'foe'; async?: boolean; sub?: string }) {
+function LiveScore({ name, avatar, score, side, async: isAsync, sub }: { name: string; avatar?: string | null; score: number; side: 'me' | 'foe'; async?: boolean; sub?: string }) {
   const shown = useAnimatedNumber(score);
   const prev = useRef(score);
   const [bump, setBump] = useState(0);
@@ -18,7 +18,7 @@ function LiveScore({ name, score, side, async: isAsync, sub }: { name: string; s
     <div
       className={`flex min-w-0 flex-1 items-center gap-2 rounded-3xl p-2.5 ${side === 'foe' ? 'flex-row-reverse bg-slate pr-2.5 text-right text-cream' : 'bg-surface/90 shadow-[0_10px_30px_-18px_rgb(70_66_94/0.5)]'}`}
     >
-      <Avatar name={name} size={34} ring={side === 'me' ? 'var(--color-teal)' : 'var(--color-red)'} />
+      <Avatar name={name} src={avatar} size={34} ring={side === 'me' ? 'var(--color-teal)' : 'var(--color-red)'} />
       <div className="min-w-0">
         <div className={`truncate text-xs font-medium ${side === 'foe' ? 'opacity-70' : 'text-muted'}`}>{name}</div>
         <div key={bump} className={`font-display text-3xl font-bold tabular-nums leading-tight tracking-tight ${color} ${bump ? 'animate-score' : ''}`}>{shown}</div>
@@ -54,11 +54,11 @@ export function RoundScreen() {
       {/* Live scoreboard */}
       <div>
         <div className="flex items-center gap-2">
-          <LiveScore name={found.you.name} score={scores.you} side="me" />
+          <LiveScore name={found.you.name} avatar={found.you.avatar} score={scores.you} side="me" />
           <div className="relative z-10 shrink-0"><VsBubble size={46} still>
             <span className="mt-0.5 text-[11px] tabular-nums opacity-90">{state.roundWins[0]}:{state.roundWins[1]}</span>
           </VsBubble></div>
-          <LiveScore name={found.opponent.name} score={scores.opponent} side="foe" async={found.opponent.async} sub={oppSub} />
+          <LiveScore name={found.opponent.name} avatar={found.opponent.avatar} score={scores.opponent} side="foe" async={found.opponent.async} sub={oppSub} />
         </div>
         <div className="mt-2.5 flex items-center gap-2.5 rounded-full py-1 pl-1 pr-3" style={{ background: meta.soft }} title={meta.name}>
           <TopicIcon domain={round.domain} size={26} solid />

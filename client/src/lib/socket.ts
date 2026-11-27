@@ -15,6 +15,16 @@ export function getSocket(): Socket {
   return socket;
 }
 
+/**
+ * Same account, new session token (after a password change): keep the open connection, which the
+ * server already trusts, and use the new token when it next reconnects.
+ */
+export function updateSocketToken(token: string) {
+  if (!socket) return;
+  socket.auth = { token };
+  socketToken = token;
+}
+
 export function closeSocket() {
   socket?.close();
   socket = null;
