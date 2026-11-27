@@ -5,12 +5,14 @@ import flagFontUrl from 'country-flag-emoji-polyfill/dist/TwemojiCountryFlags.wo
 import App from './App';
 import { initAnalytics } from './lib/analytics';
 import { initPwa } from './lib/pwa';
+import { installButtonSounds } from './lib/sound';
 import './index.css';
 
 // Windows doesn't render flag emoji; load a bundled (self-hosted) flag font only when needed.
 polyfillCountryFlagEmojis('Twemoji Country Flags', flagFontUrl);
 initAnalytics();
 initPwa();
+installButtonSounds();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

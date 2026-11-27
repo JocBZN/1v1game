@@ -17,6 +17,7 @@ import { SelectGameScreen } from './screens/SelectGameScreen';
 import { IntroSplash, shouldShowIntro } from './components/IntroSplash';
 import { ConsentBanner } from './components/ConsentBanner';
 import { pageview, track, identifyUser, resetUser } from './lib/analytics';
+import { play } from './lib/sound';
 
 export type Route = 'home' | 'leaderboard' | 'profile' | 'signup' | 'login' | 'friend' | 'games';
 
@@ -93,6 +94,7 @@ function Game({ me, refreshMe, onAuthDone, onLogout }: {
       track('round_end', { topic: state.roundEnd.domain, outcome: state.roundEnd.winner === 'you' ? 'won' : state.roundEnd.winner === 'opponent' ? 'lost' : 'tie' });
     }
     if (state.phase === 'result' && state.result) {
+      play(state.result.result === 'win' ? 'win' : state.result.result === 'loss' ? 'lose' : 'draw');
       track('duel_end', { result: state.result.result, forfeit: state.result.forfeit ?? 'none', opponent: state.result.opponent.async ? 'async' : 'live', who });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

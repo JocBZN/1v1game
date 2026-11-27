@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { play } from '../lib/sound';
 import { Chess, type Square } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import { Check } from 'lucide-react';
@@ -15,6 +16,12 @@ interface PuzzleItem {
 }
 
 type Status = 'thinking' | 'pending' | 'opponent' | 'solved' | 'failed';
+
+/** Wooden piece sounds: a knock for a move, a sharper one for a capture, a small ping for check. */
+function moveSound(captured: unknown, check: boolean) {
+  play(captured ? 'chessCapture' : 'chessMove');
+  if (check) play('chessCheck');
+}
 
 export function ChessRound({ item, feedback, onAnswer, waiting }: ModeProps<PuzzleItem>) {
   const chessRef = useRef(new Chess(item?.data.fen));
@@ -42,10 +49,12 @@ export function ChessRound({ item, feedback, onAnswer, waiting }: ModeProps<Puzz
   useEffect(() => {
     if (!feedback || !item || feedback.item !== item.item || feedback.round !== item.round) return;
     if (feedback.solved) {
+      play('correct');
       setStatus('solved');
       setSolvedCount((c) => c + 1);
       setToast({ text: `Solved! +${feedback.points}`, good: true, seq: feedback.seq });
     } else if (feedback.failed) {
+      play('wrong');
       setStatus('failed');
       const sol = feedback.solution as string | undefined;
       if (sol) setHint([sol.slice(0, 2), sol.slice(2, 4)]);
@@ -55,7 +64,8 @@ export function ChessRound({ item, feedback, onAnswer, waiting }: ModeProps<Puzz
       setStatus('opponent');
       const t = setTimeout(() => {
         try {
-          chessRef.current.move({ from: reply.slice(0, 2), to: reply.slice(2, 4), promotion: reply[4] });
+          const m = chessRef.current.move({ from: reply.slice(0, 2), to: reply.slice(2, 4), promotion: reply[4] });
+          moveSound(m.captured, chessRef.current.inCheck());
           setFen(chessRef.current.fen());
           setLastMove([reply.slice(0, 2), reply.slice(2, 4)]);
         } catch {
@@ -76,7 +86,8 @@ export function ChessRound({ item, feedback, onAnswer, waiting }: ModeProps<Puzz
     if (!piece || piece.color !== myColor) return false;
     const promotion = piece.type === 'p' && (to[1] === '8' || to[1] === '1') ? 'q' : undefined;
     try {
-      chess.move({ from, to, promotion });
+      const m = chess.move({ from, to, promotion });
+      moveSound(m.captured, chess.inCheck());
     } catch {
       return false; // illegal: just snap back, no penalty
     }
@@ -117,7 +128,7 @@ export function ChessRound({ item, feedback, onAnswer, waiting }: ModeProps<Puzz
         <span className="flex items-center gap-1 font-bold text-cyan-strong"><Check size={15} strokeWidth={3} /> {solvedCount}</span>
       </div>
 
-      <div className="relative w-full max-w-[min(100%,420px)]">
+      <div className="relative w-full max-w-[min(100%,420px)]" data-no-tap-sound>
         <div className={`overflow-hidden rounded-xl transition-shadow ${status === 'failed' ? 'animate-shake' : ''}`} style={{ boxShadow: frame }}>
           <Chessboard
             options={{

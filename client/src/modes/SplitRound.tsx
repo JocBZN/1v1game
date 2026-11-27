@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import { play } from '../lib/sound';
 import { cutRegion, type Poly, type Pt } from '../../../server/src/modes/shapes';
 import type { ModeProps } from './types';
 import { ItemHeader, WaitingNote, currentFeedback } from './ItemHeader';
@@ -89,6 +90,7 @@ export function SplitRound({ item, feedback, onAnswer, waiting }: ModeProps<Spli
       return;
     }
     setStroke([...done]);
+    play('cut');
     setSent(true);
     onAnswer({ pts: done.map(([x, y]) => [Math.round(x * 100) / 100, Math.round(y * 100) / 100]) });
   };

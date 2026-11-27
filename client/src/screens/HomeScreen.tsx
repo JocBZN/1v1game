@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { SoundToggle } from '../components/SoundToggle';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, Crown, Download, LogIn, Trophy, UserPlus, Users } from 'lucide-react';
 import type { Route } from '../App';
@@ -155,12 +156,17 @@ export function HomeScreen({ me, onPlay, onNavigate, connected }: {
   const { canInstall, install } = useInstallPrompt();
   const guest = me.user.guest;
 
-  const account = guest ? (
+  const account = (
     <div className="flex items-center gap-1.5">
-      <button onClick={() => onNavigate('login')} className="btn btn-ghost h-9 px-2 text-sm"><LogIn size={15} /> Log in</button>
-      <button onClick={() => onNavigate('signup')} className="btn btn-primary h-9 rounded-full px-3.5 text-sm"><UserPlus size={15} /> Sign up</button>
+      <SoundToggle />
+      {guest && (
+        <>
+          <button onClick={() => onNavigate('login')} className="btn btn-ghost h-9 px-2 text-sm"><LogIn size={15} /> Log in</button>
+          <button onClick={() => onNavigate('signup')} className="btn btn-primary h-9 rounded-full px-3.5 text-sm"><UserPlus size={15} /> Sign up</button>
+        </>
+      )}
     </div>
-  ) : null;
+  );
 
   const secondary = (
     <div className="grid grid-cols-2 gap-3">

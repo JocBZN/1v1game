@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { play } from '../lib/sound';
 import * as THREE from 'three';
 // Same pure model the server uses to validate moves, so the local view can never drift from the server.
 import { applyMove, goalProgress, type Axis, type CubeGoal, type CubeMove, type Sticker, type Vec3 } from '../../../server/src/cube/model';
@@ -302,7 +303,10 @@ class CubeView {
   turn(m: CubeMove, fromUser: boolean) {
     if (this.animating) return;
     this.animating = true;
-    if (fromUser) this.onMove(m);
+    if (fromUser) {
+      play('cubeTurn');
+      this.onMove(m);
+    }
     const k = AXES.indexOf(m.axis);
     const pivot = new THREE.Group();
     this.cube.add(pivot);
@@ -384,7 +388,10 @@ export function CubeRound({ item, feedback, onAnswer }: ModeProps<CubeItemData>)
   useEffect(() => {
     if (!feedback || !item || feedback.round !== item.round) return;
     if (typeof feedback.progress === 'number') setProgress(feedback.progress);
-    if (feedback.solved) setDone(true);
+    if (feedback.solved) {
+      setDone(true);
+      play('correct');
+    }
   }, [feedback?.seq]);
 
   if (!item) return <div className="m-auto text-muted">…</div>;

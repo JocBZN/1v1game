@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { play } from '../lib/sound';
 import { motion, useReducedMotion } from 'motion/react';
 import { BALL_R, HOLE_R, pathDurationMs, type Course, type Pt } from '../../../server/src/golf/physics';
 import type { ModeProps } from './types';
@@ -26,6 +27,21 @@ function pointAt(path: readonly Pt[], f: number): Pt {
   const a = path[i];
   const b = path[i + 1];
   return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+}
+
+/** Fractions (0..1) along a shot path where it turns sharply, i.e. where the ball hit a wall. */
+function bounceFractions(path: readonly Pt[]): number[] {
+  const out: number[] = [];
+  for (let i = 1; i < path.length - 2; i++) {
+    const a = [path[i][0] - path[i - 1][0], path[i][1] - path[i - 1][1]];
+    const b = [path[i + 1][0] - path[i][0], path[i + 1][1] - path[i][1]];
+    const la = Math.hypot(a[0], a[1]);
+    const lb = Math.hypot(b[0], b[1]);
+    if (la < 0.3 || lb < 0.3) continue; // nearly stopped: no audible hit
+    const cos = (a[0] * b[0] + a[1] * b[1]) / (la * lb);
+    if (cos < 0.5 && (out.length === 0 || i / (path.length - 1) - out[out.length - 1] > 0.03)) out.push(i / (path.length - 1));
+  }
+  return out;
 }
 
 const SPARKS = Array.from({ length: 8 }, (_, i) => (i / 8) * Math.PI * 2 + 0.2);
@@ -77,11 +93,18 @@ export function GolfRound({ item, feedback, onAnswer, waiting }: ModeProps<GolfD
     }
     const dur = Math.max(1, pathDurationMs(path));
     setRolling(true);
+    // A wall hit shows up as a sharp turn in the path: tick at those moments.
+    const bounces = bounceFractions(path);
+    let nextBounce = 0;
     const t0 = performance.now();
     let raf = 0;
     const step = (now: number) => {
       const f = Math.min(1, (now - t0) / dur);
       placeBall(pointAt(path, f));
+      while (nextBounce < bounces.length && bounces[nextBounce] <= f) {
+        play('bounce');
+        nextBounce++;
+      }
       if (f < 1) {
         raf = requestAnimationFrame(step);
         return;
@@ -91,7 +114,10 @@ export function GolfRound({ item, feedback, onAnswer, waiting }: ModeProps<GolfD
       setBallState(end);
       setRolling(false);
       setStrokes(feedback.strokes as number);
-      if (feedback.holed) setSunk(true);
+      if (feedback.holed) {
+        setSunk(true);
+        play('hole');
+      }
       if (!feedback.itemDone) setBusy(false);
     };
     raf = requestAnimationFrame(step);
@@ -143,6 +169,7 @@ export function GolfRound({ item, feedback, onAnswer, waiting }: ModeProps<GolfD
     setAim(null);
     if (!a || locked || a.power < MIN_POWER) return;
     setBusy(true);
+    play('putt');
     sentSeq.current = feedback?.seq ?? 0;
     onAnswer({ angle: a.angle, power: a.power });
   };

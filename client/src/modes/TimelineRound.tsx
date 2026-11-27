@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { play } from '../lib/sound';
 import { Reorder } from 'motion/react';
 import { GripVertical } from 'lucide-react';
 import type { ModeProps } from './types';
@@ -61,6 +62,8 @@ export function TimelineRound({ item, feedback, onAnswer, waiting }: ModeProps<T
               key={idx}
               value={idx}
               dragListener={!locked}
+              onDragStart={() => play('pickUp')}
+              onDragEnd={() => play('drop')}
               className={cn(
                 'flex min-h-16 touch-none select-none items-center gap-3 rounded-2xl border bg-surface px-3 py-3',
                 locked ? 'cursor-default' : 'cursor-grab active:cursor-grabbing',

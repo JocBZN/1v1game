@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
+import { SoundToggle } from '../components/SoundToggle';
 import { DOMAINS } from '../lib/domains';
 import { MODE_COMPONENTS } from '../modes/registry';
 import { useDuel } from '../state/duel';
@@ -84,7 +85,8 @@ export function RoundScreen() {
         )}
       </div>
 
-      <div className="flex justify-center pb-1">
+      <div className="relative flex justify-center pb-1">
+        <SoundToggle className="absolute left-0 top-1/2 h-7 w-7 -translate-y-1/2" />
         {confirmQuit ? (
           <div className="flex items-center gap-3 text-xs">
             <span className="text-muted">Forfeit the duel?</span>
