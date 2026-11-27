@@ -188,3 +188,114 @@ export function placeShape(polys: readonly Poly[], angleDeg: number, mirror: boo
   const oy = 50 - ((minY + maxY) / 2) * k;
   return moved.map((p) => p.map(([x, y]) => [Math.round((x * k + ox) * 100) / 100, Math.round((y * k + oy) * 100) / 100] as Pt));
 }
+
+// ------------------------------------------------------------------ freehand cuts
+
+/** Far-away box used to close a cut into a region; nothing of the 100×100 board is near it. */
+const FAR = { min: -1000, max: 1100 };
+
+/** Where the ray from `p` in direction `d` leaves the far box. */
+function rayToFarBox(p: Pt, d: Pt): Pt {
+  const len = Math.hypot(d[0], d[1]) || 1;
+  const ux = d[0] / len;
+  const uy = d[1] / len;
+  let t = Infinity;
+  if (ux > 1e-9) t = Math.min(t, (FAR.max - p[0]) / ux);
+  if (ux < -1e-9) t = Math.min(t, (FAR.min - p[0]) / ux);
+  if (uy > 1e-9) t = Math.min(t, (FAR.max - p[1]) / uy);
+  if (uy < -1e-9) t = Math.min(t, (FAR.min - p[1]) / uy);
+  if (!Number.isFinite(t)) t = 0;
+  return [p[0] + ux * t, p[1] + uy * t];
+}
+
+/** Position along the far box's border (0..4), going round clockwise from the top-left corner. */
+function borderPos([x, y]: Pt): number {
+  const w = FAR.max - FAR.min;
+  const e = 1e-6;
+  if (Math.abs(y - FAR.min) < e) return (x - FAR.min) / w;
+  if (Math.abs(x - FAR.max) < e) return 1 + (y - FAR.min) / w;
+  if (Math.abs(y - FAR.max) < e) return 2 + (FAR.max - x) / w;
+  return 3 + (FAR.max - y) / w;
+}
+
+const FAR_CORNERS: Pt[] = [[FAR.max, FAR.min], [FAR.max, FAR.max], [FAR.min, FAR.max], [FAR.min, FAR.min]];
+
+/** Direction of the stroke at one end, from a point a few units away (smoother than the last segment). */
+function endDirection(stroke: readonly Pt[], atEnd: boolean): Pt {
+  const n = stroke.length;
+  const tip = atEnd ? stroke[n - 1] : stroke[0];
+  for (let k = 1; k < n; k++) {
+    const q = atEnd ? stroke[n - 1 - k] : stroke[k];
+    if (Math.hypot(tip[0] - q[0], tip[1] - q[1]) >= 6 || k === n - 1) return [tip[0] - q[0], tip[1] - q[1]];
+  }
+  return [1, 0];
+}
+
+/**
+ * A drawn cut (any polyline) becomes one side of the board: the stroke is extended straight past
+ * both ends to a far box and closed around that box. With the even-odd rule this splits the plane in
+ * two even when the stroke wiggles or crosses itself. A two-point stroke is exactly the old straight cut.
+ */
+export function cutRegion(stroke: readonly Pt[]): Pt[] {
+  const start = rayToFarBox(stroke[0], endDirection(stroke, false));
+  const end = rayToFarBox(stroke[stroke.length - 1], endDirection(stroke, true));
+  const out: Pt[] = [start, ...stroke, end];
+  // Walk clockwise along the far box from `end` back to `start`.
+  const from = borderPos(end);
+  let to = borderPos(start);
+  if (to <= from) to += 4;
+  for (let c = Math.floor(from) + 1; c <= to; c++) {
+    if (c < to) out.push(FAR_CORNERS[(c - 1) % 4]);
+  }
+  return out;
+}
+
+export function pointInPoly([x, y]: Pt, p: readonly Pt[]): boolean {
+  let inside = false;
+  for (let i = 0, j = p.length - 1; i < p.length; j = i++) {
+    const [xi, yi] = p[i];
+    const [xj, yj] = p[j];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+/** Share (0..1) of the shape's area inside `region` (even-odd), sampled on a fine grid per piece. */
+export function regionShare(polys: readonly Poly[], region: readonly Pt[], grid = 160): number {
+  let total = 0;
+  let inRegion = 0;
+  for (const p of polys) {
+    const area = polyArea(p);
+    if (area <= 0) continue;
+    const xs = p.map((q) => q[0]);
+    const ys = p.map((q) => q[1]);
+    const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+    const sx = (x1 - x0) / grid;
+    const sy = (y1 - y0) / grid;
+    let inside = 0;
+    let hit = 0;
+    for (let i = 0; i < grid; i++) {
+      for (let j = 0; j < grid; j++) {
+        const q: Pt = [x0 + (i + 0.5) * sx, y0 + (j + 0.5) * sy];
+        if (!pointInPoly(q, p)) continue;
+        inside++;
+        if (pointInPoly(q, region)) hit++;
+      }
+    }
+    total += area;
+    if (inside > 0) inRegion += (area * hit) / inside;
+  }
+  return total > 0 ? inRegion / total : 0;
+}
+
+/** Drop points closer than `minGap` to the previous kept one (keeps the last point). */
+export function thinStroke(stroke: readonly Pt[], minGap = 0.6): Pt[] {
+  const out: Pt[] = [];
+  for (const q of stroke) {
+    const last = out[out.length - 1];
+    if (!last || Math.hypot(q[0] - last[0], q[1] - last[1]) >= minGap) out.push(q);
+  }
+  const tail = stroke[stroke.length - 1];
+  if (out.length && out[out.length - 1] !== tail) out[out.length - 1] = tail;
+  return out;
+}

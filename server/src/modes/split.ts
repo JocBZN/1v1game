@@ -1,4 +1,4 @@
-import { SHAPES, placeShape, splitShare, type Poly, type Pt } from './shapes';
+import { SHAPES, cutRegion, placeShape, regionShare, thinStroke, type Poly, type Pt } from './shapes';
 import { isNum, simulateItemBot } from './sim';
 import { sumScore, type GameMode, type RoundContent } from './types';
 
@@ -28,6 +28,36 @@ export function parseLine(x: unknown): [Pt, Pt] | null {
   return [a, b];
 }
 
+/** Longest stroke accepted (points after thinning); a fast scribble across the board is ~150. */
+export const MAX_STROKE_POINTS = 400;
+
+/**
+ * A cut drawn with the mouse or a finger: `{ pts: [[x, y], …] }` in board units (0..100).
+ * The older straight-line answer `{ x1, y1, x2, y2 }` is still accepted as a two-point stroke.
+ */
+export function parseStroke(x: unknown): Pt[] | null {
+  if (!x || typeof x !== 'object') return null;
+  const raw = (x as { pts?: unknown }).pts;
+  if (raw === undefined) return parseLine(x);
+  if (!Array.isArray(raw) || raw.length < 2 || raw.length > 4 * MAX_STROKE_POINTS) return null;
+  const pts: Pt[] = [];
+  for (const q of raw) {
+    if (!Array.isArray(q) || q.length !== 2 || !isNum(q[0]) || !isNum(q[1])) return null;
+    if (Math.abs(q[0]) > 1000 || Math.abs(q[1]) > 1000) return null;
+    pts.push([q[0], q[1]]);
+  }
+  const stroke = thinStroke(pts);
+  if (stroke.length < 2 || stroke.length > MAX_STROKE_POINTS) return null;
+  let len = 0;
+  for (let i = 1; i < stroke.length; i++) len += Math.hypot(stroke[i][0] - stroke[i - 1][0], stroke[i][1] - stroke[i - 1][1]);
+  return len >= 2 ? stroke : null;
+}
+
+/** Share of the shape on one side of a drawn cut. */
+export function strokeShare(polys: readonly Poly[], stroke: readonly Pt[]): number {
+  return regionShare(polys, cutRegion(stroke));
+}
+
 export const splitMode: GameMode<SplitContent> = {
   id: 'split',
   name: 'Split the shape',
@@ -49,9 +79,9 @@ export const splitMode: GameMode<SplitContent> = {
   },
 
   validateAnswer(content, index, answer) {
-    const line = parseLine(answer);
-    if (!line) return { correct: false, points: 0, itemDone: true, feedback: { share: null } };
-    const share = splitShare(content.items[index].polys, line[0], line[1]);
+    const stroke = parseStroke(answer);
+    if (!stroke) return { correct: false, points: 0, itemDone: true, feedback: { share: null } };
+    const share = strokeShare(content.items[index].polys, stroke);
     const points = splitPoints(share);
     return { correct: points >= 750, points, itemDone: true, feedback: { share } };
   },

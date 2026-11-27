@@ -141,10 +141,10 @@ export const TOPIC_PAGES: TopicPage[] = [
     name: 'Split the shape',
     title: 'Split the Shape – Cut It 50/50, 1v1 Online',
     description:
-      'One straight cut, two halves: split pixel aliens, rockets, hearts and more as close to 50/50 as you can. Five shapes, 10 seconds each. Free 1v1 game.',
+      'One cut, two halves: split pixel aliens, rockets, hearts and more as close to 50/50 as you can. Five shapes, 10 seconds each. Free 1v1 game.',
     h1: 'Split the shape, 50/50',
     intro:
-      'A shape appears. Drag one straight line across it. The closer the two parts are to 50 % each, the more points you get. Five shapes per round, ten seconds each, against an opponent cutting the same shapes.',
+      'A shape appears. Draw one cut across it with your finger or mouse, straight or curved. The closer the two parts are to 50 % each, the more points you get. Five shapes per round, ten seconds each, against an opponent cutting the same shapes.',
     how: [
       'A perfect 50/50 cut scores 1,000 points, 45/55 scores 750, 40/60 scores 500 and 30/70 or worse scores 0.',
       'Shapes are rotated and mirrored every time, so you cannot memorise a cut.',
@@ -162,7 +162,7 @@ export const TOPIC_PAGES: TopicPage[] = [
     ],
     faq: [
       ['What shapes are there?', 'Pixel aliens, an arcade ghost, rockets, crowns, hearts, falling blocks, a game controller and more.'],
-      ['Does the cut have to go through the whole shape?', 'Yes. Drag a line that crosses the shape from one side to the other; the game splits it along that line.'],
+      ['Does the cut have to go through the whole shape?', 'No. Draw your cut with a finger or the mouse, straight or curved; if it stops early, the game extends it in the direction you were drawing and splits the shape along it.'],
       ...COMMON_FAQ,
     ],
   },

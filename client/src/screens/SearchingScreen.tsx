@@ -10,7 +10,7 @@ const TIPS = [
   'The server picks the games. Be ready for anything.',
   'In trivia, harder questions (more stars) are worth more points.',
   'In chess puzzles, one wrong move loses the puzzle.',
-  'Split the shape: one straight cut, as close to 50/50 as you can.',
+  'Split the shape: draw one cut, straight or curved, as close to 50/50 as you can.',
   'Golf: pull back from the ball and let go. Walls bounce.',
   'Timeline: drag the events, oldest at the top.',
   'Opinion: being off by 2× still scores well. Go with your gut.',
