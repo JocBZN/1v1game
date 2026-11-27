@@ -54,7 +54,7 @@ function Podium({ rows, myId }: { rows: LeaderboardEntry[]; myId: number }) {
                 <Crown size={17} strokeWidth={2.6} />
               </motion.span>
             )}
-            <Avatar name={e.nickname} src={e.avatar} size={first ? 56 : 44} />
+            <Avatar name={e.nickname} icon={e.avatar} size={first ? 56 : 44} />
             <div className="mt-1 max-w-full truncate text-sm font-bold">{e.nickname}</div>
             <div className={`font-display font-bold tabular-nums leading-none ${first ? 'text-3xl' : 'text-2xl'}`}>{e.rating}</div>
             <div className="flex max-w-full items-center gap-1 truncate text-[10px] font-semibold opacity-75">
@@ -91,7 +91,7 @@ function Row({ e, mine, delay, dark }: { e: LeaderboardEntry; mine: boolean; del
       <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl font-display text-sm font-bold tabular-nums ${dark ? 'bg-cream/15' : 'bg-sunken text-muted'}`}>
         {e.rank}
       </span>
-      <Avatar name={e.nickname} src={e.avatar} size={36} />
+      <Avatar name={e.nickname} icon={e.avatar} size={36} />
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-bold">
           {e.nickname} {mine && <span className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold uppercase ${dark ? 'bg-red text-white' : 'bg-teal text-cream'}`}>you</span>}

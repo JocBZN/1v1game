@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { motion } from 'motion/react';
+import { IconAvatar, getProfileIcon } from '../lib/icons';
 import { ArrowLeft, Star as StarIcon, type LucideIcon } from 'lucide-react';
 import { LEAGUE_META } from '../lib/leagues';
 import { DOMAINS, type DomainId } from '../lib/domains';
@@ -64,21 +65,9 @@ const AVATAR_GRADIENTS: [string, string, string][] = [
   ['#ffe1de', '#ff6973', '#46425e'],
 ];
 
-export function Avatar({ name, size = 44, ring, src }: { name: string; size?: number; ring?: string; src?: string | null }) {
-  const ringShadow = ring ? `0 0 0 2px var(--color-bg), 0 0 0 4px ${ring}` : undefined;
-  if (src) {
-    return (
-      <img
-        src={src}
-        alt=""
-        width={size}
-        height={size}
-        draggable={false}
-        className="shrink-0 rounded-full bg-sunken object-cover"
-        style={{ width: size, height: size, boxShadow: ringShadow }}
-      />
-    );
-  }
+export function Avatar({ name, size = 44, ring, icon }: { name: string; size?: number; ring?: string; icon?: string | null }) {
+  const pic = getProfileIcon(icon);
+  if (pic) return <IconAvatar icon={pic} size={size} ring={ring} />;
   let h = 0;
   for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
   const [a, b, fg] = AVATAR_GRADIENTS[h % AVATAR_GRADIENTS.length];

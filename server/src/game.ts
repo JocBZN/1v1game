@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import type { Server } from 'socket.io';
-import { avatarUrl, db, getQuestionStats, getRating, getRatings, getRecentResults, getUserById, recordQuestionAnswer, saveDuel, saveRating, type DuelPlayerRecord, type User } from './db';
+import { db, getQuestionStats, getRating, getRatings, getRecentResults, getUserById, recordQuestionAnswer, saveDuel, saveRating, type DuelPlayerRecord, type User } from './db';
 import { RATING_TRACKS, isDomain, type DomainId, type RatingTrack } from './domains';
 import { Duel, type DuelSummary, type RatingSnap, type RoundPlan, type Slot, type SlotInit } from './duel/Duel';
 import { computeRatingUpdates } from './duel/results';
@@ -157,7 +157,7 @@ export class GameServer {
 
   private humanSlot(userId: number): SlotInit {
     const u = getUserById(userId)!;
-    return { kind: 'human', userId, name: u.nickname, avatar: avatarUrl(u.id, u.avatar_v), ratings: snapshot(userId) };
+    return { kind: 'human', userId, name: u.nickname, avatar: u.avatar_icon ?? null, ratings: snapshot(userId) };
   }
 
   /** Persist ratings + duel; returns the per-slot extra payload for `duel:end`. */
@@ -381,7 +381,7 @@ export class GameServer {
     const { opponent, plans } = built ?? buildBotDuel(myGeneral, rng);
     if (opponent.kind === 'ghost' && opponent.userId !== null) {
       const g = getUserById(opponent.userId);
-      opponent.avatar = g ? avatarUrl(g.id, g.avatar_v) : null;
+      opponent.avatar = g?.avatar_icon ?? null;
     }
     this.launch([me, opponent], plans, { mode: opponent.kind === 'ghost' ? 'ghost' : 'bot', waitMs: { [a.userId]: Date.now() - a.joinedAt } });
   }

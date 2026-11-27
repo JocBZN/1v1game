@@ -116,14 +116,15 @@ addColumn('round_recordings', 'content_version', 'INTEGER NOT NULL DEFAULT 1');
 // accounts (no password, not guests) keep working and can set a password by registering.
 addColumn('users', 'is_guest', 'INTEGER NOT NULL DEFAULT 0');
 addColumn('users', 'pass_hash', 'TEXT');
-// Profile photo version (ms timestamp of the last upload), null = no photo. Part of the photo URL, so
-// browsers can cache a photo forever and still see a new one right away.
-addColumn('users', 'avatar_v', 'INTEGER');
+// Profile icon (see icons.ts) and coins to buy icons with; null icon = the letter avatar.
+addColumn('users', 'avatar_icon', 'TEXT');
+addColumn('users', 'coins', 'INTEGER NOT NULL DEFAULT 0');
 db.exec(`
-CREATE TABLE IF NOT EXISTS avatars (
-  user_id  INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-  mime     TEXT NOT NULL,
-  data     BLOB NOT NULL
+CREATE TABLE IF NOT EXISTS user_icons (
+  user_id  INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  icon_id  TEXT NOT NULL,
+  bought_at INTEGER NOT NULL,
+  PRIMARY KEY (user_id, icon_id)
 );`);
 
 // ---------- users ----------
@@ -135,7 +136,8 @@ export interface User {
   created_at: number;
   is_guest: number;
   pass_hash: string | null;
-  avatar_v?: number | null;
+  avatar_icon?: string | null;
+  coins?: number;
 }
 
 const stmtInsertUser = db.prepare('INSERT INTO users (nickname, token, created_at, is_guest, pass_hash) VALUES (?, ?, ?, ?, ?)');
@@ -179,28 +181,30 @@ export const getUserByToken = (token: string) => stmtUserByToken.get(token) as U
 export const getUserById = (id: number) => stmtUserById.get(id) as User | undefined;
 export const getUserByNickname = (nick: string) => stmtUserByNick.get(nick) as User | undefined;
 
-// ---------- profile photo + password ----------
+// ---------- profile icons + password ----------
 
-/** Public URL of a user's photo, or null. */
-export const avatarUrl = (userId: number, v: number | null | undefined) => (v ? `/api/avatar/${userId}?v=${v}` : null);
+const stmtOwnedIcons = db.prepare('SELECT icon_id FROM user_icons WHERE user_id = ? ORDER BY bought_at');
+const stmtHasIcon = db.prepare('SELECT 1 FROM user_icons WHERE user_id = ? AND icon_id = ?');
+const stmtAddIcon = db.prepare('INSERT OR IGNORE INTO user_icons (user_id, icon_id, bought_at) VALUES (?, ?, ?)');
+const stmtSpend = db.prepare('UPDATE users SET coins = coins - ? WHERE id = ? AND coins >= ?');
+const stmtCoins = db.prepare('SELECT coins FROM users WHERE id = ?');
+const stmtSetIcon = db.prepare('UPDATE users SET avatar_icon = ? WHERE id = ?');
+const stmtAddCoins = db.prepare('UPDATE users SET coins = coins + ? WHERE id = ?');
 
-const stmtPutAvatar = db.prepare('INSERT INTO avatars (user_id, mime, data) VALUES (?, ?, ?) ON CONFLICT(user_id) DO UPDATE SET mime = excluded.mime, data = excluded.data');
-const stmtAvatarV = db.prepare('UPDATE users SET avatar_v = ? WHERE id = ?');
-const stmtDelAvatar = db.prepare('DELETE FROM avatars WHERE user_id = ?');
-const stmtGetAvatar = db.prepare('SELECT mime, data FROM avatars WHERE user_id = ?');
+export const ownedIcons = (userId: number) => (stmtOwnedIcons.all(userId) as { icon_id: string }[]).map((r) => r.icon_id);
+export const ownsIcon = (userId: number, iconId: string) => !!stmtHasIcon.get(userId, iconId);
+export const getCoins = (userId: number) => ((stmtCoins.get(userId) as { coins: number } | undefined)?.coins ?? 0);
+export const setAvatarIcon = (userId: number, iconId: string | null) => void stmtSetIcon.run(iconId, userId);
+/** For the future coin rewards (and tests). */
+export const addCoins = (userId: number, amount: number) => void stmtAddCoins.run(amount, userId);
 
-/** Store a photo; returns its new version. */
-export const setAvatar = db.transaction((userId: number, mime: string, data: Buffer): number => {
-  const v = Date.now();
-  stmtPutAvatar.run(userId, mime, data);
-  stmtAvatarV.run(v, userId);
-  return v;
+/** Pay `price` coins and own the icon, atomically. */
+export const buyIcon = db.transaction((userId: number, iconId: string, price: number): 'ok' | 'owned' | 'not_enough_coins' => {
+  if (ownsIcon(userId, iconId)) return 'owned';
+  if (price > 0 && stmtSpend.run(price, userId, price).changes === 0) return 'not_enough_coins';
+  stmtAddIcon.run(userId, iconId, Date.now());
+  return 'ok';
 });
-export const deleteAvatar = db.transaction((userId: number) => {
-  stmtDelAvatar.run(userId);
-  stmtAvatarV.run(null, userId);
-});
-export const getAvatar = (userId: number) => stmtGetAvatar.get(userId) as { mime: string; data: Buffer } | undefined;
 
 const stmtSetPassword = db.prepare('UPDATE users SET pass_hash = ?, token = ? WHERE id = ?');
 /** New password and a new session token (other devices are signed out). */
@@ -262,7 +266,7 @@ export function saveRating(row: RatingRow) {
 export interface LeaderboardRow {
   user_id: number;
   nickname: string;
-  avatar_v: number | null;
+  avatar_icon: string | null;
   rating: number;
   wins: number;
   losses: number;
@@ -271,7 +275,7 @@ export interface LeaderboardRow {
 }
 
 const stmtTop = db.prepare(`
-  SELECT r.user_id, u.nickname, u.avatar_v, r.rating, r.wins, r.losses, r.draws, r.games
+  SELECT r.user_id, u.nickname, u.avatar_icon, r.rating, r.wins, r.losses, r.draws, r.games
   FROM ratings r JOIN users u ON u.id = r.user_id
   WHERE r.track = ? AND r.games > 0 AND u.is_guest = 0
   ORDER BY r.rating DESC, r.games DESC, u.id ASC

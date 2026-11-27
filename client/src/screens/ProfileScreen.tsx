@@ -4,7 +4,7 @@ import { api, type Me, type ProfileResponse } from '../lib/api';
 import { DOMAINS, DOMAIN_LIST, type DomainId } from '../lib/domains';
 import { AsyncTag, Avatar, LeagueBadge, PageHeader, Screen, TopicIcon } from '../components/ui';
 import { SignupPrompt } from '../components/SignupPrompt';
-import { PasswordCard, PhotoPicker } from '../components/ProfileSettings';
+import { IconButton, IconPicker, PasswordCard } from '../components/ProfileSettings';
 
 function timeAgo(ts: number): string {
   const s = Math.floor((Date.now() - ts) / 1000);
@@ -37,6 +37,7 @@ export function ProfileScreen({ me, onBack, onSignup, onLogin, onLogout, onMeCha
   onLogout: () => void;
 }) {
   const [confirmLogout, setConfirmLogout] = useState(false);
+  const [picking, setPicking] = useState(false);
   const [p, setP] = useState<ProfileResponse | null>(null);
   const [error, setError] = useState(false);
 
@@ -51,10 +52,17 @@ export function ProfileScreen({ me, onBack, onSignup, onLogin, onLogout, onMeCha
   return (
     <Screen className="pb-6">
       <PageHeader title="Profile" onBack={onBack} />
+      {picking && (
+        <IconPicker
+          me={me}
+          onClose={() => setPicking(false)}
+          onChange={(avatar) => onMeChange({ ...me, user: { ...me.user, avatar } })}
+        />
+      )}
 
       <section className="card mt-4 p-5 animate-rise">
         <div className="flex items-center gap-4">
-          <PhotoPicker me={me} onChange={(avatar) => onMeChange({ ...me, user: { ...me.user, avatar } })} />
+          <IconButton me={me} onOpen={() => setPicking(true)} />
           <div className="min-w-0">
             <div className="truncate text-xl font-semibold">{data.user.nickname}</div>
             <div className="mt-0.5">

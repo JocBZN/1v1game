@@ -62,7 +62,7 @@ function Fighter({ name, avatar, league, side }: { name: string; avatar?: string
       transition={{ type: 'spring', stiffness: 220, damping: 20 }}
       className={`flex min-w-0 flex-1 flex-col items-center gap-2 rounded-3xl px-3 py-4 ${side === 'me' ? 'bg-surface/85 shadow-[0_10px_30px_-18px_rgb(70_66_94/0.5)]' : 'bg-slate text-cream'}`}
     >
-      <Avatar name={name} src={avatar} size={60} ring={side === 'me' ? 'var(--color-teal)' : 'var(--color-red)'} />
+      <Avatar name={name} icon={avatar} size={60} ring={side === 'me' ? 'var(--color-teal)' : 'var(--color-red)'} />
       <div className="max-w-full truncate font-display text-lg font-bold">{name}</div>
       <span className={side === 'foe' ? 'rounded-full bg-cream/90' : ''}><LeagueBadge league={league} small /></span>
     </motion.div>

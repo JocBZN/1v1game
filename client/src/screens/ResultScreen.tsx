@@ -68,7 +68,7 @@ function Side({ name, avatar, wins, side, won, extra }: { name: string; avatar?:
           <Crown size={15} strokeWidth={2.6} />
         </motion.span>
       )}
-      <Avatar name={name} src={avatar} size={52} ring={me ? 'var(--color-teal)' : 'var(--color-red)'} />
+      <Avatar name={name} icon={avatar} size={52} ring={me ? 'var(--color-teal)' : 'var(--color-red)'} />
       <div className="max-w-full truncate text-sm font-bold">{name}</div>
       <div className={`font-display text-5xl font-bold leading-none tabular-nums ${me ? 'text-me' : 'text-red'}`}>{wins}</div>
       <div className={`text-[11px] font-semibold ${me ? 'text-muted' : 'opacity-70'}`}>rounds won</div>

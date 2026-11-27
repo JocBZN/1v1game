@@ -93,13 +93,20 @@ export const api = {
   me: () => request<Me>('/me'),
   leaderboard: (track: RatingTrack) => request<LeaderboardResponse>(`/leaderboard/${track}`),
   profile: (id: number | 'me') => request<ProfileResponse>(`/profile/${id}`),
-  /** Upload an already cropped/resized photo. */
-  uploadAvatar: (photo: Blob) =>
-    request<{ avatar: string }>('/avatar', { method: 'POST', body: photo, headers: { 'Content-Type': photo.type } }),
-  deleteAvatar: () => request<{ avatar: null }>('/avatar', { method: 'DELETE' }),
+  icons: () => request<IconState>('/icons'),
+  buyIcon: (id: string) => request<IconState>(`/icons/${encodeURIComponent(id)}/buy`, { method: 'POST', body: '{}' }),
+  selectIcon: (id: string) => request<IconState>(`/icons/${encodeURIComponent(id)}/select`, { method: 'POST', body: '{}' }),
+  clearIcon: () => request<IconState>('/icons/selected', { method: 'DELETE' }),
   changePassword: (current: string, next: string) =>
     request<Me & { token: string }>('/password', { method: 'POST', body: JSON.stringify({ current, next }) }),
 };
+
+/** Coins, icons the player may use (free ones included) and the one in use. */
+export interface IconState {
+  coins: number;
+  owned: string[];
+  selected: string | null;
+}
 
 export interface LeaderboardEntry {
   rank: number;

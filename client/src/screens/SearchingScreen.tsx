@@ -50,7 +50,7 @@ export function SearchingScreen({ me, since, onCancel }: { me: Me; since: number
           className="flex items-center gap-2 sm:gap-3"
         >
           <SoftPanel className="flex min-w-0 flex-1 items-center gap-3 lg:p-5">
-            <Avatar name={me.user.nickname} src={me.user.avatar} size={48} ring={league.color} />
+            <Avatar name={me.user.nickname} icon={me.user.avatar} size={48} ring={league.color} />
             <div className="min-w-0">
               <div className="truncate text-sm font-bold">{me.user.nickname}</div>
               <div className="flex items-center gap-1 text-xs font-semibold" style={{ color: league.color }}>

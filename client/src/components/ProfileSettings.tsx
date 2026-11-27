@@ -1,96 +1,164 @@
-import { useRef, useState, type FormEvent } from 'react';
-import { Camera, KeyRound, Trash2 } from 'lucide-react';
-import { api, ApiError, setToken, type Me } from '../lib/api';
+import { useEffect, useState, type FormEvent } from 'react';
+import { Check, CircleDollarSign as Coin, KeyRound, Lock, Pencil, X } from 'lucide-react';
+import { api, ApiError, setToken, type IconState, type Me } from '../lib/api';
+import { IconAvatar, PROFILE_ICONS, TIER_LABEL, TIER_PRICE, getProfileIcon, type IconTier } from '../lib/icons';
 import { updateSocketToken } from '../lib/socket';
 import { Avatar } from './ui';
 
-const PHOTO_SIZE = 256;
-
-/** Center-crop to a square and shrink to 256×256 (WebP, or JPEG where WebP can't be encoded). */
-async function preparePhoto(file: File): Promise<Blob> {
-  const bitmap = await createImageBitmap(file);
-  const side = Math.min(bitmap.width, bitmap.height);
-  const canvas = document.createElement('canvas');
-  canvas.width = PHOTO_SIZE;
-  canvas.height = PHOTO_SIZE;
-  const ctx = canvas.getContext('2d')!;
-  ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(bitmap, (bitmap.width - side) / 2, (bitmap.height - side) / 2, side, side, 0, 0, PHOTO_SIZE, PHOTO_SIZE);
-  bitmap.close?.();
-  const encode = (type: string, q: number) => new Promise<Blob | null>((r) => canvas.toBlob(r, type, q));
-  const webp = await encode('image/webp', 0.86);
-  if (webp && webp.type === 'image/webp') return webp;
-  const jpeg = await encode('image/jpeg', 0.88);
-  if (!jpeg) throw new Error('encode');
-  return jpeg;
+/** Current icon with an edit badge; opens the icon picker. */
+export function IconButton({ me, onOpen }: { me: Me; onOpen: () => void }) {
+  if (me.user.guest) return <Avatar name={me.user.nickname} icon={me.user.avatar} size={56} />;
+  return (
+    <button type="button" onClick={onOpen} className="group relative block shrink-0 rounded-full" aria-label="Choose a profile icon" title="Choose an icon">
+      <Avatar name={me.user.nickname} icon={me.user.avatar} size={72} />
+      <span className="absolute -bottom-0.5 -right-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-teal text-cream shadow ring-2 ring-[var(--color-bg)] transition group-hover:scale-110">
+        <Pencil size={13} strokeWidth={2.4} />
+      </span>
+    </button>
+  );
 }
 
-/** Big profile photo: tap to change it (registered accounts), with a small remove button. */
-export function PhotoPicker({ me, onChange }: { me: Me; onChange: (avatar: string | null) => void }) {
-  const input = useRef<HTMLInputElement>(null);
+const TIERS: IconTier[] = ['free', 'common', 'rare', 'epic', 'legendary'];
+
+function Coins({ n, className = '' }: { n: number; className?: string }) {
+  return (
+    <span className={`inline-flex items-center gap-1 font-semibold tabular-nums ${className}`}>
+      <Coin size={14} strokeWidth={2.4} className="text-orange-strong" /> {n.toLocaleString('en')}
+    </span>
+  );
+}
+
+/** Pick a profile icon: free ones and bought ones can be used, the rest cost coins. */
+export function IconPicker({ me, onChange, onClose }: { me: Me; onChange: (icon: string | null) => void; onClose: () => void }) {
+  const [state, setState] = useState<IconState | null>(null);
+  const [chosen, setChosen] = useState<string | null>(me.user.avatar ?? null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const editable = !me.user.guest;
 
-  const pick = async (file: File | undefined) => {
-    if (!file) return;
-    setError(null);
-    if (!file.type.startsWith('image/')) return setError('Pick an image file.');
+  useEffect(() => {
+    api.icons().then(setState).catch(() => setError('Couldn’t load the icons.'));
+  }, []);
+
+  const owned = new Set(state?.owned ?? []);
+  const pick = chosen ? getProfileIcon(chosen) : undefined;
+  const canUse = !!pick && owned.has(pick.id);
+  const inUse = (me.user.avatar ?? null) === chosen;
+
+  const act = async (fn: () => Promise<IconState>, after?: (s: IconState) => void) => {
     setBusy(true);
+    setError(null);
     try {
-      const photo = await preparePhoto(file);
-      const r = await api.uploadAvatar(photo);
-      onChange(r.avatar);
+      const s = await fn();
+      setState(s);
+      after?.(s);
     } catch (e) {
-      setError(e instanceof ApiError && e.status === 413 ? 'That photo is too big.' : 'Couldn’t use that photo. Try another one.');
-    } finally {
-      setBusy(false);
-      if (input.current) input.current.value = '';
-    }
-  };
-
-  const remove = async () => {
-    setBusy(true);
-    setError(null);
-    try {
-      await api.deleteAvatar();
-      onChange(null);
-    } catch {
-      setError('Couldn’t remove the photo.');
+      if (e instanceof ApiError && e.code === 'not_enough_coins') setError('Not enough coins yet.');
+      else setError('Something went wrong. Try again.');
     } finally {
       setBusy(false);
     }
   };
 
-  if (!editable) return <Avatar name={me.user.nickname} src={me.user.avatar} size={56} />;
   return (
-    <div className="relative shrink-0">
-      <button
-        type="button"
-        onClick={() => input.current?.click()}
-        disabled={busy}
-        className="group relative block rounded-full"
-        aria-label={me.user.avatar ? 'Change profile photo' : 'Add a profile photo'}
-        title={me.user.avatar ? 'Change photo' : 'Add a photo'}
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate/40 p-0 sm:items-center sm:p-4" onClick={onClose}>
+      <div
+        className="flex max-h-[92vh] w-full max-w-md flex-col rounded-t-3xl bg-bg shadow-2xl sm:rounded-3xl"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-label="Choose a profile icon"
       >
-        <Avatar name={me.user.nickname} src={me.user.avatar} size={72} />
-        <span className="absolute -bottom-0.5 -right-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-teal text-cream shadow ring-2 ring-[var(--color-bg)] transition group-hover:scale-110">
-          {busy ? <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-cream/40 border-t-cream" /> : <Camera size={14} strokeWidth={2.4} />}
-        </span>
-      </button>
-      <input ref={input} type="file" accept="image/*" className="hidden" onChange={(e) => void pick(e.target.files?.[0])} />
-      {me.user.avatar && !busy && (
-        <button
-          type="button"
-          onClick={() => void remove()}
-          className="absolute -left-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-surface text-muted shadow ring-1 ring-line hover:text-red"
-          aria-label="Remove photo"
-          title="Remove photo"
-        >
-          <Trash2 size={12} strokeWidth={2.4} />
-        </button>
-      )}
-      {error && <p className="absolute left-0 top-full mt-1 w-56 text-xs font-medium text-red">{error}</p>}
+        <header className="flex items-center gap-3 border-b border-line px-5 py-4">
+          <h2 className="flex-1 font-display text-xl font-bold">Profile icon</h2>
+          {state && <Coins n={state.coins} className="rounded-full bg-orange-soft px-3 py-1 text-sm text-orange-strong" />}
+          <button type="button" onClick={onClose} className="btn btn-ghost h-9 w-9 p-0" aria-label="Close"><X size={18} /></button>
+        </header>
+
+        <div className="flex-1 overflow-y-auto px-5 pb-4">
+          {!state && !error && <p className="py-10 text-center text-sm text-muted">Loading…</p>}
+          {state && TIERS.map((tier) => (
+            <section key={tier} className="mt-4">
+              <h3 className="label mb-2 flex items-center justify-between">
+                <span>{TIER_LABEL[tier]}</span>
+                {TIER_PRICE[tier] > 0 && <Coins n={TIER_PRICE[tier]} className="text-xs text-muted" />}
+              </h3>
+              <div className="grid grid-cols-5 gap-2.5">
+                {PROFILE_ICONS.filter((i) => i.tier === tier).map((i) => {
+                  const has = owned.has(i.id);
+                  const sel = chosen === i.id;
+                  return (
+                    <button
+                      key={i.id}
+                      type="button"
+                      onClick={() => setChosen(i.id)}
+                      className={`relative flex flex-col items-center gap-1 rounded-2xl p-1.5 transition ${sel ? 'bg-surface ring-2 ring-teal' : 'hover:bg-surface'}`}
+                      title={i.name}
+                    >
+                      <IconAvatar icon={i} size={48} />
+                      {!has && (
+                        <span className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-surface text-muted shadow-sm">
+                          <Lock size={11} strokeWidth={2.6} />
+                        </span>
+                      )}
+                      {me.user.avatar === i.id && (
+                        <span className="absolute left-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-teal text-cream shadow-sm">
+                          <Check size={12} strokeWidth={3} />
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
+        </div>
+
+        <footer className="border-t border-line px-5 py-4 safe-bottom">
+          {pick ? (
+            <div className="flex items-center gap-3">
+              <IconAvatar icon={pick} size={44} />
+              <div className="min-w-0 flex-1">
+                <div className="truncate font-semibold">{pick.name}</div>
+                <div className="text-xs text-muted">{TIER_LABEL[pick.tier]}{canUse ? (pick.price ? ' · owned' : '') : ''}</div>
+              </div>
+              {canUse ? (
+                <button
+                  type="button"
+                  disabled={busy || inUse}
+                  onClick={() => void act(() => api.selectIcon(pick.id), () => onChange(pick.id))}
+                  className="btn btn-primary px-5 py-3"
+                >
+                  {inUse ? 'In use' : 'Use'}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={busy || !state || state.coins < pick.price}
+                  onClick={() => void act(() => api.buyIcon(pick.id))}
+                  className="btn btn-accent px-4 py-3"
+                >
+                  Buy · <Coins n={pick.price} />
+                </button>
+              )}
+            </div>
+          ) : (
+            <p className="text-center text-sm text-muted">Tap an icon to see it.</p>
+          )}
+          {pick && !canUse && state && state.coins < pick.price && (
+            <p className="mt-2 text-xs text-muted">You have {state.coins} coins. Ways to earn coins are coming soon.</p>
+          )}
+          {error && <p className="mt-2 text-sm font-medium text-red">{error}</p>}
+          {me.user.avatar && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void act(() => api.clearIcon(), () => { setChosen(null); onChange(null); })}
+              className="mt-3 w-full text-center text-xs text-muted underline-offset-2 hover:underline"
+            >
+              Use my letter instead
+            </button>
+          )}
+        </footer>
+      </div>
     </div>
   );
 }

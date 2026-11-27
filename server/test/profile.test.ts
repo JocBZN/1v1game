@@ -19,8 +19,6 @@ beforeAll(async () => {
 });
 afterAll(() => server.close());
 
-const PNG = Buffer.from('89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d4944415478da63f8ffff3f0005fe02fea7d6a4c90000000049454e44ae426082', 'hex');
-
 function account(nick: string) {
   const g = auth.createGuest();
   const r = auth.register(nick, 'secret123', g);
@@ -30,37 +28,52 @@ function account(nick: string) {
 const call = (path: string, token: string, init: RequestInit = {}) =>
   fetch(base + path, { ...init, headers: { Authorization: `Bearer ${token}`, ...(init.headers ?? {}) } });
 
-describe('profile photo', () => {
-  it('uploads, serves with long caching, shows up in /me, and can be removed', async () => {
-    const u = account('PhotoUser');
-    const up = await call('/avatar', u.token, { method: 'POST', body: PNG, headers: { 'Content-Type': 'image/png' } });
-    expect(up.status).toBe(200);
-    const { avatar } = (await up.json()) as { avatar: string };
-    expect(avatar).toMatch(new RegExp(`^/api/avatar/${u.id}\\?v=\\d+$`));
+describe('profile icons', () => {
+  const post = (path: string, token: string) => call(path, token, { method: 'POST', body: '{}', headers: { 'Content-Type': 'application/json' } });
 
-    const img = await fetch(base + avatar.slice(4));
-    expect(img.status).toBe(200);
-    expect(img.headers.get('content-type')).toBe('image/png');
-    expect(img.headers.get('cache-control')).toContain('immutable');
-    expect(img.headers.get('x-content-type-options')).toBe('nosniff');
-    expect(Buffer.from(await img.arrayBuffer()).equals(PNG)).toBe(true);
-
-    const me = (await (await call("/me", u.token)).json()) as any;
-    expect(me.user.avatar).toBe(avatar);
-
-    expect((await call('/avatar', u.token, { method: 'DELETE' })).status).toBe(200);
-    expect(((await (await call("/me", u.token)).json()) as any).user.avatar).toBeNull();
-    expect((await fetch(`${base}/avatar/${u.id}`)).status).toBe(404);
+  it('there are 50 icons with unique ids, 8 of them free', async () => {
+    const { PROFILE_ICONS } = await import('../src/icons');
+    expect(PROFILE_ICONS).toHaveLength(50);
+    expect(new Set(PROFILE_ICONS.map((i) => i.id)).size).toBe(50);
+    expect(PROFILE_ICONS.filter((i) => i.price === 0)).toHaveLength(8);
   });
 
-  it('rejects files that are not images, whatever they claim to be, and guests', async () => {
-    const u = account('PhotoUser2');
-    const fake = await call('/avatar', u.token, { method: 'POST', body: Buffer.from('<svg onload=alert(1)>'), headers: { 'Content-Type': 'image/png' } });
-    expect(fake.status).toBe(400);
+  it('free icons can be used right away and show in /me', async () => {
+    const u = account('IconUser');
+    const st = (await (await call('/icons', u.token)).json()) as any;
+    expect(st.coins).toBe(0);
+    expect(st.owned).toContain('smile');
+    expect(st.owned).not.toContain('crown');
+    expect((await post('/icons/star/select', u.token)).status).toBe(200);
+    expect(((await (await call('/me', u.token)).json()) as any).user.avatar).toBe('star');
+    expect((await call('/icons/selected', u.token, { method: 'DELETE' })).status).toBe(200);
+    expect(((await (await call('/me', u.token)).json()) as any).user.avatar).toBeNull();
+  });
+
+  it('paid icons need coins; buying spends them once and unlocks the icon', async () => {
+    const dbm = await import('../src/db');
+    const u = account('IconBuyer');
+    expect((await post('/icons/crown/select', u.token)).status).toBe(402);
+    const poor = await post('/icons/crown/buy', u.token);
+    expect(poor.status).toBe(402);
+    expect(((await poor.json()) as any).error).toBe('not_enough_coins');
+
+    dbm.addCoins(u.id, 1000);
+    const bought = (await (await post('/icons/crown/buy', u.token)).json()) as any;
+    expect(bought.coins).toBe(250);
+    expect(bought.owned).toContain('crown');
+    const again = (await (await post('/icons/crown/buy', u.token)).json()) as any;
+    expect(again.coins).toBe(250); // no double charge
+    expect((await post('/icons/crown/select', u.token)).status).toBe(200);
+    expect(((await (await call('/me', u.token)).json()) as any).user.avatar).toBe('crown');
+  });
+
+  it('unknown icons and guests are refused', async () => {
+    const u = account('IconUser3');
+    expect((await post('/icons/nope/select', u.token)).status).toBe(404);
     const g = auth.createGuest();
-    const guest = await call('/avatar', g.token, { method: 'POST', body: PNG, headers: { 'Content-Type': 'image/png' } });
-    expect(guest.status).toBe(403);
-    expect((await fetch(base + '/avatar', { method: 'POST', body: PNG, headers: { 'Content-Type': 'image/png' } })).status).toBe(401);
+    expect((await post('/icons/smile/select', g.token)).status).toBe(403);
+    expect((await fetch(base + '/icons')).status).toBe(401);
   });
 });
 
