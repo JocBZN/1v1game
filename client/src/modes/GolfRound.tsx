@@ -44,6 +44,8 @@ export function GolfRound({ item, feedback, onAnswer, waiting }: ModeProps<GolfD
   const drag = useRef<{ id: number; x: number; y: number } | null>(null);
   const aimRef = useRef<{ angle: number; power: number } | null>(null);
   const frame = useRef(0);
+  /** Feedback seq when the last shot was sent; null once its answer arrived. */
+  const sentSeq = useRef<number | null>(null);
   const still = useReducedMotion();
 
   const placeBall = (p: Pt) => {
@@ -67,6 +69,7 @@ export function GolfRound({ item, feedback, onAnswer, waiting }: ModeProps<GolfD
   // Animate the server's path for each shot: every frame, interpolated, straight on the SVG node.
   useEffect(() => {
     if (!item || !feedback || feedback.round !== item.round || feedback.item !== item.item) return;
+    sentSeq.current = null;
     const path = feedback.path as Pt[] | undefined;
     if (!path?.length) {
       setBusy(false);
@@ -97,6 +100,16 @@ export function GolfRound({ item, feedback, onAnswer, waiting }: ModeProps<GolfD
   }, [feedback?.seq]);
 
   useEffect(() => () => cancelAnimationFrame(frame.current), []);
+
+  // Safety net: if a shot gets no answer (dropped connection, too late), don't leave the player stuck.
+  useEffect(() => {
+    if (!busy || rolling) return;
+    const seqAtSend = sentSeq.current;
+    const t = setTimeout(() => {
+      if (sentSeq.current === seqAtSend) setBusy(false);
+    }, 5_000);
+    return () => clearTimeout(t);
+  }, [busy, rolling]);
 
   if (waiting) return <WaitingNote />;
   if (!item) return <div className="m-auto text-muted">…</div>;
@@ -130,6 +143,7 @@ export function GolfRound({ item, feedback, onAnswer, waiting }: ModeProps<GolfD
     setAim(null);
     if (!a || locked || a.power < MIN_POWER) return;
     setBusy(true);
+    sentSeq.current = feedback?.seq ?? 0;
     onAnswer({ angle: a.angle, power: a.power });
   };
 
@@ -146,17 +160,31 @@ export function GolfRound({ item, feedback, onAnswer, waiting }: ModeProps<GolfD
       ref={areaRef}
       className={`flex flex-1 touch-none select-none flex-col ${locked ? '' : 'cursor-grab active:cursor-grabbing'}`}
       onPointerDown={(e) => {
-        if (locked || drag.current) return;
+        // Aiming may start while the ball is still rolling; the shot goes when it is released.
+        if (done || (drag.current && drag.current.id !== e.pointerId && e.pointerType === 'touch')) return;
         e.preventDefault();
         areaRef.current?.setPointerCapture?.(e.pointerId);
         drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
       }}
       onPointerMove={(e) => {
-        if (drag.current?.id !== e.pointerId || locked) return;
+        if (drag.current?.id !== e.pointerId) return;
         updateAim(e.clientX, e.clientY);
       }}
       onPointerUp={release}
-      onPointerCancel={release}
+      onPointerCancel={(e) => {
+        if (drag.current?.id !== e.pointerId) return;
+        drag.current = null;
+        aimRef.current = null;
+        setAim(null);
+      }}
+      onLostPointerCapture={(e) => {
+        // Capture lost without a pointerup (e.g. a system gesture): forget the drag so the next touch works.
+        if (drag.current?.id === e.pointerId) {
+          drag.current = null;
+          aimRef.current = null;
+          setAim(null);
+        }
+      }}
     >
       <ItemHeader item={item} fb={shown ? fb : null} result={result} />
       <div className="mt-3 flex items-center justify-between text-sm">
