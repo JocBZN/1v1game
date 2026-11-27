@@ -43,13 +43,14 @@
       /* Homepage text and links. It sits OUTSIDE #root, so it never depends on the app or an API call:
          crawlers and visitors always get the H1 and the links (below the game once the app is running). */
       .seo { border-top: 1px solid #ecd9b4; background: #ffeecc; font-family: Inter, system-ui, sans-serif; color: #46425e; }
-      .seo > div { max-width: 40rem; margin: 0 auto; padding: 2.5rem 1.25rem 3rem; }
+      .seo > div { max-width: 40rem; margin: 0 auto; padding: 1.25rem 1.25rem 1.5rem; text-align: center; }
+      .seo .legal { margin: 0.5rem 0 0; font-size: 0.85rem; }
       .seo h1 { font-size: clamp(2rem, 7vw, 2.6rem); line-height: 1.05; letter-spacing: -0.04em; margin: 1rem 0 0.75rem; }
       .seo h2 { font-size: 1.1rem; margin: 1.75rem 0 0.4rem; }
       .seo p { color: #5d5975; line-height: 1.55; }
       .seo ul { padding-left: 1.1rem; line-height: 1.8; }
       .seo a { color: #15788c; }
-      .seo nav a { display: inline-block; margin-right: 0.75rem; line-height: 1.9; }
+      .seo nav a { display: inline-block; margin: 0 0.4rem; line-height: 1.9; }
       .seo .dots i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
       body.in-duel .seo { display: none; }
     </style>
@@ -58,30 +59,8 @@
     <div id="root"></div>
     <section class="seo" id="about">
       <div>
-        <div class="dots"><i style="background: #00b9be"></i><i style="background: #ffb0a3"></i><i style="background: #ff6973"></i></div>
-        <h1>1v1game: free 1v1 quiz duels online</h1>
-        <p>Press Play and your duel starts instantly: a live opponent of similar rating, or a recorded duel of a real player when nobody is online. Three rounds on random topics, best of three wins. Climb from Bronze to Legend.</p>
-        <ul>
-          <li><a href="/trivia">Trivia quiz duels</a> – 1,200+ questions in 12 categories</li>
-          <li><a href="/flag-quiz">Flag quiz</a> – guess the flags of 194 countries</li>
-          <li><a href="/chess-puzzles">Chess puzzles</a> – mate in 1, mate in 2, tactics</li>
-          <li><a href="/split-the-shape">Split the shape</a> – one cut, as close to 50/50 as you can</li>
-          <li><a href="/color-game">Guess the color</a> – rebuild a color with RGB sliders</li>
-          <li><a href="/mini-golf">Mini golf</a> – pull back, aim, shoot</li>
-          <li><a href="/timeline-game">Timeline game</a> – put history, games and movies in order</li>
-          <li><a href="/estimation-game">Estimation game</a> – wild guessing questions</li>
-          <li><a href="/guess-the-year">Guess the year</a> – films, games and songs</li>
-          <li><a href="/price-guessing-game">Price guessing game</a> – from a Big Mac to a Bugatti</li>
-          <li><a href="/followers-game">Followers game</a> – subscribers, views and players</li>
-          <li><a href="/rubiks-cube">Rubik’s Cube online</a> – one face or a cross in 3 minutes</li>
-        </ul>
-        <h2>Free quizzes with answers</h2>
-        <p>Practice first: <a href="/quiz">all quizzes</a> – <a href="/quiz/general-knowledge">general knowledge</a>, <a href="/quiz/history">history</a>, <a href="/quiz/geography">geography</a>, <a href="/quiz/world-capitals/">world capitals</a>, <a href="/quiz/science">science</a>, <a href="/quiz/space/">space</a>, <a href="/quiz/football">football</a>, <a href="/quiz/movies-music">movies &amp; music</a>, <a href="/quiz/music/">music</a>, <a href="/quiz/art-literature/">art &amp; literature</a>, <a href="/quiz/tv-shows">TV shows</a> and more.</p>
-        <nav aria-label="More quizzes"><a href="/quiz-of-the-day/">Quiz of the day</a><a href="/general-knowledge-questions/">General knowledge questions and answers</a><a href="/quiz-widget/">Quiz widget for your site</a></nav>
-        <h2>Free 1v1 games in your browser</h2>
-        <nav aria-label="Games"><a href="/1v1-games">1v1 games online</a><a href="/2-player-games">2 player games</a><a href="/quiz-games">Quiz games</a><a href="/trivia-games">Trivia games</a><a href="/brain-games">Brain games</a><a href="/geography-games">Geography games</a></nav>
-        <p>Free, no download, no email. <a href="/how-to-play">How it works</a>.</p>
         <nav aria-label="Languages"><a href="/es/" hreflang="es" lang="es">Español</a><a href="/pt/" hreflang="pt" lang="pt">Português</a><a href="/fr/" hreflang="fr" lang="fr">Français</a><a href="/de/" hreflang="de" lang="de">Deutsch</a><a href="/it/" hreflang="it" lang="it">Italiano</a><a href="/ro/" hreflang="ro" lang="ro">Română</a><a href="/pl/" hreflang="pl" lang="pl">Polski</a><a href="/tr/" hreflang="tr" lang="tr">Türkçe</a></nav>
+        <p class="legal"><a href="/privacy">Privacy</a></p>
         <noscript><p>Duel needs JavaScript to play.</p></noscript>
       </div>
     </section>
