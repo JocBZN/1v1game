@@ -71,7 +71,7 @@ export function TimelineRound({ item, feedback, onAnswer, waiting }: ModeProps<T
             >
               <GripVertical size={18} className="shrink-0 text-muted" />
               <span className="flex-1 text-[15px] font-semibold leading-tight">{item.data.labels[idx]}</span>
-              {years && <span className="font-display text-lg font-bold tabular-nums">{years[idx]}</span>}
+              {years && <span className="font-display text-lg font-bold tabular-nums">{years[idx] < 0 ? `${-years[idx]} BC` : years[idx]}</span>}
             </Reorder.Item>
           );
         })}

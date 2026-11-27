@@ -22,10 +22,13 @@ export type EstimateContent = RoundContent<EstimateItem>;
 /**
  * Points for a guess:
  *  - log games: by how many times off you are (×1 = 1000, ×`zeroAt` or more = 0, linear in log space)
- *  - year game: 1000 for the exact year, minus ~83 per year off, 0 from 12 years off
+ *  - year game: 1000 for the exact year, 0 from `yearTolerance(answer)` years off (12 for recent
+ *    years, growing with age up to 60 for antiquity: nobody dates 776 BC to the year)
  */
+export const yearTolerance = (answer: number) => Math.round(Math.min(60, Math.max(12, (2026 - answer) * 0.03)));
+
 export function estimatePoints(input: EstimateInput, answer: number, guess: number, zeroAt = 10): number {
-  if (input.kind === 'year') return Math.round(1000 * Math.max(0, 1 - Math.abs(guess - answer) / 12));
+  if (input.kind === 'year') return Math.round(1000 * Math.max(0, 1 - Math.abs(guess - answer) / yearTolerance(answer)));
   if (guess <= 0 || answer <= 0) return 0;
   const off = Math.abs(Math.log10(guess / answer)) / Math.log10(zeroAt);
   return Math.round(1000 * Math.max(0, 1 - off));
@@ -95,11 +98,12 @@ export const opinionMode = makeEstimateMode({
 });
 export const yearMode = makeEstimateMode({
   id: 'year', name: 'Release year', questions: yearQuestions,
-  input: { kind: 'year', min: 1980, max: 2026 }, perRound: 5, itemMs: 12_000, thinkMs: 7_000,
+  // Negative years are BC. The slider is denser for recent years; players can also type the year.
+  input: { kind: 'year', min: -3000, max: 2026 }, perRound: 5, itemMs: 15_000, thinkMs: 8_000,
 });
 export const priceMode = makeEstimateMode({
   id: 'price', name: 'The right price', questions: priceQuestions,
-  input: { kind: 'log', min: 0.1, max: 1e10, prefix: '$' }, perRound: 5, itemMs: 15_000, zeroAt: 5, thinkMs: 9_000,
+  input: { kind: 'log', min: 0.1, max: 1e12, prefix: '$' }, perRound: 5, itemMs: 15_000, zeroAt: 5, thinkMs: 9_000,
 });
 export const followersMode = makeEstimateMode({
   id: 'followers', name: 'Followers', questions: followerQuestions,

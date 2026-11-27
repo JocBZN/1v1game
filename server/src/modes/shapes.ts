@@ -2,6 +2,8 @@
  * Shapes for "Split the shape". Each shape is a set of NON-overlapping polygons (so areas add up),
  * in a 100×100 box with y pointing down. Pure geometry, shared with the client for drawing.
  */
+import { EXTRA_SHAPES } from './shapes-extra';
+
 export type Pt = [number, number];
 export type Poly = Pt[];
 export interface ShapeDef {
@@ -65,7 +67,7 @@ function catHead(): Poly {
   return out;
 }
 
-export const SHAPES: ShapeDef[] = [
+const BASE_SHAPES: ShapeDef[] = [
   {
     id: 'alien', name: 'Pixel alien', polys: pixels([
       '..#.....#..',
@@ -128,6 +130,8 @@ export const SHAPES: ShapeDef[] = [
     ]],
   },
 ];
+
+export const SHAPES: ShapeDef[] = [...BASE_SHAPES, ...EXTRA_SHAPES];
 
 // ------------------------------------------------------------------ geometry
 

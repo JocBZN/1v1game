@@ -31,7 +31,7 @@ export const DOMAINS: Record<DomainId, DomainMeta> = {
   golf: { id: 'golf', name: 'One-shot golf', short: 'Golf', icon: LandPlot, ...SLATE, tagline: '3 holes · up to 3 shots each' },
   timeline: { id: 'timeline', name: 'Timeline', short: 'Timeline', icon: History, ...RED, tagline: '3 rounds · put 4 events in order' },
   opinion: { id: 'opinion', name: 'Opinion', short: 'Opinion', icon: Lightbulb, ...ORANGE, tagline: '4 wild questions · closest guess wins' },
-  year: { id: 'year', name: 'Release year', short: 'Year', icon: CalendarRange, ...CYAN, tagline: '5 films, games and songs · guess the year' },
+  year: { id: 'year', name: 'Release year', short: 'Year', icon: CalendarRange, ...CYAN, tagline: '5 questions, from ancient history to today' },
   price: { id: 'price', name: 'The right price', short: 'Price', icon: Tag, ...SLATE, tagline: '5 things · guess the price' },
   followers: { id: 'followers', name: 'Followers', short: 'Followers', icon: Users, ...RED, tagline: '5 stars and games · guess the numbers' },
 };

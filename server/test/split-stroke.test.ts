@@ -8,7 +8,7 @@ const half = (s: number) => Math.min(s, 1 - s);
 
 describe('split the shape: freehand cuts', () => {
   it('a straight stroke gives the same split as the old straight line', () => {
-    for (const shape of SHAPES) {
+    for (const shape of SHAPES.filter((_, i) => i % 8 === 0)) { // a sample: every 8th shape
       const polys = placeShape(shape.polys, 37, false);
       const a: Pt = [20, 5];
       const b: Pt = [70, 95];

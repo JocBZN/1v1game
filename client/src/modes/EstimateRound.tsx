@@ -35,9 +35,29 @@ function parseBig(s: string): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
+/** Year slider: 0..1000, cubic so recent years get most of the travel (BC years are negative). */
+const YEAR_STEPS = 1000;
+const noZero = (y: number) => (y === 0 ? 1 : y);
+function yearAt(pos: number, min: number, max: number) {
+  return noZero(Math.round(max - (max - min) * (1 - pos / YEAR_STEPS) ** 3));
+}
+function posOf(year: number, min: number, max: number) {
+  const f = 1 - Math.cbrt(Math.max(0, Math.min(1, (max - year) / (max - min))));
+  return Math.round(f * YEAR_STEPS);
+}
+export const formatYear = (y: number) => (y < 0 ? `${-y} BC` : y < 1000 ? `${y} AD` : String(y));
+/** "44 BC", "44bc", "-44", "1066", "79 AD" → year (negative for BC), or null. */
+function parseYear(raw: string): number | null {
+  const m = raw.trim().toLowerCase().match(/^(-?)\s*(\d{1,4})\s*(bc|bce|î\.?hr\.?|ad|ce|d\.?hr\.?)?$/);
+  if (!m) return null;
+  const n = Number(m[2]);
+  if (!n) return null;
+  return m[1] === '-' || (m[3] && /^(bc|bce|î)/.test(m[3])) ? -n : n;
+}
+
 export function EstimateRound({ item, feedback, onAnswer, waiting }: ModeProps<EstimateData>) {
   const input = item?.data.input;
-  const start = (inp?: Input) => (!inp ? 0 : inp.kind === 'year' ? 2003 : Math.sqrt(inp.min * inp.max));
+  const start = (inp?: Input) => (!inp ? 0 : inp.kind === 'year' ? yearAt(YEAR_STEPS / 2, inp.min, inp.max) : Math.sqrt(inp.min * inp.max));
   const [value, setValue] = useState(() => start(input));
   const [text, setText] = useState('');
   const [sent, setSent] = useState(false);
@@ -71,7 +91,7 @@ export function EstimateRound({ item, feedback, onAnswer, waiting }: ModeProps<E
   const shownEnd = item.endsAt ? item.endsAt - GRACE_MS : null;
   const prefix = input.kind === 'log' ? input.prefix ?? '' : '';
   const unit = item.data.unit && item.data.unit !== '$' ? ` ${item.data.unit}` : '';
-  const show = (n: number) => (input.kind === 'year' ? String(Math.round(n)) : `${prefix}${formatBig(n)}${unit}`);
+  const show = (n: number) => (input.kind === 'year' ? formatYear(Math.round(n)) : `${prefix}${formatBig(n)}${unit}`);
 
   const answer = typeof fb?.answer === 'number' ? (fb.answer as number) : null;
   const guess = typeof fb?.guess === 'number' ? (fb.guess as number) : null;
@@ -114,15 +134,46 @@ export function EstimateRound({ item, feedback, onAnswer, waiting }: ModeProps<E
       {!fb && (
         <div className="mt-8">
           {input.kind === 'year' ? (
-            <div className="flex items-center gap-3">
-              <button className="btn btn-secondary h-11 w-11 p-0" disabled={locked} onClick={() => setValue((v) => Math.max(input.min, v - 1))} aria-label="One year earlier"><Minus size={18} /></button>
-              <input
-                type="range" min={input.min} max={input.max} step={1} value={value} disabled={locked}
-                onChange={(e) => setValue(Number(e.target.value))}
-                className="color-slider h-3 flex-1 cursor-pointer appearance-none rounded-full bg-sunken"
-              />
-              <button className="btn btn-secondary h-11 w-11 p-0" disabled={locked} onClick={() => setValue((v) => Math.min(input.max, v + 1))} aria-label="One year later"><Plus size={18} /></button>
-            </div>
+            <>
+              <div className="flex items-center gap-3">
+                <button className="btn btn-secondary h-11 w-11 p-0" disabled={locked} onClick={() => { setValue((v) => Math.max(input.min, noZero(v - 1 === 0 ? -1 : v - 1))); setText(''); }} aria-label="One year earlier"><Minus size={18} /></button>
+                <input
+                  type="range" min={0} max={YEAR_STEPS} step={1} value={posOf(value, input.min, input.max)} disabled={locked}
+                  onChange={(e) => { setValue(yearAt(Number(e.target.value), input.min, input.max)); setText(''); }}
+                  className="color-slider h-3 flex-1 cursor-pointer appearance-none rounded-full bg-sunken"
+                />
+                <button className="btn btn-secondary h-11 w-11 p-0" disabled={locked} onClick={() => { setValue((v) => Math.min(input.max, v + 1 === 0 ? 1 : v + 1)); setText(''); }} aria-label="One year later"><Plus size={18} /></button>
+              </div>
+              <div className="mt-1 flex justify-between text-[11px] text-muted"><span>{formatYear(input.min)}</span><span>{formatYear(input.max)}</span></div>
+              <div className="mt-4 flex gap-2">
+                <input
+                  inputMode="numeric" placeholder="or type it: 1066, 44 BC…" value={text} disabled={locked}
+                  onChange={(e) => {
+                    setText(e.target.value);
+                    const y = parseYear(e.target.value);
+                    if (y !== null) setValue(Math.max(input.min, Math.min(input.max, value < 0 && !/[a-z-]/i.test(e.target.value) ? -y : y)));
+                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && submit()}
+                  className="min-w-0 flex-1 rounded-2xl border border-line bg-surface px-4 py-3 text-center text-base font-medium outline-none placeholder:text-muted/60 focus:border-cyan focus:ring-4 focus:ring-cyan-soft"
+                />
+                <div className="flex shrink-0 overflow-hidden rounded-2xl border border-line">
+                  {(['BC', 'AD'] as const).map((era) => {
+                    const on = era === 'BC' ? value < 0 : value > 0;
+                    return (
+                      <button
+                        key={era}
+                        type="button"
+                        disabled={locked}
+                        onClick={() => setValue((v) => Math.max(input.min, Math.min(input.max, (era === 'BC') === (v < 0) ? v : -v)))}
+                        className={`px-3.5 text-sm font-bold transition ${on ? 'bg-teal text-cream' : 'bg-surface text-muted'}`}
+                      >
+                        {era}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
           ) : (
             <>
               <input

@@ -1,14 +1,15 @@
 import { simulateItemBot } from './sim';
+import { EXTRA_EVENTS } from './timeline-extra';
 import { sumScore, type GameMode, type RoundContent } from './types';
 
 export interface TimelineEvent {
   label: string;
   year: number;
-  kind: 'history' | 'game' | 'movie' | 'tech';
+  kind: 'history' | 'game' | 'movie' | 'tech' | 'music';
 }
 
 /** Well-documented dates only (first release / the year it happened). */
-export const EVENTS: TimelineEvent[] = [
+const BASE_EVENTS: TimelineEvent[] = [
   // history
   { label: 'Fall of the Western Roman Empire', year: 476, kind: 'history' },
   { label: 'Charlemagne crowned emperor', year: 800, kind: 'history' },
@@ -95,6 +96,12 @@ export const EVENTS: TimelineEvent[] = [
   { label: 'Instagram launched', year: 2010, kind: 'tech' },
   { label: 'ChatGPT released', year: 2022, kind: 'tech' },
 ];
+
+/** Base list plus the extra events; the first occurrence of a label wins. */
+export const EVENTS: TimelineEvent[] = (() => {
+  const seen = new Set<string>();
+  return [...BASE_EVENTS, ...EXTRA_EVENTS].filter((e) => !seen.has(e.label.toLowerCase()) && seen.add(e.label.toLowerCase()));
+})();
 
 export interface TimelineItem {
   /** in the order shown to the player (shuffled) */

@@ -1,4 +1,9 @@
 import type { EstimateQ } from './estimate';
+import { EVENTS } from './timeline';
+import { EXTRA_OPINION } from './opinion-extra';
+import { EXTRA_PRICES } from './price-extra';
+import { EXTRA_FOLLOWERS } from './followers-extra';
+import { EXTRA_YEAR_QUESTIONS } from './year-extra';
 
 /** Round to 2 significant digits so reference answers don't look falsely precise. */
 const sig2 = (n: number) => {
@@ -142,11 +147,11 @@ const FACTS: [string, number, string?][] = [
 ];
 
 export function opinionQuestions(): EstimateQ[] {
-  const facts = FACTS.map(([q, answer, note]) => ({ q, answer, note }));
+  const facts = [...FACTS, ...EXTRA_OPINION].map(([q, answer, note]) => ({ q, answer, note }));
   return [...facts, ...facts, ...packingQuestions()]; // facts weighted twice so rounds mix both kinds
 }
 
-// ------------------------------------------------------------------ RELEASE YEAR (1980–2026)
+// ------------------------------------------------------------------ RELEASE YEAR (any year, BC as negative)
 const YEARS: [string, number][] = [
   ['E.T. the Extra-Terrestrial (film)', 1982], ['Back to the Future (film)', 1985], ['Top Gun (film)', 1986], ['Die Hard (film)', 1988],
   ['Home Alone (film)', 1990], ['Jurassic Park (film)', 1993], ['The Lion King (film)', 1994], ['Pulp Fiction (film)', 1994],
@@ -182,7 +187,20 @@ const YEARS: [string, number][] = [
   ['Netflix starts streaming', 2007], ['COVID-19 declared a pandemic', 2020], ['Nintendo Switch released', 2017],
 ];
 
-export const yearQuestions = (): EstimateQ[] => YEARS.map(([q, answer]) => ({ q, answer }));
+/**
+ * All "which year" questions: the original list, the extra films/games/songs/series/launches, and the
+ * Timeline's history, science and music events (BC included). Films and games from 1980 on are already
+ * asked by title, so the Timeline's versions of those are left out. First occurrence of a text wins.
+ */
+export const yearQuestions = (): EstimateQ[] => {
+  const seen = new Set<string>();
+  const rows: [string, number][] = [
+    ...YEARS,
+    ...EXTRA_YEAR_QUESTIONS,
+    ...EVENTS.filter((e) => !((e.kind === 'movie' || e.kind === 'game') && e.year >= 1980)).map((e) => [e.label, e.year] as [string, number]),
+  ];
+  return rows.filter(([q]) => !seen.has(q.toLowerCase()) && seen.add(q.toLowerCase())).map(([q, answer]) => ({ q, answer }));
+};
 
 // ------------------------------------------------------------------ PRICE (USD, typical price)
 const PRICES: [string, number, string?][] = [
@@ -205,8 +223,10 @@ const PRICES: [string, number, string?][] = [
   ['A Louvre entry ticket (adult, 2024, in USD)', 24],
 ];
 
-export const priceQuestions = (): EstimateQ[] =>
-  PRICES.map(([q, answer, note]) => ({ q: `${q}?`, answer, unit: '$', note: note ?? 'typical US price' }));
+export const priceQuestions = (): EstimateQ[] => [
+  ...PRICES.map(([q, answer, note]) => ({ q: `${q}?`, answer, unit: '$', note: note ?? 'typical US price' })),
+  ...EXTRA_PRICES.map(([q, answer, note]) => ({ q: `${q}?`, answer, unit: '$', note })),
+];
 
 // ------------------------------------------------------------------ FOLLOWERS / VIEWS (approximate, 2025)
 const FOLLOWERS: [string, number, string][] = [
@@ -224,5 +244,7 @@ const FOLLOWERS: [string, number, string][] = [
   ['Biggest Twitch stream ever, viewers at once (La Velada 2024)', 3.8e6, 'viewers'],
 ];
 
-export const followerQuestions = (): EstimateQ[] =>
-  FOLLOWERS.map(([who, answer, unit]) => ({ q: `${who}: how many ${unit}?`, answer, unit, note: 'approximate, 2025' }));
+export const followerQuestions = (): EstimateQ[] => [
+  ...FOLLOWERS.map(([who, answer, unit]) => ({ q: `${who}: how many ${unit}?`, answer, unit, note: 'approximate, 2025' })),
+  ...EXTRA_FOLLOWERS.map(([who, answer, unit, note]) => ({ q: `${who}: how many ${unit}?`, answer, unit, note: note ?? 'approximate, 2025' })),
+];

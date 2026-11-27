@@ -291,13 +291,13 @@ export const TOPIC_PAGES: TopicPage[] = [
     name: 'Release year',
     title: 'Guess the Year – Movie, Game and Song Year Quiz',
     description:
-      'What year did it come out? Guess the release year of films, video games, hit songs and viral moments from 1980 to today. Free 1v1 year guessing game.',
+      'What year was it? Guess the year of films, video games, hit songs, inventions and history, from ancient Egypt to today. Free 1v1 year guessing game.',
     h1: 'Guess the release year',
     intro:
-      'A film, a game, a song or a viral moment appears. Slide to the year you think it came out: the exact year scores the most. Five titles per round, 12 seconds each.',
+      'A film, a game, a song, an invention or a moment in history appears. Slide to the year (or type it, BC included): the exact year scores the most. Five questions per round, 15 seconds each.',
     how: [
-      'Exact year: 1,000 points; 3 years off: 750; 12 or more years off: 0.',
-      'Everything is from 1980 to today.',
+      'Exact year: 1,000 points; 3 years off: 750; 12 or more years off: 0. For ancient history the margin grows, up to 60 years.',
+      'Anything from the pyramids (about 2560 BC) to today; BC years are typed or picked with the BC button.',
       'Five titles per round, the same for both players.',
       'The real year is shown after each answer.',
     ],
@@ -311,7 +311,7 @@ export const TOPIC_PAGES: TopicPage[] = [
       'If you have no idea, choose the middle of the decade the style belongs to.',
     ],
     faq: [
-      ['What is included?', 'Classic and recent films, video games from Pac-Man to Baldur’s Gate 3, hit songs and internet moments.'],
+      ['What is included?', 'Films, TV series, video games from Pac-Man to Baldur’s Gate 3, hit songs and albums, inventions and launches, and history from antiquity to today.'],
       ['Which release date counts?', 'The first public release, for example the original theatrical release of a film or the first platform release of a game.'],
       ...COMMON_FAQ,
     ],
