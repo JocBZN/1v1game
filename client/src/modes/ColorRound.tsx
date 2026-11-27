@@ -23,12 +23,15 @@ const CHANNELS = [
 export function ColorRound({ item, feedback, onAnswer, waiting }: ModeProps<ColorData>) {
   const [rgb, setRgb] = useState<number[]>([128, 128, 128]);
   const [sent, setSent] = useState(false);
+  /** Which channels the player has moved; numbers appear only for those. */
+  const [moved, setMoved] = useState([false, false, false]);
   const rgbRef = useRef(rgb);
   rgbRef.current = rgb;
   const sentRef = useRef(false);
 
   useEffect(() => {
     setRgb([128, 128, 128]);
+    setMoved([false, false, false]);
     setSent(false);
     sentRef.current = false;
     if (!item?.endsAt) return;
@@ -67,7 +70,7 @@ export function ColorRound({ item, feedback, onAnswer, waiting }: ModeProps<Colo
           <span className="rounded-md bg-white/85 px-2 py-0.5 text-xs font-semibold text-slate">Target{fb ? ` ${hex(target)}` : ''}</span>
         </div>
         <div className="flex h-36 items-end p-3" style={{ background: css(rgb) }}>
-          <span className="rounded-md bg-white/85 px-2 py-0.5 text-xs font-semibold text-slate">You {hex(rgb.map(Math.round))}</span>
+          <span className="rounded-md bg-white/85 px-2 py-0.5 text-xs font-semibold text-slate">You{moved.some(Boolean) || fb ? ` ${hex(rgb.map(Math.round))}` : ''}</span>
         </div>
       </div>
 
@@ -76,7 +79,7 @@ export function ColorRound({ item, feedback, onAnswer, waiting }: ModeProps<Colo
           <label key={ch.label} className="block">
             <div className="mb-1.5 flex justify-between text-xs font-semibold text-muted">
               <span>{ch.label}</span>
-              <span className="tabular-nums text-text">{Math.round(rgb[i])}</span>
+              <span className="tabular-nums text-text">{moved[i] || fb ? Math.round(rgb[i]) : '?'}</span>
             </div>
             <input
               type="range"
@@ -84,7 +87,10 @@ export function ColorRound({ item, feedback, onAnswer, waiting }: ModeProps<Colo
               max={255}
               value={rgb[i]}
               disabled={sent || !!fb}
-              onChange={(e) => setRgb((c) => c.map((v, k) => (k === i ? Number(e.target.value) : v)))}
+              onChange={(e) => {
+                setMoved((m) => m.map((v, k) => v || k === i));
+                setRgb((c) => c.map((v, k) => (k === i ? Number(e.target.value) : v)));
+              }}
               className="color-slider h-3 w-full cursor-pointer appearance-none rounded-full"
               style={{ background: ch.track(rgb) }}
             />

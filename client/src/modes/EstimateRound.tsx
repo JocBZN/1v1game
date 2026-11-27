@@ -45,7 +45,7 @@ function posOf(year: number, min: number, max: number) {
   const f = 1 - Math.cbrt(Math.max(0, Math.min(1, (max - year) / (max - min))));
   return Math.round(f * YEAR_STEPS);
 }
-export const formatYear = (y: number) => (y < 0 ? `${-y} BC` : y < 1000 ? `${y} AD` : String(y));
+export const formatYear = (y: number) => (y < 0 ? `${-y} BC` : String(y));
 /** "44 BC", "44bc", "-44", "1066", "79 AD" → year (negative for BC), or null. */
 function parseYear(raw: string): number | null {
   const m = raw.trim().toLowerCase().match(/^(-?)\s*(\d{1,4})\s*(bc|bce|î\.?hr\.?|ad|ce|d\.?hr\.?)?$/);
@@ -61,6 +61,15 @@ export function EstimateRound({ item, feedback, onAnswer, waiting }: ModeProps<E
   const [value, setValue] = useState(() => start(input));
   const [text, setText] = useState('');
   const [sent, setSent] = useState(false);
+  /** No number is shown (or sent) until the player moves the slider or types. */
+  const [touched, setTouched] = useState(false);
+  /** BC pressed before any year was chosen: applies to the next typed year. */
+  const [bcPending, setBcPending] = useState(false);
+  const touchedRef = useRef(false);
+  const touch = () => {
+    touchedRef.current = true;
+    setTouched(true);
+  };
   const valueRef = useRef(value);
   valueRef.current = value;
   const sentRef = useRef(false);
@@ -71,6 +80,9 @@ export function EstimateRound({ item, feedback, onAnswer, waiting }: ModeProps<E
     setText(item?.data.input.kind === 'log' ? '' : '');
     setSent(false);
     sentRef.current = false;
+    setTouched(false);
+    setBcPending(false);
+    touchedRef.current = false;
     if (!item?.endsAt) return;
     const t = setTimeout(() => submit(), Math.max(0, item.endsAt - GRACE_MS - performance.now()));
     return () => clearTimeout(t);
@@ -81,7 +93,8 @@ export function EstimateRound({ item, feedback, onAnswer, waiting }: ModeProps<E
     if (sentRef.current) return;
     sentRef.current = true;
     setSent(true);
-    onAnswer(valueRef.current);
+    // Nothing chosen when time ran out: send no number (0 points) rather than the slider's start.
+    onAnswer(touchedRef.current ? valueRef.current : null);
   }
 
   if (waiting) return <WaitingNote />;
@@ -104,6 +117,7 @@ export function EstimateRound({ item, feedback, onAnswer, waiting }: ModeProps<E
     }
   }
 
+  const bcOn = touched ? value < 0 : bcPending;
   const logMin = input.kind === 'log' ? Math.log10(input.min) : 0;
   const logMax = input.kind === 'log' ? Math.log10(input.max) : 0;
 
@@ -120,7 +134,10 @@ export function EstimateRound({ item, feedback, onAnswer, waiting }: ModeProps<E
       <h2 className="mt-6 text-center text-2xl font-semibold leading-snug tracking-tight">{item.data.q}</h2>
 
       <div className="mt-8 text-center">
-        <div className="font-display text-4xl font-bold tabular-nums tracking-tight">{show(fb && guess !== null ? guess : value)}</div>
+        <div className="font-display text-4xl font-bold tabular-nums tracking-tight">
+          {fb && guess !== null ? show(guess) : touched && !fb ? show(value) : <span className="text-muted/50">?</span>}
+        </div>
+        {!touched && !fb && <div className="mt-1 text-sm text-muted">Move the slider or type your answer</div>}
         {answer !== null && (
           <div className="mt-3 rounded-2xl border border-line bg-surface p-3">
             <div className="label">Answer</div>
@@ -136,13 +153,13 @@ export function EstimateRound({ item, feedback, onAnswer, waiting }: ModeProps<E
           {input.kind === 'year' ? (
             <>
               <div className="flex items-center gap-3">
-                <button className="btn btn-secondary h-11 w-11 p-0" disabled={locked} onClick={() => { setValue((v) => Math.max(input.min, noZero(v - 1 === 0 ? -1 : v - 1))); setText(''); }} aria-label="One year earlier"><Minus size={18} /></button>
+                <button className="btn btn-secondary h-11 w-11 p-0" disabled={locked} onClick={() => { touch(); setValue((v) => Math.max(input.min, noZero(v - 1 === 0 ? -1 : v - 1))); setText(''); }} aria-label="One year earlier"><Minus size={18} /></button>
                 <input
                   type="range" min={0} max={YEAR_STEPS} step={1} value={posOf(value, input.min, input.max)} disabled={locked}
-                  onChange={(e) => { setValue(yearAt(Number(e.target.value), input.min, input.max)); setText(''); }}
+                  onChange={(e) => { touch(); setValue(yearAt(Number(e.target.value), input.min, input.max)); setText(''); }}
                   className="color-slider h-3 flex-1 cursor-pointer appearance-none rounded-full bg-sunken"
                 />
-                <button className="btn btn-secondary h-11 w-11 p-0" disabled={locked} onClick={() => { setValue((v) => Math.min(input.max, v + 1 === 0 ? 1 : v + 1)); setText(''); }} aria-label="One year later"><Plus size={18} /></button>
+                <button className="btn btn-secondary h-11 w-11 p-0" disabled={locked} onClick={() => { touch(); setValue((v) => Math.min(input.max, v + 1 === 0 ? 1 : v + 1)); setText(''); }} aria-label="One year later"><Plus size={18} /></button>
               </div>
               <div className="mt-1 flex justify-between text-[11px] text-muted"><span>{formatYear(input.min)}</span><span>{formatYear(input.max)}</span></div>
               <div className="mt-4 flex gap-2">
@@ -151,27 +168,25 @@ export function EstimateRound({ item, feedback, onAnswer, waiting }: ModeProps<E
                   onChange={(e) => {
                     setText(e.target.value);
                     const y = parseYear(e.target.value);
-                    if (y !== null) setValue(Math.max(input.min, Math.min(input.max, value < 0 && !/[a-z-]/i.test(e.target.value) ? -y : y)));
+                    if (y !== null) touch();
+                    if (y !== null) setValue(Math.max(input.min, Math.min(input.max, bcOn && !/[a-z-]/i.test(e.target.value) ? -y : y)));
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && submit()}
                   className="min-w-0 flex-1 rounded-2xl border border-line bg-surface px-4 py-3 text-center text-base font-medium outline-none placeholder:text-muted/60 focus:border-cyan focus:ring-4 focus:ring-cyan-soft"
                 />
-                <div className="flex shrink-0 overflow-hidden rounded-2xl border border-line">
-                  {(['BC', 'AD'] as const).map((era) => {
-                    const on = era === 'BC' ? value < 0 : value > 0;
-                    return (
-                      <button
-                        key={era}
-                        type="button"
-                        disabled={locked}
-                        onClick={() => setValue((v) => Math.max(input.min, Math.min(input.max, (era === 'BC') === (v < 0) ? v : -v)))}
-                        className={`px-3.5 text-sm font-bold transition ${on ? 'bg-teal text-cream' : 'bg-surface text-muted'}`}
-                      >
-                        {era}
-                      </button>
-                    );
-                  })}
-                </div>
+                <button
+                  type="button"
+                  disabled={locked}
+                  aria-pressed={bcOn}
+                  onClick={() => {
+                    if (!touched) return setBcPending((b) => !b);
+                    setValue((v) => Math.max(input.min, Math.min(input.max, -v)));
+                  }}
+                  className={`shrink-0 rounded-2xl border px-4 text-sm font-bold transition ${bcOn ? 'border-teal bg-teal text-cream' : 'border-line bg-surface text-muted'}`}
+                  title="Before Christ"
+                >
+                  BC
+                </button>
               </div>
             </>
           ) : (
@@ -179,6 +194,7 @@ export function EstimateRound({ item, feedback, onAnswer, waiting }: ModeProps<E
               <input
                 type="range" min={logMin} max={logMax} step={0.01} value={Math.log10(value)} disabled={locked}
                 onChange={(e) => {
+                  touch();
                   setValue(+(10 ** Number(e.target.value)).toPrecision(2));
                   setText('');
                 }}
@@ -190,7 +206,10 @@ export function EstimateRound({ item, feedback, onAnswer, waiting }: ModeProps<E
                 onChange={(e) => {
                   setText(e.target.value);
                   const n = parseBig(e.target.value);
-                  if (n !== null) setValue(n);
+                  if (n !== null) {
+                    touch();
+                    setValue(n);
+                  }
                 }}
                 onKeyDown={(e) => e.key === 'Enter' && submit()}
                 className="mt-4 w-full rounded-2xl border border-line bg-surface px-4 py-3 text-center text-base font-medium outline-none placeholder:text-muted/60 focus:border-cyan focus:ring-4 focus:ring-cyan-soft"
@@ -200,7 +219,7 @@ export function EstimateRound({ item, feedback, onAnswer, waiting }: ModeProps<E
         </div>
       )}
 
-      <button onClick={submit} disabled={locked} className="btn btn-primary mt-auto w-full py-3.5">
+      <button onClick={submit} disabled={locked || !touched} className="btn btn-primary mt-auto w-full py-3.5">
         {fb ? `+${fb.points}` : sent ? 'Checking…' : 'Lock in'}
       </button>
     </div>
