@@ -18,7 +18,7 @@ export const SITE = {
   themeColor: '#ffeecc',
 };
 
-const DEPLOYED_AT = new Date().toISOString().slice(0, 10);
+export const DEPLOYED_AT = new Date().toISOString().slice(0, 10);
 
 /** Public base URL, without trailing slash. */
 export function publicUrl(): string {
@@ -866,7 +866,7 @@ export function mountSeo(app: express.Express, extraPaths: () => string[] = () =
   });
 
   app.get('/robots.txt', (_req, res) => {
-    res.type('text/plain').send(`User-agent: *\nAllow: /\nAllow: /api/guest\nDisallow: /api/\nDisallow: /admin\n\nSitemap: ${publicUrl()}/sitemap.xml\n${hasPack() ? `Sitemap: ${publicUrl()}/sitemap-i18n.xml\n` : ''}`);
+    res.type('text/plain').send(`User-agent: *\nAllow: /\nAllow: /api/guest\nDisallow: /api/\nDisallow: /admin\n\nSitemap: ${publicUrl()}/sitemap_index.xml\nSitemap: ${publicUrl()}/sitemap.xml\n${hasPack() ? `Sitemap: ${publicUrl()}/sitemap-i18n.xml\n` : ''}Sitemap: ${publicUrl()}/sitemap-images.xml\n`);
   });
 
   app.get('/sitemap.xml', (_req, res) => {

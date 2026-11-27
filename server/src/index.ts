@@ -9,8 +9,10 @@ import { createApi } from './api';
 import { db } from './db';
 import { SERVER_ROOT } from './paths';
 import { contentSecurityPolicy, mountSecurity } from './security';
-import { makeIndexRenderer, mountSeo } from './seo';
-import { mountQuizPages, quizPaths } from './seo-quiz';
+import { DEPLOYED_AT, makeIndexRenderer, mountSeo, publicUrl } from './seo';
+import { flagRegionPage, mountQuizPages, quizPaths } from './seo-quiz';
+import { FLAG_REGIONS } from './seo-quiz-content';
+import { mountSitemaps } from './sitemaps';
 import { mountSeoPack } from './seo-pack';
 import { pruneIdleGuests } from './db';
 import { normalizeCode } from './rooms';
@@ -38,6 +40,11 @@ app.get(['/mental-math', '/mental-math/'], (_req, res) => res.redirect(301, '/1v
 mountSeoPack(app);
 mountQuizPages(app);
 mountSeo(app, quizPaths);
+mountSitemaps(app, {
+  base: publicUrl,
+  lastmod: DEPLOYED_AT,
+  serverPages: () => FLAG_REGIONS.map((r) => ({ path: `/flag-quiz/${r.id}`, html: flagRegionPage(r.id) })),
+});
 
 if (fs.existsSync(path.join(CLIENT_DIST, 'index.html'))) {
   const renderIndex = makeIndexRenderer(CLIENT_DIST);

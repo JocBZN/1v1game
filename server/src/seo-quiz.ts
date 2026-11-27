@@ -215,7 +215,7 @@ function flagStudyHtml(id: string, regionName: string): string {
 <ul><li>Learn the look-alike flags as groups: the small difference is what sticks.</li><li>Sort flags by layout: vertical stripes, horizontal stripes, crosses, stars and emblems.</li><li>Test yourself for a few minutes a day, then play a 1v1 flag duel: 8 flags, 6 seconds each, with wrong options from the same region.</li></ul>`;
 }
 
-function flagRegionPage(id: string): string | null {
+export function flagRegionPage(id: string): string | null {
   const region = FLAG_REGIONS.find((r) => r.id === id);
   if (!region) return null;
   const countries = loadCountries()
