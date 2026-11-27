@@ -19,6 +19,8 @@ export interface AnswerResult {
   itemDone: boolean;
   /** Extra data sent back to the client AFTER answering (e.g. the correct option, the opponent's reply). */
   feedback?: Record<string, unknown>;
+  /** Pause before the next item when it should differ from the mode's feedbackDelay (e.g. a long golf roll). */
+  nextDelayMs?: number;
 }
 
 export interface AnswerContext {

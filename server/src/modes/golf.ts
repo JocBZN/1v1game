@@ -1,4 +1,5 @@
-import { HOLE_R, pathDurationMs, powerForDistance, simulateShot, type Course, type Pt, type Rect } from '../golf/physics';
+import { HOLE_R, pathDurationMs, simulateShot, type Course, type Pt } from '../golf/physics';
+import { bestShot, distanceField, generateRoundCourses } from '../golf/levels';
 import { clamp } from '../rng';
 import { isNum } from './sim';
 import { botAccuracy, botSpeedFactor, sumScore, type GameMode, type ReplayEvent, type RoundContent } from './types';
@@ -9,6 +10,9 @@ export const GOLF_HOLES = 3;
 export const GOLF_STROKES = 3;
 export const GOLF_ITEM_MS = 25_000;
 const FEEDBACK_MS = 1_800;
+/** After the ball stops: time for the win effect (holed) or to see where it ended. */
+const AFTER_HOLED_MS = 1_200;
+const AFTER_MISS_MS = 1_400;
 const HOLED_POINTS: Record<number, number> = { 1: 1000, 2: 650, 3: 400 };
 
 /** Not holed after the last stroke: up to 300 points for being close. */
@@ -24,10 +28,6 @@ function st(course: Course, itemState: Record<string, unknown>): GolfState {
   return itemState.golf as GolfState;
 }
 
-function overlaps(r: Rect, p: Pt, pad: number) {
-  return p[0] > r.x - pad && p[0] < r.x + r.w + pad && p[1] > r.y - pad && p[1] < r.y + r.h + pad;
-}
-
 export function parseShot(x: unknown): { angle: number; power: number } | null {
   if (!x || typeof x !== 'object') return null;
   const { angle, power } = x as Record<string, unknown>;
@@ -40,28 +40,11 @@ export const golfMode: GameMode<GolfContent> = {
   name: 'One-shot golf',
   itemTimeLimit: GOLF_ITEM_MS,
   feedbackDelay: FEEDBACK_MS,
-  timeLimit: GOLF_HOLES * (GOLF_ITEM_MS + FEEDBACK_MS) + 1_000,
+  // Extra room for long final rolls, which delay the next hole (see nextDelayMs).
+  timeLimit: GOLF_HOLES * (GOLF_ITEM_MS + FEEDBACK_MS) + 6_000,
 
   generateRound(rng) {
-    const items = Array.from({ length: GOLF_HOLES }, (): Course => {
-      const start: Pt = [rng.int(25, 75), rng.int(128, 138)];
-      const hole: Pt = [rng.int(18, 82), rng.int(16, 30)];
-      const walls: Rect[] = [];
-      const count = rng.int(1, 2);
-      for (let i = 0; i < 40 && walls.length < count; i++) {
-        const w = rng.int(24, 46);
-        const h = rng.int(5, 8);
-        // the first one sits across the straight line, so a bank shot or a curve around it is needed
-        const t = walls.length === 0 ? rng.int(35, 65) / 100 : rng() * 0.8 + 0.1;
-        const cx = walls.length === 0 ? start[0] + (hole[0] - start[0]) * t + rng.int(-8, 8) : rng.int(10, 90);
-        const cy = start[1] + (hole[1] - start[1]) * t;
-        const r: Rect = { x: clamp(Math.round(cx - w / 2), 0, 100 - w), y: Math.round(cy - h / 2), w, h };
-        if (overlaps(r, start, 8) || overlaps(r, hole, 10) || walls.some((o) => overlaps(o, [r.x + r.w / 2, r.y + r.h / 2], 14))) continue;
-        walls.push(r);
-      }
-      return { w: 100, h: 150, start, hole, walls };
-    });
-    return { items };
+    return { items: generateRoundCourses(rng) };
   },
 
   publicItem(content, index) {
@@ -82,10 +65,10 @@ export const golfMode: GameMode<GolfContent> = {
     s.pos = res.end;
     s.strokes++;
     const base = { path: res.path, end: res.end, holed: res.holed, strokes: s.strokes, animMs: pathDurationMs(res.path) };
-    if (res.holed) return { correct: true, points: HOLED_POINTS[s.strokes], itemDone: true, feedback: base };
+    if (res.holed) return { correct: true, points: HOLED_POINTS[s.strokes], itemDone: true, feedback: base, nextDelayMs: base.animMs + AFTER_HOLED_MS };
     if (s.strokes >= GOLF_STROKES) {
       const dist = Math.hypot(res.end[0] - course.hole[0], res.end[1] - course.hole[1]) - HOLE_R;
-      return { correct: false, points: nearPoints(dist), itemDone: true, feedback: base };
+      return { correct: false, points: nearPoints(dist), itemDone: true, feedback: base, nextDelayMs: base.animMs + AFTER_MISS_MS };
     }
     return { correct: false, points: 0, itemDone: false, feedback: base };
   },
@@ -96,7 +79,7 @@ export const golfMode: GameMode<GolfContent> = {
 
   scoreRound: sumScore,
 
-  /** Bot: aims straight at the hole with rating-based noise, using the real physics (walls included). */
+  /** Bot: plans each shot with the solver (around walls, through gaps) and adds rating-based noise. */
   simulateBot(content, rating, rng) {
     const events: ReplayEvent[] = [];
     const speed = botSpeedFactor(rating);
@@ -105,13 +88,13 @@ export const golfMode: GameMode<GolfContent> = {
     content.items.forEach((course, i) => {
       let pos: Pt = [...course.start];
       let itemT = 0;
+      const field = distanceField(course);
       for (let stroke = 1; stroke <= GOLF_STROKES; stroke++) {
         itemT += clamp(rng.normal(4_000 * speed, 1_200), 1_500, 8_000);
-        const dx = course.hole[0] - pos[0];
-        const dy = course.hole[1] - pos[1];
-        const dist = Math.hypot(dx, dy);
-        const angle = Math.atan2(dy, dx) + rng.normal(0, 0.09 * noise);
-        const power = clamp(powerForDistance(dist + 4) * (1 + rng.normal(0, 0.22 * noise)), 0.05, 1);
+        // Plan the best shot around the walls, then miss it a little, more so for weaker bots.
+        const plan = bestShot(course, pos, field, 28, 5, 16).shot;
+        const angle = plan.angle + rng.normal(0, 0.06 * noise);
+        const power = clamp(plan.power * (1 + rng.normal(0, 0.16 * noise)), 0.05, 1);
         const res = simulateShot(course, pos, { angle, power });
         itemT += pathDurationMs(res.path);
         if (itemT > GOLF_ITEM_MS - 200) break;

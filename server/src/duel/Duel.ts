@@ -262,11 +262,11 @@ export class Duel {
     this.advance(slot, index);
   }
 
-  private advance(slot: Slot, index: number) {
+  private advance(slot: Slot, index: number, delayMs?: number) {
     const round = this.round!;
     const pr = round.players[slot];
     pr.pending = true;
-    const delay = round.mode.feedbackDelay;
+    const delay = delayMs ?? round.mode.feedbackDelay;
     if (delay <= 0) this.sendItem(slot, index + 1);
     else this.later(delay, () => {
       if (this.round === round && !round.ended) this.sendItem(slot, index + 1);
@@ -301,7 +301,7 @@ export class Duel {
       score: pr.score, itemDone: result.itemDone, ...(result.feedback ?? {}),
     });
     this.emitScores();
-    if (result.itemDone) this.advance(slot, pr.index);
+    if (result.itemDone) this.advance(slot, pr.index, result.nextDelayMs);
   }
 
   /** Replays a ghost recording / bot simulation with its original timing. */
