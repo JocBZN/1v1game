@@ -6,6 +6,10 @@
 ## Proiectul pe scurt
 - **1v1game.net** („Duel”): duel 1v1 în browser, 3 runde pe jocuri alese la întâmplare din **12**: trivia, steaguri, șah, cub Rubik, Split the shape, Guess the color, One-shot golf, Timeline, Opinion, Release year, The right price, Followers. Câștigi 2 din 3.
 
+## 27 nov: golf cu crosă și teren de minigolf real (`client/src/modes/GolfRound.tsx`)
+- **Crosa:** cât tragi (de oriunde), un putter văzut de sus apare în spatele mingii, pe direcția loviturii, și se îndepărtează cu cât tragi mai tare (avânt maxim 11 unități, `BACKSWING`). La eliberare, crosa vine în minge (110 ms), lovitura se trimite la contact, odată cu sunetul `putt`, apoi crosa trece puțin de minge și dispare (170 ms). Cu „reduced motion”, lovitura pleacă imediat.
+- **Terenul:** gazon artificial verde cu dungi de tuns, bordură și obstacole din lemn cu umbră, gaură albă cu cupa închisă la culoare, steag roșu, minge cu umbră. Totul e SVG, fără imagini; id-urile din `<defs>` sunt unice prin `useId`.
+
 ## 26 nov, după-amiaza: SEO terminat pe partea de cod
 - **Audit cu crawler pe toate cele 217 URL-uri din sitemap-uri:** toate răspund 200, canonical corect, hreflang reciproc, JSON-LD valid, `alt` la toate imaginile. Problemele au scăzut de la 139 la ~30, iar cele rămase sunt minore: pagini-unealtă cu 200–240 de cuvinte și câteva titluri traduse de 61–68 de caractere.
 - **Paginile englezești ale jocurilor** (`server/src/seo.ts`):

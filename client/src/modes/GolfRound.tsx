@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { play } from '../lib/sound';
 import { motion, useReducedMotion } from 'motion/react';
 import { BALL_R, HOLE_R, pathDurationMs, type Course, type Pt } from '../../../server/src/golf/physics';
@@ -46,6 +46,38 @@ function bounceFractions(path: readonly Pt[]): number[] {
 
 const SPARKS = Array.from({ length: 8 }, (_, i) => (i / 8) * Math.PI * 2 + 0.2);
 
+/** Club swing on release: backswing position → contact with the ball, then a short follow-through. */
+const SWING_MS = 110;
+const FOLLOW_MS = 170;
+/** Gap between the ball and the club face: at contact, and the extra backswing at full power (course units). */
+const CONTACT_GAP = BALL_R + 0.15;
+const BACKSWING = 11;
+const clubGap = (power: number) => CONTACT_GAP + 0.8 + power * BACKSWING;
+
+/**
+ * A putter seen from above, behind the ball, facing the shot direction (`angle`). `gap` is the
+ * distance from the ball centre to the club face; a bigger gap is a bigger backswing.
+ */
+function Club({ at, angle, gap, opacity = 1, ids }: { at: Pt; angle: number; gap: number; opacity?: number; ids: { metal: string } }) {
+  const deg = (angle * 180) / Math.PI;
+  const x = -gap; // club face, in the rotated frame (shot goes towards +x)
+  return (
+    <g transform={`translate(${at[0]} ${at[1]}) rotate(${deg})`} opacity={opacity} pointerEvents="none">
+      {/* shadow */}
+      <g transform="translate(0.7 1)" opacity={0.22}>
+        <line x1={x - 1.3} y1={-4.5} x2={x - 6.5} y2={-26} stroke="#1d2b1d" strokeWidth={1.3} strokeLinecap="round" />
+        <rect x={x - 2.6} y={-5} width={2.6} height={10} rx={1} fill="#1d2b1d" />
+      </g>
+      {/* shaft and grip, towards the player standing beside the ball */}
+      <line x1={x - 1.3} y1={-4.5} x2={x - 5} y2={-19.5} stroke="#b9bfcc" strokeWidth={0.9} strokeLinecap="round" />
+      <line x1={x - 4.8} y1={-18.8} x2={x - 6.6} y2={-26.5} stroke="#2e2b3d" strokeWidth={2} strokeLinecap="round" />
+      {/* head */}
+      <rect x={x - 2.6} y={-5} width={2.6} height={10} rx={1} fill={`url(#${ids.metal})`} stroke="#4b4f5e" strokeWidth={0.3} />
+      <line x1={x - 0.25} y1={-4.2} x2={x - 0.25} y2={4.2} stroke="#eef0f4" strokeWidth={0.35} opacity={0.8} />
+    </g>
+  );
+}
+
 export function GolfRound({ item, feedback, onAnswer, waiting }: ModeProps<GolfData>) {
   const areaRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -57,6 +89,11 @@ export function GolfRound({ item, feedback, onAnswer, waiting }: ModeProps<GolfD
   const [busy, setBusy] = useState(false); // shot sent / ball rolling
   const [sunk, setSunk] = useState(false); // win animation
   const [rolling, setRolling] = useState(false);
+  /** The club swinging through after a release (drawn until the follow-through ends). */
+  const [swing, setSwing] = useState<{ at: Pt; angle: number; gap: number; opacity: number } | null>(null);
+  const swingRaf = useRef(0);
+  const uid = useId().replace(/:/g, '');
+  const ids = { grass: `g${uid}`, stripes: `s${uid}`, wood: `w${uid}`, rail: `r${uid}`, metal: `m${uid}`, ballG: `b${uid}`, cup: `c${uid}`, shade: `h${uid}` };
   const drag = useRef<{ id: number; x: number; y: number } | null>(null);
   const aimRef = useRef<{ angle: number; power: number } | null>(null);
   const frame = useRef(0);
@@ -80,6 +117,8 @@ export function GolfRound({ item, feedback, onAnswer, waiting }: ModeProps<GolfD
     setBusy(false);
     setSunk(false);
     setRolling(false);
+    cancelAnimationFrame(swingRaf.current);
+    setSwing(null);
   }, [item?.round, item?.item]);
 
   // Animate the server's path for each shot: every frame, interpolated, straight on the SVG node.
@@ -125,7 +164,10 @@ export function GolfRound({ item, feedback, onAnswer, waiting }: ModeProps<GolfD
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [feedback?.seq]);
 
-  useEffect(() => () => cancelAnimationFrame(frame.current), []);
+  useEffect(() => () => {
+    cancelAnimationFrame(frame.current);
+    cancelAnimationFrame(swingRaf.current);
+  }, []);
 
   // Safety net: if a shot gets no answer (dropped connection, too late), don't leave the player stuck.
   useEffect(() => {
@@ -169,9 +211,39 @@ export function GolfRound({ item, feedback, onAnswer, waiting }: ModeProps<GolfD
     setAim(null);
     if (!a || locked || a.power < MIN_POWER) return;
     setBusy(true);
-    play('putt');
-    sentSeq.current = feedback?.seq ?? 0;
-    onAnswer({ angle: a.angle, power: a.power });
+    const shoot = () => {
+      play('putt');
+      sentSeq.current = feedback?.seq ?? 0;
+      onAnswer({ angle: a.angle, power: a.power });
+    };
+    if (still) return shoot();
+    // Swing: the club comes forward from the backswing, hits the ball (the shot is sent at contact),
+    // follows through a little and fades out.
+    const at: Pt = [...ball.current];
+    const g0 = clubGap(a.power);
+    const t0 = performance.now();
+    let hit = false;
+    cancelAnimationFrame(swingRaf.current);
+    const step = (now: number) => {
+      const t = now - t0;
+      if (t < SWING_MS) {
+        const k = t / SWING_MS;
+        setSwing({ at, angle: a.angle, gap: g0 + (CONTACT_GAP - g0) * k * k, opacity: 1 });
+      } else {
+        if (!hit) {
+          hit = true;
+          shoot();
+        }
+        const k = Math.min(1, (t - SWING_MS) / FOLLOW_MS);
+        setSwing({ at, angle: a.angle, gap: CONTACT_GAP - (1 - (1 - k) * (1 - k)) * 6, opacity: 1 - k });
+        if (k >= 1) {
+          setSwing(null);
+          return;
+        }
+      }
+      swingRaf.current = requestAnimationFrame(step);
+    };
+    swingRaf.current = requestAnimationFrame(step);
   };
 
   const holed = done && fb?.holed === true;
@@ -222,21 +294,68 @@ export function GolfRound({ item, feedback, onAnswer, waiting }: ModeProps<GolfD
         <svg
           ref={svgRef}
           viewBox={`0 0 ${course.w} ${course.h}`}
-          className="h-full max-h-[52vh] w-auto max-w-full rounded-2xl"
+          className="h-full max-h-[52vh] w-auto max-w-full overflow-visible"
           style={{ aspectRatio: `${course.w} / ${course.h}` }}
         >
-          <rect x={0} y={0} width={course.w} height={course.h} fill="#d2f0ef" />
-          <rect x={0.6} y={0.6} width={course.w - 1.2} height={course.h - 1.2} fill="none" stroke="#15788c" strokeWidth={1.2} rx={3} />
+          <defs>
+            {/* Artificial turf: bright green with soft mowing stripes and a darker edge. */}
+            <pattern id={ids.stripes} width={course.w} height={20} patternUnits="userSpaceOnUse">
+              <rect width={course.w} height={10} fill="#4fae4a" />
+              <rect y={10} width={course.w} height={10} fill="#47a443" />
+            </pattern>
+            <radialGradient id={ids.shade} cx="50%" cy="45%" r="75%">
+              <stop offset="60%" stopColor="#000" stopOpacity={0} />
+              <stop offset="100%" stopColor="#0b3d12" stopOpacity={0.28} />
+            </radialGradient>
+            {/* Wooden rails and obstacles. */}
+            <linearGradient id={ids.rail} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="#c98a55" />
+              <stop offset="1" stopColor="#9c6235" />
+            </linearGradient>
+            <linearGradient id={ids.wood} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#d79a63" />
+              <stop offset="0.5" stopColor="#b97842" />
+              <stop offset="1" stopColor="#8f5a31" />
+            </linearGradient>
+            <linearGradient id={ids.metal} x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stopColor="#7d8394" />
+              <stop offset="0.6" stopColor="#c7ccd8" />
+              <stop offset="1" stopColor="#e9ecf2" />
+            </linearGradient>
+            <radialGradient id={ids.ballG} cx="35%" cy="30%" r="75%">
+              <stop offset="0" stopColor="#ffffff" />
+              <stop offset="0.7" stopColor="#f1f1ee" />
+              <stop offset="1" stopColor="#c9cbc4" />
+            </radialGradient>
+            <radialGradient id={ids.cup} cx="50%" cy="40%" r="60%">
+              <stop offset="0" stopColor="#0d140d" />
+              <stop offset="1" stopColor="#2c382c" />
+            </radialGradient>
+          </defs>
+
+          {/* Wooden frame around the green (drawn outside the course box, like the rails of a real course). */}
+          <rect x={-3} y={-3} width={course.w + 6} height={course.h + 6} rx={4} fill={`url(#${ids.rail})`} />
+          <rect x={-3} y={-3} width={course.w + 6} height={course.h + 6} rx={4} fill="none" stroke="#7a4a27" strokeWidth={0.5} />
+          <rect x={0} y={0} width={course.w} height={course.h} fill={`url(#${ids.stripes})`} />
+          <rect x={0} y={0} width={course.w} height={course.h} fill={`url(#${ids.shade})`} />
+          {/* inner lip of the rail */}
+          <rect x={0} y={0} width={course.w} height={course.h} fill="none" stroke="#2f7a2c" strokeWidth={0.8} opacity={0.6} />
+
           {course.walls.map((w, i) => (
-            <rect key={i} x={w.x} y={w.y} width={w.w} height={w.h} rx={1.2} fill="#46425e" />
+            <g key={i}>
+              <rect x={w.x + 0.6} y={w.y + 0.9} width={w.w} height={w.h} rx={1} fill="#1f4d1c" opacity={0.35} />
+              <rect x={w.x} y={w.y} width={w.w} height={w.h} rx={1} fill={`url(#${ids.wood})`} stroke="#7a4a27" strokeWidth={0.35} />
+              <rect x={w.x + 0.5} y={w.y + 0.35} width={Math.max(0, w.w - 1)} height={Math.min(0.6, w.h / 3)} rx={0.3} fill="#f0c08e" opacity={0.55} />
+            </g>
           ))}
 
-          {/* Hole, with a short win effect: ripple, sparks and a flag wiggle (under a second). */}
-          <circle cx={hx} cy={hy} r={HOLE_R} fill="#46425e" />
+          {/* Hole: white cup rim, dark inside; short win effect: ripple, sparks and a flag wiggle. */}
+          <circle cx={hx} cy={hy} r={HOLE_R + 0.7} fill="#f4f4ef" />
+          <circle cx={hx} cy={hy} r={HOLE_R} fill={`url(#${ids.cup})`} />
           {sunk && !still && (
             <>
               <motion.circle
-                cx={hx} cy={hy} fill="none" stroke="#15788c" strokeWidth={0.8}
+                cx={hx} cy={hy} fill="none" stroke="#ffffff" strokeWidth={0.8}
                 initial={{ r: HOLE_R, opacity: 0.9 }}
                 animate={{ r: HOLE_R * 4, opacity: 0 }}
                 transition={{ duration: 0.7, ease: 'easeOut' }}
@@ -245,7 +364,7 @@ export function GolfRound({ item, feedback, onAnswer, waiting }: ModeProps<GolfD
                 <motion.circle
                   key={i}
                   r={0.9}
-                  fill={i % 2 ? '#ff6973' : '#ffb0a3'}
+                  fill={i % 2 ? '#ffd23f' : '#ffffff'}
                   initial={{ cx: hx, cy: hy, opacity: 1 }}
                   animate={{ cx: hx + Math.cos(a) * 11, cy: hy + Math.sin(a) * 11, opacity: 0 }}
                   transition={{ duration: 0.65, ease: 'easeOut', delay: 0.05 }}
@@ -260,8 +379,9 @@ export function GolfRound({ item, feedback, onAnswer, waiting }: ModeProps<GolfD
               animate={sunk && !still ? { rotate: [0, -9, 7, -3, 0] } : { rotate: 0 }}
               transition={{ duration: 0.6, ease: 'easeInOut' }}
             >
-              <line x1={0} y1={0} x2={0} y2={-13} stroke="#46425e" strokeWidth={0.6} />
-              <path d="M0,-13 l7,2.5 l-7,2.5 Z" fill="#ff6973" />
+              <line x1={0.5} y1={0.4} x2={6} y2={-10} stroke="#000" strokeWidth={0.6} opacity={0.15} />
+              <line x1={0} y1={0} x2={0} y2={-13} stroke="#f4f4ef" strokeWidth={0.7} />
+              <path d="M0,-13 l7,2.5 l-7,2.5 Z" fill="#e63b2e" />
             </motion.g>
           </g>
 
@@ -270,9 +390,8 @@ export function GolfRound({ item, feedback, onAnswer, waiting }: ModeProps<GolfD
               <line
                 x1={bx} y1={by}
                 x2={bx + Math.cos(aim.angle) * guide} y2={by + Math.sin(aim.angle) * guide}
-                stroke="#ff6973" strokeWidth={1.1} strokeDasharray="2 1.6" strokeLinecap="round"
+                stroke="#ffffff" strokeWidth={0.9} strokeDasharray="2 1.6" strokeLinecap="round" opacity={0.85}
               />
-              <circle cx={bx} cy={by} r={BALL_R + 3 + aim.power * 4} fill="none" stroke="#ff6973" strokeWidth={0.5} opacity={0.6} />
             </g>
           )}
 
@@ -283,10 +402,14 @@ export function GolfRound({ item, feedback, onAnswer, waiting }: ModeProps<GolfD
               animate={sunk ? { scale: 0, opacity: 0 } : { scale: 1, opacity: 1 }}
               transition={{ duration: sunk ? 0.25 : 0, ease: 'easeIn' }}
             >
-              <circle cx={0.35} cy={0.5} r={BALL_R} fill="#46425e" opacity={0.18} />
-              <circle r={BALL_R} fill="#fff" stroke="#46425e" strokeWidth={0.5} />
+              <ellipse cx={0.6} cy={0.9} rx={BALL_R} ry={BALL_R * 0.85} fill="#0b3d12" opacity={0.3} />
+              <circle r={BALL_R} fill={`url(#${ids.ballG})`} stroke="#8d8f88" strokeWidth={0.2} />
             </motion.g>
           </g>
+
+          {/* The club: follows the pull-back while aiming, swings through on release. */}
+          {aim && !locked && <Club at={[bx, by]} angle={aim.angle} gap={clubGap(aim.power)} ids={ids} />}
+          {swing && <Club at={swing.at} angle={swing.angle} gap={swing.gap} opacity={swing.opacity} ids={ids} />}
         </svg>
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-sunken">
