@@ -10,22 +10,20 @@ export type IconTier = 'free' | 'common' | 'rare' | 'epic' | 'legendary';
 export const TIER_PRICE: Record<IconTier, number> = { free: 0, common: 100, rare: 300, epic: 750, legendary: 2000 };
 export const TIER_LABEL: Record<IconTier, string> = { free: 'Free', common: 'Common', rare: 'Rare', epic: 'Epic', legendary: 'Legendary' };
 
-/** Site palette pairs: background, glyph. */
-export const ICON_SCHEMES = [
-  { bg: '#15788c', fg: '#ffeecc', soft: '#00b9be' }, // teal
-  { bg: '#ff6973', fg: '#ffeecc', soft: '#ffb0a3' }, // coral
-  { bg: '#00b9be', fg: '#46425e', soft: '#d2f0ef' }, // cyan
-  { bg: '#ffb0a3', fg: '#46425e', soft: '#ffe4dc' }, // peach
-  { bg: '#46425e', fg: '#ffb0a3', soft: '#7b7790' }, // slate
-] as const;
+/** One colour per rarity, from the site palette: background, glyph, soft accent. */
+export const TIER_COLORS: Record<IconTier, { bg: string; fg: string; soft: string }> = {
+  free: { bg: '#7b7790', fg: '#ffeecc', soft: '#a9a5bb' }, // muted violet-grey
+  common: { bg: '#00b9be', fg: '#46425e', soft: '#d2f0ef' }, // cyan
+  rare: { bg: '#15788c', fg: '#ffeecc', soft: '#00b9be' }, // teal
+  epic: { bg: '#ff6973', fg: '#ffeecc', soft: '#ffb0a3' }, // coral
+  legendary: { bg: '#46425e', fg: '#ffeecc', soft: '#ffb0a3' }, // drawn with a teal→coral gradient
+};
 
 export interface ProfileIcon {
   id: string;
   name: string;
   tier: IconTier;
   price: number;
-  /** Index into ICON_SCHEMES. */
-  scheme: number;
 }
 
 const DEFS: [string, string, IconTier][] = [
@@ -50,34 +48,11 @@ const DEFS: [string, string, IconTier][] = [
   ['rainbow', 'Rainbow', 'legendary'], ['orbit', 'Orbit', 'legendary'],
 ];
 
-/**
- * Colours: stable per icon, picked so an icon never matches its left neighbour or the one above it in
- * the picker's 5-wide grid (each tier starts a new row).
- */
-function assignSchemes(): number[] {
-  const out: number[] = [];
-  let tierStart = 0;
-  DEFS.forEach(([id, , tier], i) => {
-    if (i > 0 && tier !== DEFS[i - 1][2]) tierStart = i;
-    const col = (i - tierStart) % 5;
-    let h = 0;
-    for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-    const left = col > 0 ? out[i - 1] : -1;
-    const above = i - 5 >= tierStart ? out[i - 5] : -1;
-    let k = h % ICON_SCHEMES.length;
-    while (k === left || k === above) k = (k + 1) % ICON_SCHEMES.length;
-    out.push(k);
-  });
-  return out;
-}
-const SCHEMES = assignSchemes();
-
-export const PROFILE_ICONS: ProfileIcon[] = DEFS.map(([id, name, tier], i) => ({
+export const PROFILE_ICONS: ProfileIcon[] = DEFS.map(([id, name, tier]) => ({
   id,
   name,
   tier,
   price: TIER_PRICE[tier],
-  scheme: SCHEMES[i],
 }));
 
 const BY_ID = new Map(PROFILE_ICONS.map((i) => [i.id, i]));

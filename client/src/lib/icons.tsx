@@ -4,10 +4,10 @@ import {
   Rabbit, Rainbow, Rocket, Sailboat, Shell, Skull, Smile, Snail, Snowflake, Squirrel, Star, Sun, Swords, Telescope, Trophy,
   Turtle, WandSparkles, Zap, type LucideIcon,
 } from 'lucide-react';
-import { ICON_SCHEMES, PROFILE_ICONS, getProfileIcon, type ProfileIcon } from '../../../server/src/icons';
+import { PROFILE_ICONS, TIER_COLORS, getProfileIcon, type ProfileIcon } from '../../../server/src/icons';
 
 export { PROFILE_ICONS, getProfileIcon, type ProfileIcon };
-export { TIER_LABEL, TIER_PRICE, type IconTier } from '../../../server/src/icons';
+export { TIER_COLORS, TIER_LABEL, TIER_PRICE, type IconTier } from '../../../server/src/icons';
 
 const GLYPHS: Record<string, LucideIcon> = {
   smile: Smile, star: Star, heart: Heart, zap: Zap, sun: Sun, moon: Moon, cloud: Cloud, flame: Flame,
@@ -21,12 +21,12 @@ const GLYPHS: Record<string, LucideIcon> = {
 };
 
 /**
- * A profile icon in the site's style: a flat circle in the palette, soft shapes drifting behind the
- * glyph (like the home screen), and a little more shine the rarer it is.
+ * A profile icon in the site's style: a flat circle in its rarity's colour, soft shapes drifting behind
+ * the glyph (like the home screen), and a little more shine the rarer it is.
  */
 export function IconAvatar({ icon, size = 44, ring }: { icon: ProfileIcon; size?: number; ring?: string }) {
   const Glyph = GLYPHS[icon.id] ?? Smile;
-  const sc = ICON_SCHEMES[icon.scheme];
+  const sc = TIER_COLORS[icon.tier];
   const legendary = icon.tier === 'legendary';
   const bg = legendary ? `linear-gradient(135deg, #15788c 0%, #00b9be 45%, #ff6973 100%)` : sc.bg;
   const fg = legendary ? '#ffeecc' : sc.fg;

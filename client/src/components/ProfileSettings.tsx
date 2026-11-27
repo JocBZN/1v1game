@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Check, CircleDollarSign as Coin, KeyRound, Lock, Pencil, X } from 'lucide-react';
 import { api, ApiError, setToken, type IconState, type Me } from '../lib/api';
-import { IconAvatar, PROFILE_ICONS, TIER_LABEL, TIER_PRICE, getProfileIcon, type IconTier } from '../lib/icons';
+import { IconAvatar, PROFILE_ICONS, TIER_COLORS, TIER_LABEL, TIER_PRICE, getProfileIcon, type IconTier } from '../lib/icons';
 import { updateSocketToken } from '../lib/socket';
 import { Avatar } from './ui';
 
@@ -19,6 +19,10 @@ export function IconButton({ me, onOpen }: { me: Me; onOpen: () => void }) {
 }
 
 const TIERS: IconTier[] = ['free', 'common', 'rare', 'epic', 'legendary'];
+
+/** Rarity colour for small text on cream (the bright cyan is too light there, so it uses teal-ish). */
+const tierText = (t: IconTier) => (t === 'common' ? '#0a8f94' : t === 'legendary' ? '#d94a55' : TIER_COLORS[t].bg);
+const tierDot = (t: IconTier) => (t === 'legendary' ? 'linear-gradient(135deg, #15788c, #00b9be, #ff6973)' : TIER_COLORS[t].bg);
 
 function Coins({ n, className = '' }: { n: number; className?: string }) {
   return (
@@ -78,7 +82,10 @@ export function IconPicker({ me, onChange, onClose }: { me: Me; onChange: (icon:
           {state && TIERS.map((tier) => (
             <section key={tier} className="mt-4">
               <h3 className="label mb-2 flex items-center justify-between">
-                <span>{TIER_LABEL[tier]}</span>
+                <span className="flex items-center gap-1.5" style={{ color: tierText(tier) }}>
+                  <span className="h-2.5 w-2.5 rounded-full" style={{ background: tierDot(tier) }} />
+                  {TIER_LABEL[tier]}
+                </span>
                 {TIER_PRICE[tier] > 0 && <Coins n={TIER_PRICE[tier]} className="text-xs text-muted" />}
               </h3>
               <div className="grid grid-cols-5 gap-2.5">
@@ -118,7 +125,7 @@ export function IconPicker({ me, onChange, onClose }: { me: Me; onChange: (icon:
               <IconAvatar icon={pick} size={44} />
               <div className="min-w-0 flex-1">
                 <div className="truncate font-semibold">{pick.name}</div>
-                <div className="text-xs text-muted">{TIER_LABEL[pick.tier]}{canUse ? (pick.price ? ' · owned' : '') : ''}</div>
+                <div className="text-xs font-semibold" style={{ color: tierText(pick.tier) }}>{TIER_LABEL[pick.tier]}{canUse ? (pick.price ? ' · owned' : '') : ''}</div>
               </div>
               {canUse ? (
                 <button
