@@ -49,7 +49,7 @@ describe('sitemaps', () => {
     expect(r.text).toContain('<image:loc>https://1v1game.net/flags/ro.svg</image:loc>');
     // Each page lists 1000 images at most (the sitemap protocol limit).
     for (const block of r.text.split('<url>').slice(1)) expect((block.match(/<image:image>/g) ?? []).length).toBeLessThanOrEqual(1000);
-    if (hasPack()) expect(r.text).toMatch(/<loc>https:\/\/1v1game\.net\/(es|ro|fr)\/[^<]+<\/loc>/);
+    if (hasPack()) expect(r.text).not.toMatch(/<loc>https:\/\/1v1game\.net\/(es|pt|fr|de|it|ro|pl|tr)\//);
   });
 
   it('serves a sitemap index and robots.txt lists every sitemap', async () => {

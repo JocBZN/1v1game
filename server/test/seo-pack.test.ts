@@ -27,13 +27,12 @@ afterAll(() => server.close());
 const get = (p: string) => fetch(base + p, { redirect: 'manual' });
 
 describe.skipIf(!hasPack())('SEO pack', () => {
-  it('serves the language pages, with a trailing-slash redirect', async () => {
-    const r = await get('/es');
-    expect(r.status).toBe(301);
-    expect(r.headers.get('location')).toBe('/es/');
-    const page = await get('/es/');
-    expect(page.status).toBe(200);
-    expect(await page.text()).toContain('<html lang="es">');
+  it('sends the removed language pages (/es/, /ro/ …) to the home page', async () => {
+    for (const p of ['/es', '/es/', '/ro/quiz/', '/de/quiz/geographie/', '/tr']) {
+      const r = await get(p);
+      expect(r.status, p).toBe(301);
+      expect(r.headers.get('location'), p).toBe('/');
+    }
   });
 
   it('leaves the game server’s own /quiz and /flag-quiz pages alone', async () => {
@@ -60,9 +59,9 @@ describe.skipIf(!hasPack())('SEO pack', () => {
     expect(r.headers.get('content-security-policy')).toContain('frame-ancestors *');
   });
 
-  it('declares the translations of the English pages in their <head>', async () => {
+  it('declares no translations any more, only the English page itself', async () => {
     const html = await (await get('/quiz/geography')).text();
-    expect(html).toContain('<link rel="alternate" hreflang="es" href="https://1v1game.net/es/quiz/geografia/">');
+    expect(html).not.toContain('hreflang="es"');
     expect(html).toContain('<link rel="alternate" hreflang="x-default" href="https://1v1game.net/quiz/geography">');
   });
 

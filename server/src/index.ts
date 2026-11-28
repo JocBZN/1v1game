@@ -38,7 +38,7 @@ mountPosthogProxy(app);
 app.get('/api/photo/:id', (req, res) => void serveImage(req, res));
 app.use('/api', createApi());
 mountAdmin(app);
-// Generated multilingual pages first: they own /es/, /quiz/space/, /flag-quiz/north-america/ …
+// Generated SEO pages first: they own /quiz/space/, /flag-quiz/north-america/ … (and redirect the old /es/ … pages)
 // The mental math game was retired: send old links and search traffic to the games hub.
 app.get(['/mental-math', '/mental-math/'], (_req, res) => res.redirect(301, '/1v1-games'));
 mountSeoPack(app);

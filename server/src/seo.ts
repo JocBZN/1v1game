@@ -757,14 +757,12 @@ ${ld}
 ${o.bodyHtml}
 </main>
 <footer>
-${hasPack() ? FOOTER_LANG_LINKS : ''}
 <nav class="foot"><strong>Games</strong> <a href="/trivia">Trivia duel</a> <a href="/chess-puzzles">Chess puzzles</a> <a href="/flag-quiz">Flag quiz</a> <a href="/rubiks-cube">Rubik’s Cube</a> <a href="/split-the-shape">Split the shape</a> <a href="/color-game">Guess the color</a> <a href="/mini-golf">Mini golf</a> <a href="/timeline-game">Timeline</a> <a href="/estimation-game">Estimation game</a> <a href="/guess-the-year">Guess the year</a> <a href="/price-guessing-game">Price game</a> <a href="/followers-game">Followers game</a></nav><p>© ${new Date().getFullYear()} Duel on 1v1game.net · 1v1 brain games in your browser · <a href="/privacy">Privacy</a></p>
 </footer>
 </body>
 </html>`;
 }
 
-const FOOTER_LANG_LINKS = `<nav class="foot" aria-label="Languages"><strong>Languages</strong> <a href="/" hreflang="en" lang="en">English</a> <a href="/es/" hreflang="es" lang="es">Español</a> <a href="/pt/" hreflang="pt" lang="pt">Português</a> <a href="/fr/" hreflang="fr" lang="fr">Français</a> <a href="/de/" hreflang="de" lang="de">Deutsch</a> <a href="/it/" hreflang="it" lang="it">Italiano</a> <a href="/ro/" hreflang="ro" lang="ro">Română</a> <a href="/pl/" hreflang="pl" lang="pl">Polski</a> <a href="/tr/" hreflang="tr" lang="tr">Türkçe</a></nav>`;
 
 export function homeJsonLd(): string {
   const base = publicUrl();

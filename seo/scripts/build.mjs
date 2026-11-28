@@ -25,7 +25,8 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'public');
 const SNIP = join(ROOT, 'snippets');
 const TODAY = new Date().toISOString().slice(0, 10);
-const LANG_KEYS = Object.keys(LANGS);
+// Only English: the translated pages (/es/, /ro/ …) were removed; their old URLs redirect to the home page.
+const LANG_KEYS = ['en'];
 
 // English URLs that already exist on the live site (no trailing slash, as the site uses them).
 // A category listed here is NOT generated in English; its translations point to it via hreflang.
@@ -176,7 +177,7 @@ ${body}
 <footer><div class="wrap">
 <p><strong>${esc(L.ui.quizzes)}:</strong> ${catLinks}</p>
 <p><a href="${xp.gk(l)}">${esc(X[l].gk.nav)}</a><a href="${xp.daily(l)}">${esc(X[l].daily.h1)}</a><a href="${xp.flagHub(l)}">${esc(X[l].flags.hubName)}</a><a href="${xp.widget(l)}">${esc(X[l].widget.nav)}</a></p>
-<p><strong>${esc(L.ui.langs)}:</strong> ${langLinks}</p>
+${LANG_KEYS.length > 1 ? `<p><strong>${esc(L.ui.langs)}:</strong> ${langLinks}</p>` : ''}
 <p><a href="/1v1-games">1v1 games</a><a href="/trivia">Trivia</a><a href="/flag-quiz">Flag quiz</a><a href="/chess-puzzles">Chess puzzles</a><a href="/rubiks-cube">Rubik’s Cube</a><a href="/mini-golf">Mini golf</a><a href="/timeline-game">Timeline</a><a href="/estimation-game">Estimation game</a> · © ${new Date().getFullYear()} 1v1game.net</p>
 </div></footer>
 </body>
