@@ -49,3 +49,15 @@ describe('rating multipliers', () => {
     expect(ratingFactors('L', 0.3, good).recordX).toBeLessThan(1);
   });
 });
+
+describe('the right price mix', () => {
+  it('has at most one console, phone or Apple product per round', async () => {
+    const { GADGETS } = await import('../src/modes/estimate');
+    const { createRng } = await import('../src/rng');
+    for (let s = 0; s < 200; s++) {
+      const items = priceMode.generateRound(createRng(s)).items;
+      expect(items).toHaveLength(5);
+      expect(items.filter((q) => GADGETS.test(q.q)).length).toBeLessThanOrEqual(1);
+    }
+  });
+});

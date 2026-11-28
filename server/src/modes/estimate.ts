@@ -43,6 +43,8 @@ export function makeEstimateMode(opts: {
   itemMs: number;
   /** log games: how many times off scores 0 */
   zeroAt?: number;
+  /** at most `max` questions matching `re` per round (keeps one kind of question from crowding the others) */
+  cap?: { re: RegExp; max: number };
   thinkMs: number;
 }): GameMode<EstimateContent> {
   const FEEDBACK_MS = 3_000;
@@ -56,7 +58,16 @@ export function makeEstimateMode(opts: {
 
     generateRound(rng) {
       const seen = new Set<string>();
-      const items = rng.shuffle(opts.questions()).filter((q) => !seen.has(q.q) && seen.add(q.q)).slice(0, opts.perRound);
+      let capped = 0;
+      const items = rng
+        .shuffle(opts.questions())
+        .filter((q) => {
+          if (seen.has(q.q)) return false;
+          seen.add(q.q);
+          if (opts.cap?.re.test(q.q)) return capped++ < opts.cap.max;
+          return true;
+        })
+        .slice(0, opts.perRound);
       return { items };
     },
 
@@ -101,9 +112,14 @@ export const yearMode = makeEstimateMode({
   // Negative years are BC. The slider is denser for recent years; players can also type the year.
   input: { kind: 'year', min: -3000, max: 2026 }, perRound: 5, itemMs: 15_000, thinkMs: 8_000,
 });
+/** Consoles, phones and Apple products (the "The right price" list has a lot of them). */
+export const GADGETS =
+  /iPhone|iPad|Mac(Book| mini| Pro|intosh)|iMac|Apple|AirPods|iPod|HomePod|PlayStation|Xbox|Nintendo|\bWii\b|Game ?Boy|GameCube|Sega|\bPSP\b|PS Vita|\bNES\b|Switch|Steam Deck|Galaxy|Pixel|phone|console|Dreamcast|Atari|Virtual Boy|Genesis/i;
 export const priceMode = makeEstimateMode({
   id: 'price', name: 'The right price', questions: priceQuestions,
   input: { kind: 'log', min: 0.1, max: 1e12, prefix: '$' }, perRound: 5, itemMs: 15_000, zeroAt: 5, thinkMs: 9_000,
+  // Gadgets are over a third of the list: at most one console, phone or Apple product per round.
+  cap: { re: GADGETS, max: 1 },
 });
 export const followersMode = makeEstimateMode({
   id: 'followers', name: 'Followers', questions: followerQuestions,
