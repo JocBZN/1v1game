@@ -61,3 +61,18 @@ describe('the right price mix', () => {
     }
   });
 });
+
+describe('the right price: sold things', () => {
+  it('has 1,000+ things that were sold, each with the year and at most 3 per round', async () => {
+    const { priceQuestions } = await import('../src/modes/estimate-data');
+    const { createRng } = await import('../src/rng');
+    const sold = priceQuestions().filter((q) => /, sold in \d{4}/.test(q.q));
+    expect(sold.length).toBeGreaterThanOrEqual(1000);
+    for (const q of priceQuestions()) expect(q.q).toMatch(/\b(1[5-9]|20)\d{2}\b/);
+    for (let s = 0; s < 200; s++) {
+      const items = priceMode.generateRound(createRng(s)).items;
+      expect(items).toHaveLength(5);
+      expect(items.filter((q) => /, sold in \d{4}/.test(q.q)).length).toBeLessThanOrEqual(3);
+    }
+  });
+});

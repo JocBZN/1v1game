@@ -36,7 +36,7 @@ const COUNTS: Fact[] = [
   ['How many Grand Slam singles titles did Serena Williams win?', 23], ['How many Olympic medals did Michael Phelps win?', 28], ['How many Olympic gold medals did Michael Phelps win?', 23],
   ['How many Olympic gold medals did Usain Bolt win?', 8], ['How many perfect 10s did Nadia Comăneci score at the 1976 Olympics?', 7], ['How many times has Brazil won the football World Cup?', 5],
   ['How many Ballon d’Or awards had Lionel Messi won by the end of 2025?', 8], ['How many Ballon d’Or awards had Cristiano Ronaldo won by the end of 2025?', 5], ['How many European Cups / Champions Leagues had Real Madrid won by the end of 2025?', 15, 'as of the end of 2025'],
-  ['How many points did Wilt Chamberlain score in his record NBA game?', 100], ['How many points did Wayne Gretzky score in his NHL career?', 2_857],
+  ['How many points did Wilt Chamberlain score in his record NBA game (1962)?', 100], ['How many points did Wayne Gretzky score in his NHL career?', 2_857],
   ['How many goals does Guinness credit Pelé with?', 1_279], ['How many years did Queen Elizabeth II reign (rounded down)?', 70], ['How many years did Louis XIV reign (rounded down)?', 72],
   ['How many years did Queen Victoria reign (rounded down)?', 63], ['How many years did the Hundred Years’ War actually last?', 116], ['How many years did the Berlin Wall stand (rounded down)?', 28],
   ['How many years did the Byzantine Empire last, from Constantinople becoming capital (330) to its fall (1453)?', 1_123], ['How many years did the Ottoman Empire last (1299–1922)?', 623],
@@ -127,7 +127,7 @@ const BIG_AREAS: [string, number][] = [
 // ------------------------------------------------------------------ speed records
 const SPEED: [string, number][] = [
   ['the land speed record car ThrustSSC (1997)', 1_228], ['a Japanese SCMaglev train in its record run (2015)', 603], ['Concorde at cruising speed', 2_180],
-  ['the SR-71 Blackbird at its record speed', 3_530], ['a French TGV in its record run (2007)', 575], ['the Bugatti Chiron Super Sport 300+ in its record run', 490],
+  ['the SR-71 Blackbird in its 1976 speed record', 3_530], ['a French TGV in its record run (2007)', 575], ['the Bugatti Chiron Super Sport 300+ in its 2019 record run', 490],
   ['the fastest tennis serve recorded (Sam Groth, 2012)', 263], ['a cheetah at full sprint', 110], ['a racing greyhound', 70],
 ];
 
@@ -146,14 +146,14 @@ const SPACE: Fact[] = [
   ['How many °C is the surface of the Sun?', 5_500, 'about'], ['How many °C is the core of the Sun?', 15_000_000, 'about'], ['How many metres tall is Olympus Mons on Mars?', 21_900, 'about 21.9 km'],
   ['How many metres deep is the deepest point of the Mariana Trench?', 10_935, 'approximate'], ['How many metres deep is Lake Baikal at its deepest?', 1_642],
   ['How many metres high is Angel Falls?', 979], ['How many metres high is Victoria Falls?', 108], ['How many days did Apollo 11 take, launch to splashdown?', 8],
-  ['How many people have walked on the Moon?', 12], ['How many Apollo missions landed on the Moon?', 6], ['How many km/h is the speed of sound at 20 °C?', 1_235],
+  ['How many people have walked on the Moon (all of them in 1969–1972)?', 12], ['How many Apollo missions landed on the Moon?', 6], ['How many km/h is the speed of sound at 20 °C?', 1_235],
 ];
 
 // ------------------------------------------------------------------ records and people
 const RECORDS: Fact[] = [
-  ['How many centimetres tall was Robert Wadlow, the tallest man ever?', 272], ['How many seconds did Kelvin Kiptum’s marathon world record take?', 7_235, '2:00:35'],
-  ['How many km/h was Usain Bolt’s top speed in his 9.58 world record?', 44.72], ['How many centimetres is Javier Sotomayor’s high-jump world record?', 245],
-  ['How many centimetres is Mike Powell’s long-jump world record?', 895],
+  ['How many centimetres tall was Robert Wadlow, the tallest man ever?', 272], ['How many seconds did Kelvin Kiptum’s 2023 marathon world record take?', 7_235, '2:00:35'],
+  ['How many km/h was Usain Bolt’s top speed in his 9.58 world record (2009)?', 44.72], ['How many centimetres is Javier Sotomayor’s high-jump world record (set in 1993)?', 245],
+  ['How many centimetres is Mike Powell’s long-jump world record (set in 1991)?', 895],
   ['How many steps are there to the top of the Statue of Liberty’s crown?', 354], ['How many rooms does Buckingham Palace have?', 775],
   ['How many square metres of floor does Romania’s Palace of the Parliament have?', 365_000], ['How many metres long is the Golden Gate Bridge’s main span?', 1_280],
   ['How many metres long is the Brooklyn Bridge’s main span?', 486], ['How many metres long is the Çanakkale 1915 Bridge’s main span?', 2_023],

@@ -4,6 +4,7 @@ import { EXTRA_OPINION } from './opinion-extra';
 import { EXTRA_PRICES } from './price-extra';
 import { FOLLOWER_QUESTIONS } from './followers-extra';
 import { EXTRA_YEAR_QUESTIONS } from './year-extra';
+import { SOLD } from './price-sold';
 
 /** Round to 2 significant digits so reference answers don't look falsely precise. */
 const sig2 = (n: number) => {
@@ -81,7 +82,7 @@ const FACTS: [string, number, string?][] = [
   ['How many trees are there on Earth?', 3e12, 'Nature, 2015 study'],
   ['How many ants are alive on Earth, according to a 2022 study?', 2e16, 'PNAS, 2022 estimate'],
   ['How many chickens are alive on Earth?', 3e10],
-  ['How many cups of coffee are drunk worldwide every day?', 2.25e9],
+  ['How many cups of coffee are drunk worldwide every day (2020s estimate)?', 2.25e9],
   ['How many emails were sent worldwide every day in 2024?', 3.5e11, 'estimate'],
   ['How many Google searches happened every day in 2024?', 8.5e9, 'estimate'],
   ['How many stars can you see with the naked eye across the whole sky?', 9_000],
@@ -94,7 +95,7 @@ const FACTS: [string, number, string?][] = [
   ['How many tonnes does the Eiffel Tower weigh?', 10_100],
   ['How many metres tall is Mount Everest?', 8_849],
   ['How many islands does Sweden have?', 267_570],
-  ['How many languages are spoken in the world today?', 7_000],
+  ['How many languages are spoken in the world (Ethnologue, 2024)?', 7_000],
   ['How many different positions can a Rubik’s Cube be in?', 4.3e19],
   ['How many litres of blood does the heart pump in one day?', 7_500],
   ['How many McDonald’s restaurants were there worldwide in 2023?', 41_000, '2023'],
@@ -102,10 +103,10 @@ const FACTS: [string, number, string?][] = [
   ['How many articles did the English Wikipedia have in 2025?', 6.9e6, '2025'],
   ['How many hours of video were uploaded to YouTube every minute in 2019?', 500, 'YouTube, 2019'],
   ['How many photos were taken worldwide in 2023?', 1.8e12, '2023 estimate'],
-  ['How many golf balls are lost in the US every year?', 3e8],
-  ['How many planes are in the air at any given moment?', 10_000],
+  ['How many golf balls are lost in the US every year (2010s estimate)?', 3e8],
+  ['How many planes are in the air at any given moment (busy day, 2024)?', 10_000],
   ['How many airline passengers flew in 2019?', 4.5e9],
-  ['How many babies are born worldwide every day?', 385_000],
+  ['How many babies are born worldwide every day (2024)?', 385_000],
   ['How many grains of rice are in a 1 kg bag?', 50_000],
   ['How many sesame seeds are on a Big Mac bun?', 178, 'McDonald’s average'],
   ['How many stitches are on a baseball?', 108],
@@ -129,7 +130,7 @@ const FACTS: [string, number, string?][] = [
   ['How many litres of water does it take to make one cup of coffee, growing the beans included?', 140],
   ['How many possible combinations are there in a 6-out-of-49 lottery?', 13_983_816],
   ['How many seconds are there in 100 years?', 3.16e9],
-  ['How many people have ever lived on Earth?', 1.17e11, 'Population Reference Bureau estimate'],
+  ['How many people have ever lived on Earth (estimate made in 2022)?', 1.17e11, 'Population Reference Bureau estimate'],
   ['How many songs were on Spotify in 2022?', 1e8, 'Spotify, 2022'],
   ['How many copies of the video game Minecraft had been sold by April 2025?', 3.5e8, 'Guinness World Records'],
   ['How many coins would you need to stack to reach the Moon?', 2.5e11, '1.5 mm thick coins'],
@@ -142,7 +143,7 @@ const FACTS: [string, number, string?][] = [
   ['How many hours does a koala sleep in a week?', 140, 'about 20 hours a day'],
   ['How many litres of water does an average person drink in a lifetime?', 60_000, 'about 2 litres a day'],
   ['How many kilometres does an average person walk in a lifetime?', 110_000],
-  ['How many pizzas are eaten in the US every day?', 3e6, '100 million slices'],
+  ['How many pizzas are eaten in the US every day (2010s estimate)?', 3e6, '100 million slices'],
   ['How many LEGO bricks would you need to build a tower to the Moon?', 4e10, '9.6 mm bricks'],
 ];
 
@@ -223,20 +224,33 @@ const PRICES: [string, number, string?][] = [
   ['Patek Philippe Nautilus 5711 (list price before it was discontinued)', 35_000], ['Tesla Model 3 (base, US)', 39_000, '2024'],
   ['Lamborghini Huracán (base)', 250_000], ['Ferrari SF90 Stradale', 507_000], ['Bugatti Chiron', 3_000_000],
   ['A seat on a Virgin Galactic space flight', 450_000], ['An F-35A fighter jet', 82_500_000], ['A Boeing 737 MAX 8 (list price)', 121_600_000],
-  ['Building the Burj Khalifa', 1_500_000_000], ['Salvator Mundi by Leonardo da Vinci (sold in 2017)', 450_300_000],
+  ['Building the Burj Khalifa in Dubai (finished 2010)', 1_500_000_000, 'in 2010 dollars'],
   ['A Louvre entry ticket (adult, 2024, in USD)', 24],
 ];
 
-/** The year a price is from goes into the question (prices change); undated base prices are 2024 US prices. */
+/**
+ * The year a price is from goes into the question (prices change); undated base prices are 2024 US prices.
+ * Old prices also say they are in the dollars of that year (an 1803 or 1990 dollar is not a 2026 dollar).
+ */
+const OLD_BEFORE = 2020;
+const dollarsOf = (y: number) => (y < OLD_BEFORE ? `, in ${y} dollars` : '');
 const withYear = (q: string, note: string | undefined, fallback: string) => {
-  const y = note?.match(/\b(1[89]|20)\d{2}\b/)?.[0];
-  if (y ? q.includes(y) : /\b(1[89]|20)\d{2}\b/.test(q)) return `${q}?`;
-  const tag = y ?? fallback;
+  const y = note?.match(/\b(1[5-9]|20)\d{2}\b/)?.[0] ?? q.match(/\b(1[5-9]|20)\d{2}\b/g)?.pop();
+  const said = /dollars/.test(q);
+  if (y && q.includes(y)) {
+    const add = said ? '' : dollarsOf(Number(y)).slice(2);
+    if (!add) return `${q}?`;
+    // "… (finished 1931)" → "… (finished 1931, in 1931 dollars)"
+    return q.endsWith(')') ? `${q.slice(0, -1)}, ${add})?` : `${q} (${add})?`;
+  }
+  const tag = y ? `${y}${said ? '' : dollarsOf(Number(y))}` : fallback;
   return tag ? `${q} (${tag})?` : `${q}?`;
 };
 export const priceQuestions = (): EstimateQ[] => [
   ...PRICES.map(([q, answer, note]) => ({ q: withYear(q, note, 'US price, 2024'), answer, unit: '$', note: note ?? 'typical US price, 2024' })),
   ...EXTRA_PRICES.map(([q, answer, note]) => ({ q: withYear(q, note, ''), answer, unit: '$', note })),
+  // Things that were sold: "…, sold in 1990" + "(in 1990 dollars)".
+  ...SOLD.map(([q, answer, note]) => ({ q: withYear(q, note, ''), answer, unit: '$', note })),
 ];
 
 

@@ -50,7 +50,7 @@ export function makeEstimateMode(opts: {
   /** year games: how many years off scores 0 (default: grows with age, see yearTolerance) */
   yearZero?: number;
   /** at most `max` questions matching `re` per round (keeps one kind of question from crowding the others) */
-  cap?: { re: RegExp; max: number };
+  cap?: { re: RegExp; max: number }[];
   thinkMs: number;
 }): GameMode<EstimateContent> {
   const FEEDBACK_MS = 3_000;
@@ -64,14 +64,17 @@ export function makeEstimateMode(opts: {
 
     generateRound(rng) {
       const seen = new Set<string>();
-      let capped = 0;
+      const capped = (opts.cap ?? []).map(() => 0);
       const items = rng
         .shuffle(opts.questions())
         .filter((q) => {
           const k = q.img ?? q.q;
           if (seen.has(k)) return false;
           seen.add(k);
-          if (opts.cap?.re.test(q.q)) return capped++ < opts.cap.max;
+          // Every cap the question falls under must still have room.
+          const hit = (opts.cap ?? []).map((c) => c.re.test(q.q));
+          if (hit.some((h, i) => h && capped[i] >= opts.cap![i].max)) return false;
+          hit.forEach((h, i) => h && capped[i]++);
           return true;
         })
         .slice(0, opts.perRound);
@@ -128,7 +131,8 @@ export const priceMode = makeEstimateMode({
   id: 'price', name: 'The right price', questions: priceQuestions,
   input: { kind: 'log', min: 0.1, max: 1e12, prefix: '$' }, perRound: 5, itemMs: 15_000, zeroAt: 5, thinkMs: 9_000,
   // Gadgets are over a third of the list: at most one console, phone or Apple product per round.
-  cap: { re: GADGETS, max: 1 },
+  // Things sold at auction / privately are most of the list: at most 3 per round, so everyday prices still come up.
+  cap: [{ re: GADGETS, max: 1 }, { re: /, sold in \d{4}/, max: 3 }],
 });
 export const followersMode = makeEstimateMode({
   id: 'followers', name: 'Followers', questions: followerQuestions,
