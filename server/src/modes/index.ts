@@ -41,12 +41,16 @@ export function availableDomains(): DomainId[] {
   return Object.keys(MODES) as DomainId[];
 }
 
-/** Three different random domains (repeats only if fewer than 3 modes are registered). */
-export function pickDomains(rng: Rng, count = 3): DomainId[] {
+/**
+ * Three different random domains, chosen from `allowed` when given (bans, private-room settings).
+ * With fewer allowed domains than rounds, domains repeat (one allowed game = every round is that game).
+ */
+export function pickDomains(rng: Rng, count = 3, allowed?: readonly DomainId[]): DomainId[] {
   // Dev/test only: FORCE_DOMAINS=chess,trivia,flags fixes the order of domains.
   const forced = process.env.FORCE_DOMAINS?.split(',').filter((d) => d in MODES) as DomainId[] | undefined;
   if (forced?.length) return Array.from({ length: count }, (_, i) => forced[i % forced.length]);
-  const all = rng.shuffle(availableDomains());
+  const pool = allowed?.length ? availableDomains().filter((d) => allowed.includes(d)) : availableDomains();
+  const all = rng.shuffle(pool.length ? pool : availableDomains());
   const out: DomainId[] = [];
   for (let i = 0; i < count; i++) out.push(all[i % all.length]);
   return out;

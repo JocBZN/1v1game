@@ -58,7 +58,7 @@ export class GameServer {
     this.rooms = new Rooms({
       emit: (userId, event, data) => this.emit(userId, event, data),
       nameOf: (userId) => getUserById(userId)?.nickname ?? 'Player',
-      startDuel: (hostId, guestId, onEnd) => this.startFriendDuel(hostId, guestId, onEnd),
+      startDuel: (hostId, guestId, onEnd, allowed) => this.startFriendDuel(hostId, guestId, onEnd, allowed),
     });
     setInterval(() => this.rooms.sweep(), 10_000).unref();
     this.mm = new Matchmaker(
@@ -90,7 +90,11 @@ export class GameServer {
     this.rooms.offline(user.id);
   }
 
-  joinQueue(user: User) {
+  /** Game each queued player banned for their next duel (null = no ban). */
+  private bans = new Map<number, DomainId | null>();
+
+  joinQueue(user: User, ban?: unknown) {
+    this.bans.set(user.id, isDomain(ban) ? ban : null);
     if (this.duels.has(user.id)) {
       this.duels.get(user.id)!.reconnected(user.id);
       return;
@@ -130,6 +134,11 @@ export class GameServer {
 
   rematch(user: User) {
     if (!this.duels.has(user.id)) this.rooms.rematch(user.id);
+  }
+
+  roomSettings(user: User, payload: unknown) {
+    const list = (payload as { allowed?: unknown })?.allowed;
+    if (Array.isArray(list)) this.rooms.setAllowed(user.id, list.filter(isDomain));
   }
 
   leaveRoom(user: User) {
@@ -339,9 +348,15 @@ export class GameServer {
     }
   }
 
+  /** Every game except the ones these players banned. */
+  private allowedFor(...userIds: number[]): DomainId[] {
+    const banned = new Set(userIds.map((u) => this.bans.get(u)).filter((d): d is DomainId => !!d));
+    return availableDomains().filter((d) => !banned.has(d));
+  }
+
   private startHumanDuel(a: QueueEntry, b: QueueEntry) {
     const rng = createRng();
-    const plans: RoundPlan[] = pickDomains(rng).map((domain) => ({
+    const plans: RoundPlan[] = pickDomains(rng, 3, this.allowedFor(a.userId, b.userId)).map((domain) => ({
       domain,
       content: getMode(domain).generateRound(rng),
       scripts: [null, null],
@@ -354,9 +369,9 @@ export class GameServer {
   }
 
   /** Private room: two friends, same rounds as a normal duel, no rating change. */
-  private startFriendDuel(hostId: number, guestId: number, onEnd: (winner: 0 | 1 | null) => void) {
+  private startFriendDuel(hostId: number, guestId: number, onEnd: (winner: 0 | 1 | null) => void, allowed?: readonly DomainId[]) {
     const rng = createRng();
-    const plans: RoundPlan[] = pickDomains(rng).map((domain) => ({
+    const plans: RoundPlan[] = pickDomains(rng, 3, allowed).map((domain) => ({
       domain,
       content: getMode(domain).generateRound(rng),
       scripts: [null, null],
@@ -374,11 +389,11 @@ export class GameServer {
     const myGeneral = me.ratings.general.rating;
     let built: ReturnType<typeof buildGhostDuel> = null;
     try {
-      built = buildGhostDuel(a.userId, myGeneral, rng);
+      built = buildGhostDuel(a.userId, myGeneral, rng, new Set(availableDomains().filter((d) => !this.allowedFor(a.userId).includes(d))));
     } catch (e) {
       console.error('[ghost] failed, falling back to bot', e);
     }
-    const { opponent, plans } = built ?? buildBotDuel(myGeneral, rng);
+    const { opponent, plans } = built ?? buildBotDuel(myGeneral, rng, pickDomains(rng, 3, this.allowedFor(a.userId)));
     if (opponent.kind === 'ghost' && opponent.userId !== null) {
       const g = getUserById(opponent.userId);
       opponent.avatar = g?.avatar_icon ?? null;

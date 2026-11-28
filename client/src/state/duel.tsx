@@ -90,6 +90,8 @@ export interface RoomState {
   duels: number;
   /** Your wins, their wins in this room. */
   score: [number, number];
+  /** Games the host allows in this room. */
+  allowed: DomainId[];
 }
 
 export type RoomError = 'not_found' | 'full' | 'busy';
@@ -255,7 +257,10 @@ interface DuelApi {
   rematch(): void;
   leaveRoom(): void;
   clearRoomError(): void;
-  play(): void;
+  /** Join the queue; `ban` = a game this player doesn't want (optional). */
+  play(ban?: DomainId | null): void;
+  /** Host only: the games this room plays. */
+  setRoomGames(allowed: DomainId[]): void;
   cancel(): void;
   answer(answer: unknown): void;
   forfeit(): void;
@@ -271,6 +276,8 @@ export function DuelProvider({ children }: { children: ReactNode }) {
   const [room, setRoom] = useState<RoomState | null>(null);
   const [roomError, setRoomError] = useState<RoomError | null>(null);
   const pendingCode = useRef<string | null>(codeFromPath());
+  /** The ban sent with the last queue join (re-sent if the server lost the queue). */
+  const banRef = useRef<DomainId | null>(null);
   const [joining, setJoining] = useState(pendingCode.current !== null);
 
   useEffect(() => {
@@ -319,7 +326,7 @@ export function DuelProvider({ children }: { children: ReactNode }) {
       // The server has no duel for us: drop a stale duel screen, or re-join the queue if we were searching.
       on('duel:none', () => {
         const phase = stateRef.current.phase;
-        if (phase === 'searching') s.emit('queue:join');
+        if (phase === 'searching') s.emit('queue:join', { ban: banRef.current });
         else if (phase === 'found' || phase === 'intro' || phase === 'playing' || phase === 'roundEnd') dispatch({ type: 'reset' });
       }),
     ];
@@ -356,9 +363,13 @@ export function DuelProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'reset' });
     },
     clearRoomError: () => setRoomError(null),
-    play: () => {
+    play: (ban) => {
+      banRef.current = ban ?? null;
       dispatch({ type: 'queue:joined' });
-      getSocket().emit('queue:join');
+      getSocket().emit('queue:join', { ban: banRef.current });
+    },
+    setRoomGames: (allowed) => {
+      getSocket().emit('room:settings', { allowed });
     },
     cancel: () => {
       getSocket().emit('queue:leave');

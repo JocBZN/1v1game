@@ -14,6 +14,7 @@ import { LeaderboardScreen } from './screens/LeaderboardScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
 import { FriendScreen, RoomScreen } from './screens/FriendScreen';
 import { SelectGameScreen } from './screens/SelectGameScreen';
+import { BanSheet } from './components/BanSheet';
 import { IntroSplash, shouldShowIntro } from './components/IntroSplash';
 import { ConsentBanner } from './components/ConsentBanner';
 import { pageview, track, identifyUser, resetUser } from './lib/analytics';
@@ -47,7 +48,23 @@ function useRoute(): [Route, (r: Route) => void] {
   return [route, go];
 }
 
-function Game({ me, refreshMe, onAuthDone, onLogout }: {
+/** Every Play goes through the ban-a-game menu first. */
+function BanSheetHost({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const duel = useDuel();
+  if (!open) return null;
+  return (
+    <BanSheet
+      onClose={onClose}
+      onPlay={(ban) => {
+        onClose();
+        duel.play(ban);
+      }}
+    />
+  );
+}
+
+function Game({ me, refreshMe, onAuthDone, onLogout, setBanOpen }: {
+  setBanOpen: (open: boolean) => void;
   me: Me;
   refreshMe: () => void;
   onAuthDone: (me: Me) => void;
@@ -142,7 +159,8 @@ function Game({ me, refreshMe, onAuthDone, onLogout }: {
           onAgain={() => {
             track('result_action', { action: 'again', result: state.result!.result });
             if (state.result!.practice) return duel.practice(state.result!.practice);
-            return state.result!.friendly && duel.room ? duel.rematch() : duel.play();
+            if (state.result!.friendly && duel.room) return duel.rematch();
+            setBanOpen(true);
           }}
           onLeaderboard={() => {
             track('result_action', { action: 'leaderboard', result: state.result!.result });
@@ -168,6 +186,7 @@ function Game({ me, refreshMe, onAuthDone, onLogout }: {
       <RoomScreen
         room={duel.room}
         onRematch={duel.rematch}
+        onGames={duel.setRoomGames}
         onLeave={() => {
           duel.leaveRoom();
           go('home');
@@ -222,10 +241,12 @@ function Game({ me, refreshMe, onAuthDone, onLogout }: {
   }
   if (route === 'leaderboard') return <LeaderboardScreen me={me} onBack={() => go('home')} onSignup={toSignup} onLogin={toLogin} />;
   if (route === 'profile') return <ProfileScreen me={me} onBack={() => go('home')} onSignup={toSignup} onLogin={toLogin} onLogout={onLogout} onMeChange={onAuthDone} />;
-  return <HomeScreen me={me} connected={state.connected} onPlay={duel.play} onNavigate={go} />;
+  return <HomeScreen me={me} connected={state.connected} onPlay={() => setBanOpen(true)} onNavigate={go} />;
 }
 
 export default function App() {
+  /** The ban-a-game menu, opened by every Play. */
+  const [banOpen, setBanOpen] = useState(false);
   const [me, setMe] = useState<Me | null>(null);
   const [failed, setFailed] = useState(false);
   // First-visit splash (overlays the app while it loads).
@@ -292,7 +313,8 @@ export default function App() {
     <div className="flex h-full items-center justify-center text-muted">Loading…</div>
   ) : (
     <DuelProvider key={me.user.id}>
-      <Game me={me} refreshMe={refreshMe} onAuthDone={setMe} onLogout={logout} />
+      <Game me={me} refreshMe={refreshMe} onAuthDone={setMe} onLogout={logout} setBanOpen={setBanOpen} />
+      <BanSheetHost open={banOpen} onClose={() => setBanOpen(false)} />
     </DuelProvider>
   );
 

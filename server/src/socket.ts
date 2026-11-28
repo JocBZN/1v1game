@@ -51,9 +51,9 @@ export function attachSockets(server: http.Server) {
         other.disconnect(true);
       }
     };
-    socket.on('queue:join', () => {
+    socket.on('queue:join', (payload) => {
       takeOver();
-      game.joinQueue(user);
+      game.joinQueue(user, payload?.ban);
     });
     socket.on('room:create', () => {
       takeOver();
@@ -69,6 +69,7 @@ export function attachSockets(server: http.Server) {
     });
     socket.on('room:rematch', () => game.rematch(user));
     socket.on('room:leave', () => game.leaveRoom(user));
+    socket.on('room:settings', (payload) => game.roomSettings(user, payload));
     socket.on('queue:leave', () => game.leaveQueue(user));
     socket.on('round:answer', (payload) => game.answer(user, payload));
     socket.on('duel:forfeit', () => game.forfeit(user));

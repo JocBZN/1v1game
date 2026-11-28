@@ -4,11 +4,11 @@ import { CODE_ALPHABET, ROOM_IDLE_MS, ROOM_LEAVE_AFTER_MS, Rooms, normalizeCode 
 function setup() {
   let t = 1_000;
   const events: { userId: number; event: string; data: any }[] = [];
-  const duels: { hostId: number; guestId: number; end: (w: 0 | 1 | null) => void }[] = [];
+  const duels: { hostId: number; guestId: number; end: (w: 0 | 1 | null) => void; allowed: readonly string[] }[] = [];
   const rooms = new Rooms({
     emit: (userId, event, data) => events.push({ userId, event, data }),
     nameOf: (id) => `P${id}`,
-    startDuel: (hostId, guestId, end) => duels.push({ hostId, guestId, end }),
+    startDuel: (hostId, guestId, end, allowed) => duels.push({ hostId, guestId, end, allowed }),
     now: () => t,
   });
   const last = (userId: number, event: string) => [...events].reverse().find((e) => e.userId === userId && e.event === event)?.data;
@@ -127,5 +127,24 @@ describe('Rooms', () => {
     advance(ROOM_LEAVE_AFTER_MS);
     rooms.sweep();
     expect(rooms.roomOf(2)?.code).toBe(code);
+  });
+});
+
+describe('room game settings', () => {
+  it('the host picks the allowed games (at least one); the guest cannot; duels use them', () => {
+    const { rooms, duels, last } = setup();
+    const { code } = rooms.create(1);
+    expect(last(1, 'room:state').allowed).toHaveLength(12);
+    rooms.setAllowed(1, ['chess', 'golf', 'nonsense' as never]);
+    expect(last(1, 'room:state').allowed).toEqual(['chess', 'golf']);
+    rooms.setAllowed(1, []); // ignored: at least one game must stay
+    expect(rooms.roomOf(1)!.allowed).toEqual(['chess', 'golf']);
+    rooms.join(2, code);
+    expect(duels[0].allowed).toEqual(['chess', 'golf']);
+    duels[0].end(0);
+    rooms.setAllowed(2, ['trivia']); // guest: ignored
+    expect(rooms.roomOf(1)!.allowed).toEqual(['chess', 'golf']);
+    rooms.setAllowed(1, ['golf']);
+    expect(last(2, 'room:state').allowed).toEqual(['golf']);
   });
 });

@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import type { RoomError, RoomState } from '../state/duel';
 import { track } from '../lib/analytics';
-import { Avatar, PageHeader, Screen } from '../components/ui';
+import { Avatar, PageHeader, Screen, TopicIcon } from '../components/ui';
+import { DOMAIN_LIST, type DomainId } from '../lib/domains';
 
 const CODE_CHARS = /[^ABCDEFGHJKMNPQRSTUVWXYZ23456789]/g;
 
@@ -80,8 +81,10 @@ export function FriendScreen({ connected, error, onCreate, onJoin, onBack }: {
 }
 
 /** Lobby: waiting for the friend, or between duels. */
-export function RoomScreen({ room, onLeave, onRematch }: {
+export function RoomScreen({ room, onLeave, onRematch, onGames }: {
   room: RoomState;
+  /** Host only: change the games this room plays. */
+  onGames: (allowed: DomainId[]) => void;
   onLeave: () => void;
   onRematch: () => void;
 }) {
@@ -156,6 +159,8 @@ export function RoomScreen({ room, onLeave, onRematch }: {
         )}
       </section>
 
+      <RoomGames room={room} onGames={onGames} />
+
       {room.duels > 0 && friend && (
         <div className="mt-3 text-center text-sm text-muted">
           Room score <span className="font-semibold text-me">{room.score[0]}</span> – <span className="font-semibold text-foe">{room.score[1]}</span>
@@ -191,5 +196,54 @@ function Seat({ name, tag, ready, online }: { name: string; tag?: string; ready:
         <span className="text-xs font-semibold text-cyan-strong">ready</span>
       ) : null}
     </div>
+  );
+}
+
+/** Which games this room plays: the host toggles them (at least one stays on), the guest just sees them. */
+function RoomGames({ room, onGames }: { room: RoomState; onGames: (allowed: DomainId[]) => void }) {
+  const host = room.you === 'host';
+  const allowed = new Set(room.allowed);
+  const editable = host && !room.inDuel;
+  const toggle = (id: DomainId) => {
+    const next = DOMAIN_LIST.map((d) => d.id).filter((d) => (d === id ? !allowed.has(d) : allowed.has(d)));
+    if (next.length) onGames(next);
+  };
+  return (
+    <section className="card mt-3 p-4 animate-rise" style={{ animationDelay: '90ms' }}>
+      <div className="flex items-baseline justify-between">
+        <h2 className="font-semibold">Games in this room</h2>
+        <span className="text-xs text-muted">{allowed.size} of {DOMAIN_LIST.length}</span>
+      </div>
+      <p className="mt-0.5 text-xs text-muted">
+        {host
+          ? allowed.size === 1 ? 'Only one game: all 3 rounds will be this game.' : 'Tap to turn games on or off. Rounds are picked from the games that are on.'
+          : 'The room owner picks the games.'}
+      </p>
+      {host && (
+        <div className="mt-2 flex gap-2 text-xs">
+          <button type="button" disabled={!editable} onClick={() => onGames(DOMAIN_LIST.map((d) => d.id))} className="chip border border-line">All games</button>
+        </div>
+      )}
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        {DOMAIN_LIST.map((d) => {
+          const on = allowed.has(d.id);
+          const last = on && allowed.size === 1;
+          return (
+            <button
+              key={d.id}
+              type="button"
+              disabled={!editable || last}
+              onClick={() => toggle(d.id)}
+              aria-pressed={on}
+              className={`flex items-center gap-2 rounded-2xl border px-2.5 py-2 text-left text-sm transition disabled:cursor-default ${on ? 'border-teal bg-surface' : 'border-line bg-sunken/60 text-muted'} ${editable && !last ? 'hover:-translate-y-px' : ''}`}
+              title={last ? 'At least one game must stay on' : undefined}
+            >
+              <span className={on ? '' : 'opacity-40 grayscale'}><TopicIcon domain={d.id} size={26} /></span>
+              <span className={`min-w-0 flex-1 truncate font-semibold ${on ? '' : 'line-through'}`}>{d.name}</span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
   );
 }

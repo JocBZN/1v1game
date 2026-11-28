@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { DOMAIN_IDS, type DomainId } from './domains';
 
 /** Unambiguous characters only (no 0/O, 1/I/L), so a code read out loud or typed on a phone works. */
 export const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -33,6 +34,8 @@ export interface Room {
   duels: number;
   /** Duels won by host / guest in this room. */
   score: [number, number];
+  /** Games the host allows in this room (at least one). */
+  allowed: DomainId[];
   touchedAt: number;
 }
 
@@ -41,7 +44,7 @@ export type RoomError = 'not_found' | 'full' | 'busy';
 export interface RoomHooks {
   emit(userId: number, event: string, data?: unknown): void;
   /** Start a friendly duel; `onEnd` gets the winner (0 = host, 1 = guest, null = draw). */
-  startDuel(hostId: number, guestId: number, onEnd: (winner: 0 | 1 | null) => void): void;
+  startDuel(hostId: number, guestId: number, onEnd: (winner: 0 | 1 | null) => void, allowed: readonly DomainId[]): void;
   nameOf(userId: number): string;
   now?: () => number;
 }
@@ -90,6 +93,7 @@ export class Rooms {
       duels: room.duels,
       // Always "your wins, their wins".
       score: you === 'host' ? room.score : [room.score[1], room.score[0]],
+      allowed: room.allowed,
     };
   }
 
@@ -112,6 +116,7 @@ export class Rooms {
       inDuel: false,
       duels: 0,
       score: [0, 0],
+      allowed: [...DOMAIN_IDS],
       touchedAt: this.now(),
     };
     this.rooms.set(room.code, room);
@@ -137,6 +142,17 @@ export class Rooms {
     this.broadcast(room);
     this.start(room);
     return { ok: true, room };
+  }
+
+  /** Host only, between duels: which games this room plays (at least one; unknown ids ignored). */
+  setAllowed(userId: number, list: readonly DomainId[]) {
+    const room = this.roomOf(userId);
+    if (!room || room.host.userId !== userId || room.inDuel) return;
+    const allowed = DOMAIN_IDS.filter((d) => list.includes(d));
+    if (!allowed.length) return;
+    room.allowed = allowed;
+    room.touchedAt = this.now();
+    this.broadcast(room);
   }
 
   /** After a duel both press Rematch; the next duel starts when both are ready. */
@@ -186,7 +202,7 @@ export class Rooms {
         else if (room.guest?.userId === winnerId) room.score[1]++;
       }
       if (this.rooms.get(room.code) === room) this.broadcast(room);
-    });
+    }, room.allowed);
   }
 
   online(userId: number) {

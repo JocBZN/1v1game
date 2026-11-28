@@ -57,7 +57,8 @@ export function buildBotDuel(myGeneral: number, rng: Rng, domains?: DomainId[]):
  * original timing. Domains the ghost has no (unseen) recordings for are played by a bot at the
  * ghost's rating. Returns null when there's nobody to replay.
  */
-export function buildGhostDuel(viewerId: number, myGeneral: number, rng: Rng): { opponent: SlotInit; plans: RoundPlan[] } | null {
+export function buildGhostDuel(viewerId: number, myGeneral: number, rng: Rng, banned: ReadonlySet<DomainId> = new Set()): { opponent: SlotInit; plans: RoundPlan[] } | null {
+  const playable = availableDomains().filter((d) => !banned.has(d));
   const candidates = getGhostCandidates(viewerId)
     .map((c) => ({ ...c, snap: getRecordingById(c.last_id)! }))
     .filter((c) => c.snap)
@@ -66,7 +67,7 @@ export function buildGhostDuel(viewerId: number, myGeneral: number, rng: Rng): {
   // Among the closest few, pick one that has something this viewer hasn't seen yet.
   for (const ghost of rng.shuffle(candidates.slice(0, 5))) {
     const unseen = new Map<DomainId, RecordingRow[]>();
-    for (const d of availableDomains()) {
+    for (const d of playable) {
       const accepts = getMode(d).acceptsContent;
       const recs = getGhostRecordings(ghost.user_id, d, viewerId).filter((r) => !accepts || accepts(JSON.parse(r.content)));
       if (recs.length) unseen.set(d, recs);
@@ -75,7 +76,7 @@ export function buildGhostDuel(viewerId: number, myGeneral: number, rng: Rng): {
 
     // Prefer domains with recordings (still random), fill up with the others.
     const withRec = rng.shuffle([...unseen.keys()]);
-    const others = rng.shuffle(availableDomains().filter((d) => !unseen.has(d)));
+    const others = rng.shuffle(playable.filter((d) => !unseen.has(d)));
     const domains = [...withRec, ...others].slice(0, 3);
     if (domains.length < 3) return null;
     const ordered = rng.shuffle(domains);
