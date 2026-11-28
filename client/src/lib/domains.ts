@@ -36,7 +36,7 @@ export const DOMAINS: Record<DomainId, DomainMeta> = {
   followers: { id: 'followers', name: 'Followers', short: 'Followers', icon: Users, ...RED, tagline: '5 stars and games · guess the numbers' },
   globe: { id: 'globe', name: 'Pin the country', short: 'Globe', icon: Earth, ...CYAN, tagline: '5 countries · drop a pin on the globe' },
   photo: { id: 'photo', name: 'Photo year', short: 'Photo', icon: Camera, ...ORANGE, tagline: '3 photos · 60 seconds each · guess the year' },
-  vehicles: { id: 'vehicles', name: 'Vehicles', short: 'Vehicles', icon: CarFront, ...SLATE, tagline: '5 cars, planes, bikes and boats · name them' },
+  vehicles: { id: 'vehicles', name: 'Vehicles', short: 'Vehicles', icon: CarFront, ...SLATE, tagline: '5 cars, planes, bikes and boats · 30 seconds each' },
 };
 
 export const DOMAIN_LIST: DomainMeta[] = [

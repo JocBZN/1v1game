@@ -64,7 +64,7 @@ export interface VehicleItem extends ChoiceItem {
 export type VehicleContent = RoundContent<VehicleItem>;
 
 export const VEHICLE_ITEMS = 5;
-export const VEHICLE_ITEM_MS = 12_000;
+export const VEHICLE_ITEM_MS = 30_000;
 const FEEDBACK_MS = 1_800;
 const PRICE_INPUT = { kind: 'log' as const, min: 100, max: 1e10, prefix: '$' };
 
