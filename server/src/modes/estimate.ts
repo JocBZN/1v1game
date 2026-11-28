@@ -1,4 +1,5 @@
 import type { DomainId } from '../domains';
+import { prefetchImages } from '../images';
 import { isNum, simulateItemBot } from './sim';
 import { sumScore, type GameMode, type RoundContent } from './types';
 
@@ -78,12 +79,15 @@ export function makeEstimateMode(opts: {
           return true;
         })
         .slice(0, opts.perRound);
+      // Picture games: fetch this round's pictures now, so they're ready when each item appears.
+      const pics = items.flatMap((q) => (q.img ? [q.img] : []));
+      if (pics.length) prefetchImages(pics);
       return { items };
     },
 
     publicItem(content, index) {
       const it = content.items[index];
-      return { q: it.q, unit: it.unit ?? '', input: opts.input, seconds: opts.itemMs / 1000, index, total: content.items.length, ...(it.img ? { img: it.img } : {}) };
+      return { q: it.q, unit: it.unit ?? '', input: opts.input, seconds: opts.itemMs / 1000, index, total: content.items.length, ...(it.img ? { img: it.img, next: content.items[index + 1]?.img ?? null } : {}) };
     },
 
     validateAnswer(content, index, answer) {

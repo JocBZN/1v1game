@@ -14,6 +14,8 @@ interface EstimateData {
   total: number;
   /** photo year game: the picture to date */
   img?: string;
+  /** the next item's picture, loaded ahead */
+  next?: string | null;
 }
 
 const GRACE_MS = 700;
@@ -105,6 +107,7 @@ export function EstimateRound({ item, feedback, onAnswer, waiting }: ModeProps<E
     onAnswer(touchedRef.current ? valueRef.current : null);
   }
 
+  usePreload(item?.data.next);
   if (waiting) return <WaitingNote />;
   if (!item || !input) return <div className="m-auto text-muted">…</div>;
   const fb = currentFeedback(item, feedback);
@@ -268,6 +271,8 @@ export function Photo({ src, className = 'h-[27vh] min-h-40 sm:h-[38vh]' }: { sr
           src={src}
           alt="A photo to date"
           referrerPolicy="no-referrer"
+          fetchPriority="high"
+          decoding="async"
           draggable={false}
           onLoad={() => setLoaded(true)}
           onError={() => setFailed(true)}
@@ -276,4 +281,14 @@ export function Photo({ src, className = 'h-[27vh] min-h-40 sm:h-[38vh]' }: { sr
       )}
     </div>
   );
+}
+
+/** Start downloading a picture before it is shown (the next item's photo). */
+export function usePreload(src: string | null | undefined) {
+  useEffect(() => {
+    if (!src) return;
+    const img = new Image();
+    img.decoding = 'async';
+    img.src = src;
+  }, [src]);
 }

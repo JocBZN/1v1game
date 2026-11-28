@@ -10,7 +10,7 @@
 import fs from 'node:fs';
 import type { Rng } from '../rng';
 import { dataFile } from '../paths';
-import { imagePath, onImageLookup } from '../images';
+import { imagePath, onImageLookup, prefetchImages } from '../images';
 import { validateChoice, simulateChoiceBot, type ChoiceItem } from './choice';
 import { estimatePoints } from './estimate';
 import { isNum } from './sim';
@@ -187,12 +187,14 @@ export const vehiclesMode: GameMode<VehicleContent> = {
       used.add(row.img);
       items.push(it);
     }
+    prefetchImages(items.map((i) => i.img));
     return { items };
   },
 
   publicItem(content, index) {
     const it = content.items[index];
-    const base = { kind: it.kind, q: it.q, img: imagePath(it.img), index, total: content.items.length };
+    const next = content.items[index + 1];
+    const base = { kind: it.kind, q: it.q, img: imagePath(it.img), next: next ? imagePath(next.img) : null, index, total: content.items.length };
     if (it.kind === 'price') return { ...base, unit: '$', input: PRICE_INPUT, seconds: VEHICLE_ITEM_MS / 1000 };
     return { ...base, options: it.options, stars: it.stars ?? 3 };
   },

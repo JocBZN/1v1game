@@ -1,6 +1,6 @@
 import { Stars } from '../components/ui';
 import { ChoiceRound } from './ChoiceRound';
-import { EstimateRound, Photo, isCredit } from './EstimateRound';
+import { EstimateRound, Photo, isCredit, usePreload } from './EstimateRound';
 import { WaitingNote, currentFeedback } from './ItemHeader';
 import type { ModeProps } from './types';
 
@@ -12,11 +12,13 @@ interface VehicleData {
   stars?: number;
   index: number;
   total: number;
+  next?: string | null;
 }
 
 /** A photo of a vehicle and either 4 names to choose from or (now and then) a price slider. */
 export function VehiclesRound(props: ModeProps<VehicleData>) {
   const { item, feedback, onAnswer, waiting } = props;
+  usePreload(item?.data.next);
   if (waiting) return <WaitingNote />;
   // Price questions use the estimate UI (photo + slider).
   if (item?.data.kind === 'price') return <EstimateRound {...(props as unknown as Parameters<typeof EstimateRound>[0])} />;

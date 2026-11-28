@@ -17,7 +17,7 @@ import { mountSeoPack } from './seo-pack';
 import { pruneIdleGuests } from './db';
 import { normalizeCode } from './rooms';
 import { attachSockets } from './socket';
-import { serveImage } from './images';
+import { serveImage, warmImageCache } from './images';
 import './modes/photos';
 import './modes/vehicles';
 
@@ -101,6 +101,8 @@ attachSockets(server);
 
 server.listen(PORT, () => {
   console.log(`[duel] server on http://localhost:${PORT}`);
+  // Fill the picture cache in the background (the disk cache starts empty after each deploy).
+  if (process.env.NODE_ENV === 'production' && process.env.WARM_IMAGES !== '0') warmImageCache();
 });
 
 // Every visit without a token (crawlers included, now that robots.txt allows /api/guest) creates a
