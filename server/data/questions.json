@@ -503,7 +503,7 @@
   {"id":"fm51","cat":"film_music","difficulty":1,"q":"Which studio made Toy Story (1995), the first fully computer-animated feature film?","correct":"Pixar","wrong":["DreamWorks","Blue Sky","Illumination"],"stars":1},
   {"id":"fm52","cat":"film_music","difficulty":1,"q":"What is the best-known song from Disney's Frozen?","correct":"Let It Go","wrong":["Into the Unknown","Do You Want to Build a Snowman?","For the First Time in Forever"],"stars":1},
   {"id":"fm53","cat":"film_music","difficulty":1,"q":"Whom does Shrek marry?","correct":"Princess Fiona","wrong":["Princess Peach","Snow White","Cinderella"],"stars":1},
-  {"id":"fm54","cat":"film_music","difficulty":2,"q":"Which film is the highest-grossing of all time?","correct":"Avatar","wrong":["Avengers: Endgame","Titanic","Star Wars: The Force Awakens"],"stars":3},
+  {"id":"fm54","cat":"film_music","difficulty":2,"q":"Which film became the highest-grossing film of all time in 2010, passing Titanic?","correct":"Avatar","wrong":["Avengers: Endgame","The Dark Knight","Star Wars: The Force Awakens"],"stars":3},
   {"id":"fm55","cat":"film_music","difficulty":2,"q":"Which film won Best Picture at the 2024 Oscars?","correct":"Oppenheimer","wrong":["Barbie","Poor Things","Killers of the Flower Moon"],"stars":3},
   {"id":"fm56","cat":"film_music","difficulty":3,"q":"Which film won Best Picture at the 2025 Oscars?","correct":"Anora","wrong":["The Brutalist","Conclave","Emilia Pérez"],"stars":4},
   {"id":"fm57","cat":"film_music","difficulty":2,"q":"Who directed Parasite (2019), the first non-English-language Best Picture winner?","correct":"Bong Joon-ho","wrong":["Park Chan-wook","Kim Ki-duk","Lee Chang-dong"],"stars":3},

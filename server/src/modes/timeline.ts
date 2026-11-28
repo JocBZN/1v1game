@@ -87,20 +87,49 @@ const BASE_EVENTS: TimelineEvent[] = [
   { label: 'Avengers: Endgame premieres', year: 2019, kind: 'movie' },
   { label: 'Oppenheimer premieres', year: 2023, kind: 'movie' },
   // tech
-  { label: 'Windows 95 released', year: 1995, kind: 'tech' },
-  { label: 'Google founded', year: 1998, kind: 'tech' },
-  { label: 'Wikipedia launched', year: 2001, kind: 'tech' },
-  { label: 'Facebook launched', year: 2004, kind: 'tech' },
-  { label: 'YouTube launched', year: 2005, kind: 'tech' },
-  { label: 'First iPhone released', year: 2007, kind: 'tech' },
-  { label: 'Instagram launched', year: 2010, kind: 'tech' },
-  { label: 'ChatGPT released', year: 2022, kind: 'tech' },
+  { label: 'Windows 95 (operating system) released', year: 1995, kind: 'tech' },
+  { label: 'Google (search engine company) founded', year: 1998, kind: 'tech' },
+  { label: 'Wikipedia (online encyclopedia) launched', year: 2001, kind: 'tech' },
+  { label: 'Facebook (social network) launched', year: 2004, kind: 'tech' },
+  { label: 'YouTube (video website) launched', year: 2005, kind: 'tech' },
+  { label: 'First iPhone (smartphone) released', year: 2007, kind: 'tech' },
+  { label: 'Instagram (photo app) launched', year: 2010, kind: 'tech' },
+  { label: 'ChatGPT (AI chatbot) released', year: 2022, kind: 'tech' },
 ];
 
-/** Base list plus the extra events; the first occurrence of a label wins. */
+const CONSOLE_RE = /^(First )?(Atari 2600|Commodore 64|NES|Famicom|Sega Genesis \/ Mega Drive|SNES|Game Boy( Color| Advance)?|Nintendo (64|DS|3DS|Wii|Switch 2|Switch)|Sega Dreamcast|PlayStation( 2| 3| 4| 5)?|GameCube|Xbox( 360| One| Series X\|S)?|PSP|Wii U|Steam Deck) released/;
+const VERB_RE = / (released|early access|full release|first public version|created|launched|sells)\b/;
+
+/**
+ * Every card must say what it is: "Gone with the Wind (film)", "Portal (video game) released",
+ * "Wii U (console) released". TV series and awards already say so in their labels.
+ */
+export function specificLabel(e: TimelineEvent): string {
+  const l = e.label;
+  if (e.kind === 'movie') {
+    if (/\b(airs|series|anime|Oscars?|Palme|Best Picture)\b|\(film|\bfilm\b/i.test(l)) return l;
+    if (/ premieres$/.test(l)) return l.replace(/ premieres$/, ' (film) premieres');
+    const m = l.match(/^(.*) \(([^)]*)\)$/);
+    return m ? `${m[1]} (film, ${m[2]})` : `${l} (film)`;
+  }
+  if (e.kind === 'game') {
+    if (/^Steam platform/.test(l)) return l.replace('Steam platform', 'Steam (PC game store)');
+    const type = /^Commodore 64/.test(l) ? 'home computer' : /^Steam Deck/.test(l) ? 'handheld gaming PC' : /^Roblox/.test(l) ? 'online game platform' : CONSOLE_RE.test(l) ? 'console' : 'video game';
+    const v = l.match(VERB_RE);
+    if (!v || v.index === undefined) return `${l} (${type})`;
+    const head = l.slice(0, v.index);
+    const tail = l.slice(v.index);
+    return head.endsWith(')') ? `${head.slice(0, -1)} ${type})${tail}` : `${head} (${type})${tail}`;
+  }
+  return l;
+}
+
+/** Base list plus the extra events, every label made specific; the first occurrence of a label wins. */
 export const EVENTS: TimelineEvent[] = (() => {
   const seen = new Set<string>();
-  return [...BASE_EVENTS, ...EXTRA_EVENTS].filter((e) => !seen.has(e.label.toLowerCase()) && seen.add(e.label.toLowerCase()));
+  return [...BASE_EVENTS, ...EXTRA_EVENTS]
+    .map((e) => ({ ...e, label: specificLabel(e) }))
+    .filter((e) => !seen.has(e.label.toLowerCase()) && seen.add(e.label.toLowerCase()));
 })();
 
 export interface TimelineItem {

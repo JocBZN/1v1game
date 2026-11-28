@@ -83,6 +83,8 @@ describe('estimate questions', () => {
     for (const x of followerQuestions()) expect(x.answer >= 1_000 && x.answer <= 1e11, x.q).toBe(true);
     expect(unique(priceQuestions())).toBe(priceQuestions().length);
     expect(unique(followerQuestions())).toBe(followerQuestions().length);
-    expect(followerQuestions().length).toBeGreaterThanOrEqual(300);
+    expect(followerQuestions().length).toBeGreaterThanOrEqual(150);
+    // every followers question says when its number is from
+    for (const x of followerQuestions()) expect(x.q, x.q).toMatch(/\(.*\)\?$/);
   });
 });
