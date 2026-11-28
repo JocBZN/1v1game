@@ -287,8 +287,11 @@ export function HomeScreen({ me, onPlay, onNavigate, connected }: {
               <span className="font-display text-xl font-bold">{MATCH_DOMAINS.length} games</span>
               <span className="text-xs text-muted">3 random ones each duel</span>
             </div>
-            <GameTiles />
-            <div className="mt-auto">{steps}</div>
+            {/* Only the games scroll: the square itself stays put. */}
+            <div className="game-scroll -mx-2 min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pb-3 pt-1 [mask-image:linear-gradient(180deg,transparent,#000_12px,#000_calc(100%-28px),transparent)]">
+              <GameTiles />
+            </div>
+            <div>{steps}</div>
           </div>
         </motion.div>
       </div>
