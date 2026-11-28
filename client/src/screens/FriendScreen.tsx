@@ -240,6 +240,7 @@ function RoomGames({ room, onGames }: { room: RoomState; onGames: (allowed: Doma
             >
               <span className={on ? '' : 'opacity-40 grayscale'}><TopicIcon domain={d.id} size={26} /></span>
               <span className={`min-w-0 flex-1 truncate font-semibold ${on ? '' : 'line-through'}`}>{d.name}</span>
+              {d.id === 'cube' && allowed.size > 1 && <span className="shrink-0 rounded-full bg-orange-soft px-1.5 text-[10px] font-bold text-orange-strong" title="Comes up in 1% of duels unless it is the only game on">rare 1%</span>}
             </button>
           );
         })}

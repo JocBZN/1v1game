@@ -4,7 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, Crown, Download, LogIn, Trophy, UserPlus, Users } from 'lucide-react';
 import type { Route } from '../App';
 import type { Me } from '../lib/api';
-import { DOMAIN_LIST } from '../lib/domains';
+import { MATCH_DOMAINS } from '../lib/domains';
 import { LEAGUE_META, leagueProgress } from '../lib/leagues';
 import { useInstallPrompt } from '../lib/pwa';
 import { Avatar, LeagueIcon, TopicIcon, useAnimatedNumber } from '../components/ui';
@@ -17,10 +17,10 @@ function RollingTitle({ big }: { big?: boolean }) {
   const still = useReducedMotion();
   useEffect(() => {
     if (still) return;
-    const t = setInterval(() => setI((n) => (n + 1) % DOMAIN_LIST.length), 1800);
+    const t = setInterval(() => setI((n) => (n + 1) % MATCH_DOMAINS.length), 1800);
     return () => clearInterval(t);
   }, [still]);
-  const d = DOMAIN_LIST[i];
+  const d = MATCH_DOMAINS[i];
   return (
     <h1 className={`font-display font-bold leading-[1.05] tracking-tight ${big ? 'text-5xl' : 'text-[2.15rem]'}`}>
       Beat one person at
@@ -128,7 +128,7 @@ function PlayButton({ onPlay, connected, big }: { onPlay: () => void; connected:
 function GameTiles() {
   return (
     <ul className="grid grid-cols-3 gap-3">
-      {DOMAIN_LIST.map((d, i) => (
+      {MATCH_DOMAINS.map((d, i) => (
         <motion.li
           key={d.id}
           initial={{ opacity: 0, y: 16, scale: 0.92 }}
@@ -250,7 +250,7 @@ export function HomeScreen({ me, onPlay, onNavigate, connected }: {
         {guestLine}
         <motion.div {...enter(5)} className="mt-1">
           <div className="mb-2.5 flex items-baseline justify-between">
-            <span className="font-display text-lg font-bold">{DOMAIN_LIST.length} games</span>
+            <span className="font-display text-lg font-bold">{MATCH_DOMAINS.length} games</span>
             <span className="text-xs text-muted">3 random ones each duel</span>
           </div>
           <GameMarquee className="-mx-4 sm:-mx-6" />
@@ -284,7 +284,7 @@ export function HomeScreen({ me, onPlay, onNavigate, connected }: {
           </div>
           <div className="flex min-h-0 flex-col gap-5">
             <div className="flex items-baseline justify-between">
-              <span className="font-display text-xl font-bold">{DOMAIN_LIST.length} games</span>
+              <span className="font-display text-xl font-bold">{MATCH_DOMAINS.length} games</span>
               <span className="text-xs text-muted">3 random ones each duel</span>
             </div>
             <GameTiles />

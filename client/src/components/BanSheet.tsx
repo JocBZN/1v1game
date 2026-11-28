@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Ban, X } from 'lucide-react';
-import { DOMAIN_LIST, type DomainId } from '../lib/domains';
+import { MATCH_DOMAINS, type DomainId } from '../lib/domains';
 import { TopicIcon } from './ui';
 
 const KEY = 'duel.ban';
 const readBan = (): DomainId | null => {
   try {
     const v = localStorage.getItem(KEY);
-    return DOMAIN_LIST.some((d) => d.id === v) ? (v as DomainId) : null;
+    return MATCH_DOMAINS.some((d) => d.id === v) ? (v as DomainId) : null;
   } catch {
     return null;
   }
@@ -47,7 +47,7 @@ export function BanSheet({ onPlay, onClose }: { onPlay: (ban: DomainId | null) =
         </header>
 
         <div className="grid flex-1 grid-cols-2 gap-2 overflow-y-auto px-5 py-3">
-          {DOMAIN_LIST.map((d) => {
+          {MATCH_DOMAINS.map((d) => {
             const on = ban === d.id;
             return (
               <button
@@ -67,7 +67,7 @@ export function BanSheet({ onPlay, onClose }: { onPlay: (ban: DomainId | null) =
 
         <footer className="grid gap-2 border-t border-line px-5 py-4 safe-bottom">
           <button type="button" onClick={() => go(ban)} className="btn btn-primary py-3.5 text-lg">
-            {ban ? `Play without ${DOMAIN_LIST.find((d) => d.id === ban)!.name}` : 'Play'}
+            {ban ? `Play without ${MATCH_DOMAINS.find((d) => d.id === ban)!.name}` : 'Play'}
           </button>
           {ban && (
             <button type="button" onClick={() => go(null)} className="text-center text-sm text-muted underline-offset-2 hover:underline">

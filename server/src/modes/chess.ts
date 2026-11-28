@@ -7,11 +7,11 @@ import { botAccuracy, botSpeedFactor, sumScore, type GameMode, type ReplayEvent,
 
 export type ChessContent = RoundContent<Puzzle>;
 
-export const CHESS_PUZZLES_PER_ROUND = 20; // more than anyone solves in 45 s
+export const CHESS_PUZZLES_PER_ROUND = 5;
 export const CHESS_SOLVE_POINTS = 1000;
-/** Small speed bonus (max 100, over 15 s) — only a tie-breaker; puzzles solved is what counts. */
+/** Small speed bonus (max 100, over 10 s) — only a tie-breaker; puzzles solved is what counts. */
 export const CHESS_SPEED_BONUS = 100;
-export const CHESS_BONUS_WINDOW_MS = 15_000;
+export const CHESS_BONUS_WINDOW_MS = 10_000;
 
 export function chessPoints(elapsedMs: number): number {
   return CHESS_SOLVE_POINTS + Math.round(CHESS_SPEED_BONUS * Math.max(0, 1 - elapsedMs / CHESS_BONUS_WINDOW_MS));
@@ -32,15 +32,16 @@ export function loadPuzzles(): Puzzle[] {
 export const chessMode: GameMode<ChessContent> = {
   id: 'chess',
   name: 'Chess puzzles',
-  timeLimit: 45_000,
+  /** 30 seconds for the whole round, five puzzles. */
+  timeLimit: 30_000,
   feedbackDelay: 1_100,
 
   generateRound(rng) {
     const all = loadPuzzles();
     const tier = (d: number) => rng.shuffle(all.filter((p) => p.difficulty === d));
-    // Warm up with easy ones, then mix up.
+    // Start with two easy ones, then mix up.
     const easy = tier(1);
-    const items = [...easy.slice(0, 4), ...rng.shuffle([...easy.slice(4), ...tier(2), ...tier(3)])].slice(0, CHESS_PUZZLES_PER_ROUND);
+    const items = [...easy.slice(0, 2), ...rng.shuffle([...easy.slice(2), ...tier(2), ...tier(3)])].slice(0, CHESS_PUZZLES_PER_ROUND);
     return { items };
   },
 

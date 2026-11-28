@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { cn } from '../lib/cn';
-import { DOMAIN_LIST, type DomainMeta } from '../lib/domains';
+import { MATCH_DOMAINS, type DomainMeta } from '../lib/domains';
 import { TopicIcon } from './ui';
 
 /** Shared look of the home screen: drifting shapes, VS bubble, the mystery opponent, game chips. */
@@ -96,8 +96,8 @@ export function GameChip({ d }: { d: DomainMeta }) {
 /** Rows of game chips sliding in opposite directions. */
 export function GameMarquee({ rows = 2, className }: { rows?: 1 | 2; className?: string }) {
   const still = useReducedMotion();
-  const half = Math.ceil(DOMAIN_LIST.length / 2);
-  const lines = rows === 2 ? [DOMAIN_LIST.slice(0, half), DOMAIN_LIST.slice(half)] : [DOMAIN_LIST];
+  const half = Math.ceil(MATCH_DOMAINS.length / 2);
+  const lines = rows === 2 ? [MATCH_DOMAINS.slice(0, half), MATCH_DOMAINS.slice(half)] : [MATCH_DOMAINS];
   return (
     <div className={cn('space-y-2.5 overflow-hidden py-1 [mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)]', className)}>
       {lines.map((row, r) => (

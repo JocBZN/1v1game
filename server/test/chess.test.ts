@@ -76,9 +76,9 @@ describe('chess mode scoring', () => {
     expect(pub).toMatchObject({ fen: PHILIDOR.fen, color: 'w' });
     expect(JSON.stringify(pub)).not.toMatch(/c4g8|"moves"|"solution"/);
   });
-  it('a round starts with easy puzzles', () => {
+  it('a round has five puzzles and starts with two easy ones', () => {
     const r = chessMode.generateRound(createRng(1));
-    expect(r.items.length).toBe(20);
-    expect(r.items.slice(0, 4).every((p) => p.difficulty === 1)).toBe(true);
+    expect(r.items.length).toBe(5);
+    expect(r.items.slice(0, 2).every((p) => p.difficulty === 1)).toBe(true);
   });
 });

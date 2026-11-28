@@ -9,7 +9,7 @@ import { leagueFor } from './leagues';
 import { capture } from './analytics';
 import { Matchmaker, type QueueEntry } from './matchmaking';
 import { availableDomains, getMode, pickDomains } from './modes';
-import { createRng } from './rng';
+import { createRng, type Rng } from './rng';
 import { starsFromRate } from './modes/scoring';
 import { setLiveStars, type TriviaContent } from './modes/trivia';
 
@@ -46,6 +46,24 @@ type DuelExtra = {
   league?: { before: string; after: string };
   ratingFactors?: { streak: number };
 } | null;
+
+/** Games left out of normal matches; they only come up in private rooms. */
+export const PRIVATE_ONLY: readonly DomainId[] = ['cube'];
+/** Chance that a private-room duel includes the Rubik's Cube (when the host allows it). */
+export const CUBE_ROOM_CHANCE = 0.01;
+
+/**
+ * A private room's three games: from the host's list, with the Rubik's Cube only rarely
+ * (1% of duels) unless it is the only game left on.
+ */
+export function friendDomains(rng: Rng, allowed?: readonly DomainId[]): DomainId[] {
+  const list = allowed?.length ? [...allowed] : availableDomains();
+  const others = list.filter((d) => !PRIVATE_ONLY.includes(d));
+  if (!others.length) return pickDomains(rng, 3, list);
+  const picks = pickDomains(rng, 3, others);
+  if (list.includes('cube') && rng.chance(CUBE_ROOM_CHANCE)) picks[rng.int(0, picks.length - 1)] = 'cube';
+  return picks;
+}
 
 /** Orchestrates queue → duel → results. */
 export class GameServer {
@@ -351,7 +369,7 @@ export class GameServer {
   /** Every game except the ones these players banned. */
   private allowedFor(...userIds: number[]): DomainId[] {
     const banned = new Set(userIds.map((u) => this.bans.get(u)).filter((d): d is DomainId => !!d));
-    return availableDomains().filter((d) => !banned.has(d));
+    return availableDomains().filter((d) => !banned.has(d) && !PRIVATE_ONLY.includes(d));
   }
 
   private startHumanDuel(a: QueueEntry, b: QueueEntry) {
@@ -371,7 +389,7 @@ export class GameServer {
   /** Private room: two friends, same rounds as a normal duel, no rating change. */
   private startFriendDuel(hostId: number, guestId: number, onEnd: (winner: 0 | 1 | null) => void, allowed?: readonly DomainId[]) {
     const rng = createRng();
-    const plans: RoundPlan[] = pickDomains(rng, 3, allowed).map((domain) => ({
+    const plans: RoundPlan[] = friendDomains(rng, allowed).map((domain) => ({
       domain,
       content: getMode(domain).generateRound(rng),
       scripts: [null, null],

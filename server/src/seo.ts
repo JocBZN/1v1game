@@ -108,10 +108,10 @@ export const TOPIC_PAGES: TopicPage[] = [
     name: 'Chess puzzles',
     title: 'Chess Puzzles Online – 1v1 Mate in 1 and 2 Races',
     description:
-      'Race an opponent on chess puzzles: mate in 1, mate in 2 and winning material. 45 seconds, one wrong move loses the puzzle. Free in your browser.',
+      'Race an opponent on chess puzzles: mate in 1, mate in 2 and winning material. Five puzzles in 30 seconds, one wrong move loses the puzzle. Free in your browser.',
     h1: 'Chess puzzle races, 1v1',
     intro:
-      'Solve as many chess puzzles as you can in 45 seconds while your opponent works through the same puzzles. Every move is checked on the server, so the board is always fair and nobody can use an engine in another tab to gain time.',
+      'Solve as many of the five chess puzzles as you can in 30 seconds while your opponent works through the same puzzles. Every move is checked on the server, so the board is always fair and nobody can use an engine in another tab to gain time.',
     how: [
       'Puzzles are mate in 1, mate in 2 and short tactics that win material.',
       'Each solved puzzle is worth 1,000 points plus a small speed bonus of up to 100.',
@@ -450,10 +450,12 @@ const HOW_TO_PLAY: TopicPage = {
   how: [
     `12 games: ${GAMES_SENTENCE}.`,
     'Each duel has three rounds on three different games. Win two to win the duel.',
+    'Before each duel you can ban one game you don’t want; your opponent’s ban counts too.',
+    'The Rubik’s Cube only comes up in private rooms, in about 1% of duels there.',
     'Leagues: Bronze, Silver (1300), Gold (1500), Platinum (1700), Diamond (1900), Legend (2100).',
     'Ratings use the Glicko-2 system, like many chess sites, with a small bonus for win streaks and one-sided wins.',
     'Leaving or being disconnected for more than 15 seconds counts as a loss.',
-    'Private rooms: share a 5-character code or a link to play a friend, with no rating change.',
+    'Private rooms: share a 5-character code or a link to play a friend, with no rating change. The room owner chooses which games are on, even just one.',
   ],
   about: [
     'Your overall rating changes after every duel, and you also have a separate rating for each game, so you can see which ones you are best at. New players move quickly; after a few dozen duels the rating settles and moves less.',
@@ -511,7 +513,7 @@ export const KEYWORD_PAGES: TopicPage[] = [
     how: [
       'Both players get exactly the same content in each round, so the faster and more accurate player wins.',
       'Scores update live on both screens during the round.',
-      'Rounds are short: 10 seconds per trivia question, 6 seconds per flag, 45 seconds of chess puzzles, 3 minutes for the cube.',
+      'Rounds are short: 10 seconds per trivia question, 6 seconds per flag, 30 seconds for five chess puzzles, 3 minutes for the cube.',
       'Play a friend in a private room: send a 5-character code or a link, and they can join without signing up.',
       'If nobody else is online, you play a recorded duel of a real player, so you never wait.',
     ],
@@ -565,7 +567,7 @@ export const KEYWORD_PAGES: TopicPage[] = [
     how: [
       '1,200+ questions, at least 90 per category, rated from 1 to 5 stars.',
       'Each trivia round takes about a minute: 5 questions, 10 seconds each.',
-      'Trivia is one of 12 games, so a duel can also include flags, chess puzzles, the Rubik’s Cube, mini golf or a guessing game.',
+      'Trivia is one of 11 games in random duels, so a duel can also include flags, chess puzzles, mini golf or a guessing game. The Rubik’s Cube is played in private rooms.',
       'A daily quiz of the day with 10 new questions to keep your streak going.',
     ],
     about: [

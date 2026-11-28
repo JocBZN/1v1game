@@ -20,3 +20,18 @@ describe('pickDomains', () => {
     expect(new Set(two)).toEqual(new Set(['flags', 'trivia']));
   });
 });
+
+describe('Rubik’s Cube is private-room only', () => {
+  it('never comes up in normal matches, rarely in rooms, always when it is the only game', async () => {
+    const { friendDomains, CUBE_ROOM_CHANCE } = await import('../src/game');
+    const { availableDomains: all } = await import('../src/modes');
+    let withCube = 0;
+    const N = 20_000;
+    for (let seed = 1; seed <= N; seed++) if (friendDomains(createRng(seed), all()).includes('cube')) withCube++;
+    expect(CUBE_ROOM_CHANCE).toBe(0.01);
+    expect(withCube / N).toBeGreaterThan(0.005);
+    expect(withCube / N).toBeLessThan(0.016);
+    expect(friendDomains(createRng(3), ['cube'])).toEqual(['cube', 'cube', 'cube']);
+    for (let seed = 1; seed <= 200; seed++) expect(friendDomains(createRng(seed), ['trivia', 'flags'])).not.toContain('cube');
+  });
+});

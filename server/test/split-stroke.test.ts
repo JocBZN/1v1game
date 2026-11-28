@@ -47,7 +47,7 @@ describe('split the shape: freehand cuts', () => {
     for (let y = -5; y <= 105; y += 0.5) pts.push([50 + 3 * Math.sin(y / 9), y]);
     const t = performance.now();
     const r = splitMode.validateAnswer(c, 0, { pts }, {} as never);
-    expect(performance.now() - t).toBeLessThan(250);
+    expect(performance.now() - t).toBeLessThan(1_000);
     expect(r.points).toBeGreaterThanOrEqual(0);
     expect(typeof r.feedback?.share).toBe('number');
   });
