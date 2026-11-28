@@ -92,8 +92,7 @@ async function load(id: string, url: string): Promise<Buffer | null> {
   return buf;
 }
 
-function get(id: string): Promise<Buffer | null> {
-  const url = urls.get(id);
+function get(id: string, url = urls.get(id)): Promise<Buffer | null> {
   if (!url) return Promise.resolve(null);
   let p = inflight.get(id);
   if (!p) {
@@ -126,10 +125,14 @@ export function warmImageCache({ delayMs = 1_500, startAfterMs = 20_000 } = {}) 
 /** GET /api/photo/:id */
 export async function serveImage(req: Request, res: Response) {
   if (!urls.size) for (const l of loaders) l();
-  const id = String(req.params.id);
-  const url = urls.get(id);
-  if (!url) return res.status(404).end();
-  const buf = await get(id);
+  const base = String(req.params.id);
+  const small = urls.get(base);
+  if (!small) return res.status(404).end();
+  // ?size=large: the 960 px version, for the full-screen view.
+  const large = req.query.size === 'large';
+  const url = large ? small.replace(/\/(lossy-page1-)?500px-/, '/$1960px-') : small;
+  const id = large ? `${base}-l` : base;
+  const buf = await get(id, url);
   // Commons unreachable or throttling us: let the browser load it from Commons directly.
   if (!buf) return res.redirect(302, url);
   res.setHeader('Content-Type', buf[0] === 0x89 ? 'image/png' : 'image/jpeg');

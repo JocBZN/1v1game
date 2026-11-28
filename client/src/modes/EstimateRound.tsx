@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Minus, Plus } from 'lucide-react';
+import { Maximize2, Minus, Plus, X } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import type { ModeProps } from './types';
 import { ItemHeader, WaitingNote, currentFeedback } from './ItemHeader';
 import { SecondsLeft, TimerBar } from '../components/ui';
@@ -256,30 +257,83 @@ export const isCredit = (x: unknown): x is { text: string; url: string } =>
 export function Photo({ src, className = 'h-[27vh] min-h-40 sm:h-[38vh]' }: { src: string; className?: string }) {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [full, setFull] = useState(false);
   useEffect(() => {
     setLoaded(false);
     setFailed(false);
+    setFull(false);
   }, [src]);
   return (
-    <div className={`relative mt-3 flex items-center justify-center overflow-hidden rounded-2xl bg-sunken ${className}`}>
-      {!loaded && !failed && <div className="absolute inset-0 animate-pulse bg-sunken" />}
-      {failed ? (
-        <span className="text-sm text-muted">The photo didn’t load. Take your best guess.</span>
-      ) : (
-        <img
-          key={src}
-          src={src}
-          alt="A photo to date"
-          referrerPolicy="no-referrer"
-          fetchPriority="high"
-          decoding="async"
-          draggable={false}
-          onLoad={() => setLoaded(true)}
-          onError={() => setFailed(true)}
-          className={`max-h-full max-w-full select-none object-contain transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
-        />
-      )}
-    </div>
+    <>
+      <button
+        type="button"
+        onClick={() => !failed && setFull(true)}
+        aria-label="Show the photo full screen"
+        className={`group relative mt-3 flex w-full items-center justify-center overflow-hidden rounded-2xl bg-sunken ${failed ? 'cursor-default' : 'cursor-zoom-in'} ${className}`}
+      >
+        {!loaded && !failed && <div className="absolute inset-0 animate-pulse bg-sunken" />}
+        {failed ? (
+          <span className="text-sm text-muted">The photo didn’t load. Take your best guess.</span>
+        ) : (
+          <img
+            key={src}
+            src={src}
+            alt="A photo to date"
+            referrerPolicy="no-referrer"
+            fetchPriority="high"
+            decoding="async"
+            draggable={false}
+            onLoad={() => setLoaded(true)}
+            onError={() => setFailed(true)}
+            className={`max-h-full max-w-full select-none object-contain transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+          />
+        )}
+        {loaded && (
+          <span className="pointer-events-none absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-slate/60 text-cream opacity-80 transition group-hover:opacity-100">
+            <Maximize2 size={15} strokeWidth={2.4} />
+          </span>
+        )}
+      </button>
+      {full && <FullScreenPhoto src={src} onClose={() => setFull(false)} />}
+    </>
+  );
+}
+
+/** The photo over the whole screen (sharper 960 px version once it arrives); the X button or Esc closes it. */
+function FullScreenPhoto({ src, onClose }: { src: string; onClose: () => void }) {
+  const [big, setBig] = useState(false);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 animate-[fade-in_150ms_ease-out]" style={{ background: 'rgb(12 11 18)' }} role="dialog" aria-label="Photo, full screen" onClick={onClose}>
+      {/* the small picture is already loaded: show it at once, swap in the large one when it's ready */}
+      <img src={src} alt="" onClick={(e) => e.stopPropagation()} className={`absolute inset-2 h-[calc(100%-1rem)] w-[calc(100%-1rem)] select-none object-contain ${big ? 'opacity-0' : ''}`} draggable={false} />
+      <img
+        src={`${src}?size=large`}
+        alt="A photo to date, full screen"
+        referrerPolicy="no-referrer"
+        draggable={false}
+        onLoad={() => setBig(true)}
+        onClick={(e) => e.stopPropagation()}
+        className={`relative h-full w-full select-none object-contain transition-opacity duration-200 ${big ? 'opacity-100' : 'opacity-0'}`}
+      />
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose();
+        }}
+        aria-label="Close full screen"
+        className="absolute right-3 top-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur hover:bg-white/25"
+        style={{ top: 'max(0.75rem, env(safe-area-inset-top))' }}
+      >
+        <X size={24} strokeWidth={2.5} />
+      </button>
+    </div>,
+    document.body,
   );
 }
 
