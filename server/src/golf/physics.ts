@@ -25,7 +25,7 @@ export interface Shot {
 
 export const BALL_R = 2;
 export const HOLE_R = 3.6;
-export const MAX_SPEED = 230;
+export const MAX_SPEED = 290;
 const DT = 1 / 120;
 const DRAG = 0.9895;
 const ROLL = 40; // mostly constant deceleration: the ball stops cleanly instead of crawling
