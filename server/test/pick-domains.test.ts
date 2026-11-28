@@ -35,3 +35,22 @@ describe('Rubik’s Cube is private-room only', () => {
     for (let seed = 1; seed <= 200; seed++) expect(friendDomains(createRng(seed), ['trivia', 'flags'])).not.toContain('cube');
   });
 });
+
+describe('Guess the color comes up half as often', () => {
+  it('normal matches: about 13.6% of duels instead of 27%; still always when it is the only game', () => {
+    const normal = availableDomains().filter((d) => d !== 'cube');
+    let color = 0, trivia = 0;
+    const N = 40_000;
+    for (let seed = 1; seed <= N; seed++) {
+      const p = pickDomains(createRng(seed), 3, normal);
+      expect(new Set(p).size).toBe(3);
+      if (p.includes('color')) color++;
+      if (p.includes('trivia')) trivia++;
+    }
+    const usual = 3 / normal.length; // 27%
+    expect(color / N).toBeGreaterThan(usual * 0.5 - 0.012);
+    expect(color / N).toBeLessThan(usual * 0.5 + 0.012);
+    expect(trivia / N).toBeGreaterThan(usual - 0.01); // the others don't lose anything
+    expect(pickDomains(createRng(5), 3, ['color'])).toEqual(['color', 'color', 'color']);
+  });
+});

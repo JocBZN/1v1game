@@ -49,9 +49,23 @@ export function pickDomains(rng: Rng, count = 3, allowed?: readonly DomainId[]):
   // Dev/test only: FORCE_DOMAINS=chess,trivia,flags fixes the order of domains.
   const forced = process.env.FORCE_DOMAINS?.split(',').filter((d) => d in MODES) as DomainId[] | undefined;
   if (forced?.length) return Array.from({ length: count }, (_, i) => forced[i % forced.length]);
-  const pool = allowed?.length ? availableDomains().filter((d) => allowed.includes(d)) : availableDomains();
-  const all = rng.shuffle(pool.length ? pool : availableDomains());
-  const out: DomainId[] = [];
-  for (let i = 0; i < count; i++) out.push(all[i % all.length]);
-  return out;
+  let pool = allowed?.length ? availableDomains().filter((d) => allowed.includes(d)) : availableDomains();
+  if (!pool.length) pool = availableDomains();
+  const cycle = (list: DomainId[]) => {
+    const all = rng.shuffle(list);
+    return Array.from({ length: count }, (_, i) => all[i % all.length]);
+  };
+  // Some games come up less often than the rest (only when other games are allowed too).
+  for (const [rare, factor] of Object.entries(RARER) as [DomainId, number][]) {
+    if (!pool.includes(rare) || pool.length === 1) continue;
+    const others = pool.filter((d) => d !== rare);
+    const picks = cycle(others);
+    // Same chance as before for every other game, `factor` × the usual chance for this one.
+    if (rng.chance(factor * Math.min(1, count / pool.length))) picks[rng.int(0, count - 1)] = rare;
+    return picks;
+  }
+  return cycle(pool);
 }
+
+/** Games that come up less often: multiplier on their usual chance of being in a duel. */
+export const RARER: Partial<Record<DomainId, number>> = { color: 0.5 };

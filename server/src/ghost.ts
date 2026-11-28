@@ -4,7 +4,7 @@ import {
 } from './db';
 import { RATING_TRACKS, type DomainId, type RatingTrack } from './domains';
 import type { RatingSnap, RoundPlan, RoundRecording, SlotInit } from './duel/Duel';
-import { availableDomains, getMode, pickDomains } from './modes';
+import { RARER, availableDomains, getMode, pickDomains } from './modes';
 import type { RoundContent } from './modes/types';
 import type { Rng } from './rng';
 
@@ -79,6 +79,12 @@ export function buildGhostDuel(viewerId: number, myGeneral: number, rng: Rng, ba
     const others = rng.shuffle(playable.filter((d) => !unseen.has(d)));
     const domains = [...withRec, ...others].slice(0, 3);
     if (domains.length < 3) return null;
+    // Same rule as pickDomains for rarer games (e.g. Guess the color comes up half as often).
+    for (const [rare, factor] of Object.entries(RARER) as [DomainId, number][]) {
+      const k = domains.indexOf(rare);
+      const spare = playable.filter((d) => !domains.includes(d));
+      if (k >= 0 && spare.length && !rng.chance(factor)) domains[k] = rng.pick(spare);
+    }
     const ordered = rng.shuffle(domains);
 
     const general: RatingSnap = { rating: ghost.snap.general_rating, rd: ghost.snap.general_rd, vol: 0.06 };
