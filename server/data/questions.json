@@ -573,7 +573,7 @@
   {"id":"fb13","cat":"football","difficulty":1,"q":"Which country won Euro 2020 (played in 2021)?","correct":"Italy","wrong":["England","Spain","Denmark"],"stars":2},
   {"id":"fb14","cat":"football","difficulty":2,"q":"How far from the goal line is the penalty spot?","correct":"11 metres (12 yards)","wrong":["9 metres","16.5 metres","10 metres"],"stars":3},
   {"id":"fb15","cat":"football","difficulty":1,"q":"Which card shows that a player has been sent off?","correct":"Red","wrong":["Yellow","Blue","Green"],"stars":2},
-  {"id":"fb16","cat":"football","difficulty":2,"q":"Who is the all-time top scorer in men's World Cup history, with 16 goals?","correct":"Miroslav Klose","wrong":["Ronaldo Nazário","Gerd Müller","Lionel Messi"],"stars":3},
+  {"id":"fb16","cat":"football","difficulty":2,"q":"Who became the all-time top scorer in men's World Cup history at the 2026 World Cup?","correct":"Kylian Mbappé","wrong": ["Lionel Messi", "Miroslav Klose", "Harry Kane"],"stars":3},
   {"id":"fb17","cat":"football","difficulty":2,"q":"Which country has won the most men's European Championships?","correct":"Spain","wrong":["Germany","Italy","France"],"stars":3},
   {"id":"fb18","cat":"football","difficulty":2,"q":"Who won the Ballon d'Or in 2022?","correct":"Karim Benzema","wrong":["Lionel Messi","Robert Lewandowski","Kylian Mbappé"],"stars":3},
   {"id":"fb19","cat":"football","difficulty":2,"q":"With which club did Pelé spend most of his career?","correct":"Santos","wrong":["Flamengo","New York Cosmos","Corinthians"],"stars":3},

@@ -23,7 +23,7 @@ const COUNTS: Fact[] = [
   ['How many episodes of Game of Thrones were made?', 73], ['How many episodes of Breaking Bad were made?', 62], ['How many episodes of Seinfeld were made?', 180],
   ['How many episodes of The Office (US) were made?', 201], ['How many Pokémon were in the first games (Red and Green)?', 151],
   ['How many stars are there to collect in Super Mario 64?', 120], ['How many official James Bond films did Eon make up to No Time to Die?', 25],
-  ['How many member states does the United Nations have?', 193], ['How many countries are in the European Union?', 27], ['How many countries are in NATO?', 32],
+  ['How many member states does the United Nations have?', 193], ['How many countries are in the European Union (as of 2026)?', 27], ['How many countries are in NATO (as of 2026)?', 32],
   ['How many states does the USA have?', 50], ['How many provinces does Canada have?', 10], ['How many states does Germany have?', 16],
   ['How many counties does Romania have (not counting Bucharest)?', 41], ['How many cantons does Switzerland have?', 26], ['How many countries are in Africa?', 54],
   ['How many countries are in South America?', 12], ['How many time zones does Russia have?', 11], ['How many official languages does the EU have?', 24],
