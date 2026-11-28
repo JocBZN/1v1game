@@ -17,6 +17,9 @@ import { mountSeoPack } from './seo-pack';
 import { pruneIdleGuests } from './db';
 import { normalizeCode } from './rooms';
 import { attachSockets } from './socket';
+import { serveImage } from './images';
+import './modes/photos';
+import './modes/vehicles';
 
 const PORT = Number(process.env.PORT ?? 3001);
 /** Built client (`npm run build`). In production the server hosts it, so everything is on one origin. */
@@ -32,6 +35,7 @@ if (process.env.NODE_ENV !== 'production') app.use(cors());
 app.get('/health', (_req, res) => res.json({ ok: true }));
 // Browser analytics go through our domain (see analytics.ts).
 mountPosthogProxy(app);
+app.get('/api/photo/:id', (req, res) => void serveImage(req, res));
 app.use('/api', createApi());
 mountAdmin(app);
 // Generated multilingual pages first: they own /es/, /quiz/space/, /flag-quiz/north-america/ …

@@ -58,9 +58,9 @@ interface TopicPage {
   faq: [string, string][];
 }
 
-/** The 13 games, in the order they are usually listed. Keep in sync with server/src/modes. */
+/** The 15 games, in the order they are usually listed. Keep in sync with server/src/modes. */
 const GAMES_SENTENCE =
-  'trivia, flags, chess puzzles, a 3D Rubik’s Cube, split the shape, guess the color, mini golf, timeline, an estimation game, guess the year, guess the price, guess the followers and pin the country on a globe';
+  'trivia, flags, chess puzzles, a 3D Rubik’s Cube, split the shape, guess the color, mini golf, timeline, an estimation game, guess the year, guess the price, guess the followers, pin the country on a globe, date the photo and name the vehicle';
 
 /** FAQ entries shared by every game page. */
 const COMMON_FAQ: [string, string][] = [
@@ -443,12 +443,12 @@ const HOW_TO_PLAY: TopicPage = {
   name: 'How to play',
   title: 'How to Play Duel – Rules, Leagues and Ratings',
   description:
-    'Duel rules: 3 rounds on random games, best of 3 wins. 13 games, Glicko-2 ratings overall and per game, leagues from Bronze to Legend, private rooms.',
+    'Duel rules: 3 rounds on random games, best of 3 wins. 15 games, Glicko-2 ratings overall and per game, leagues from Bronze to Legend, private rooms.',
   h1: 'How Duel works',
   intro:
     'Press Play and you are matched with a real player of similar rating. If nobody is free within about five seconds you play a ghost (a recorded round of a real player) or a computer opponent, so you never wait. The server picks three different games; win two rounds to win the duel.',
   how: [
-    `13 games: ${GAMES_SENTENCE}.`,
+    `15 games: ${GAMES_SENTENCE}.`,
     'Each duel has three rounds on three different games. Win two to win the duel.',
     'Before each duel you can ban one game you don’t want; your opponent’s ban counts too.',
     'The Rubik’s Cube only comes up in private rooms, in about 1% of duels there.',
@@ -482,7 +482,7 @@ export const KEYWORD_PAGES: TopicPage[] = [
       'Free 1v1 games in your browser: trivia, flags, chess puzzles, a 3D Rubik’s Cube, mini golf, timeline and more. Three rounds, best of three, no download.',
     h1: '1v1 games online: 12 brain games, one opponent',
     intro:
-      'Duel is a 1v1 game where every match mixes three different brain games. You don’t pick the game: the server draws three at random from twelve, so you need to be good at a bit of everything to win consistently. It runs in any browser, on phone or PC, and a match takes about five minutes.',
+      'Duel is a 1v1 game where every match mixes three different brain games. You don’t pick the game: the server draws three at random from fourteen, so you need to be good at a bit of everything to win consistently. It runs in any browser, on phone or PC, and a match takes about five minutes.',
     how: [
       'Press Play: you are matched with a live player of similar rating, or a recorded duel of a real player (or a computer opponent) if nobody is online within a few seconds.',
       `Three rounds on three different games, drawn from: ${GAMES_SENTENCE}.`,
@@ -519,7 +519,7 @@ export const KEYWORD_PAGES: TopicPage[] = [
     ],
     about: [
       'Two-player games are better when they are fair. On Duel nothing depends on luck of the draw between players: the server generates one set of questions, puzzles or courses per round and both of you play it, then compares the scores.',
-      `You get variety without choosing: each duel draws three of the twelve games (${GAMES_SENTENCE}).`,
+      `You get variety without choosing: each duel draws three of the games (${GAMES_SENTENCE}).`,
     ],
     faq: [
       ['Can I play with a friend?', 'Yes. Choose “Play a friend”, create a room and send the code or the link. Friend duels do not change your rating, and you can ask for a rematch at the end.'],
@@ -567,7 +567,7 @@ export const KEYWORD_PAGES: TopicPage[] = [
     how: [
       '1,200+ questions, at least 90 per category, rated from 1 to 5 stars.',
       'Each trivia round takes about a minute: 5 questions, 10 seconds each.',
-      'Trivia is one of 12 games in random duels, so a duel can also include flags, chess puzzles, mini golf or a guessing game or pinning a country on a globe. The Rubik’s Cube is played in private rooms.',
+      'Trivia is one of 14 games in random duels, so a duel can also include flags, chess puzzles, mini golf or a guessing game , pinning a country on a globe, dating an old photo or naming a car or plane. The Rubik’s Cube is played in private rooms.',
       'A daily quiz of the day with 10 new questions to keep your streak going.',
     ],
     about: [
@@ -588,7 +588,7 @@ export const KEYWORD_PAGES: TopicPage[] = [
       'Free brain games for adults: general knowledge, flags, chess puzzles, a 3D Rubik’s Cube, estimation and precision games, played as short 1v1 duels.',
     h1: 'Brain games online, played against an opponent',
     intro:
-      'Brain training works better when there is something at stake. Duel turns thirteen brain games (knowledge, visual recognition, logic, spatial reasoning, estimation, precision and timing) into short duels against an opponent, with a rating that shows whether you are actually improving.',
+      'Brain training works better when there is something at stake. Duel turns fifteen brain games (knowledge, visual recognition, logic, spatial reasoning, estimation, precision and timing) into short duels against an opponent, with a rating that shows whether you are actually improving.',
     how: [
       'Knowledge: trivia questions from 12 categories.',
       'Visual memory: recognise the flags of 194 countries.',
@@ -599,7 +599,7 @@ export const KEYWORD_PAGES: TopicPage[] = [
       'Spatial reasoning: a real 3D Rubik’s Cube you turn with your finger or mouse.',
     ],
     about: [
-      'Each game has its own rating, so you can see your strong and weak spots: maybe your trivia is excellent but your estimation is way off. Playing all thirteen keeps the training varied, which is more fun than repeating one exercise.',
+      'Each game has its own rating, so you can see your strong and weak spots: maybe your trivia is excellent but your estimation is way off. Playing all fifteen keeps the training varied, which is more fun than repeating one exercise.',
     ],
     faq: [
       ['Is it suitable for adults and teenagers?', 'Yes. The content is general-audience and the difficulty adapts through matchmaking: you mostly play people of a similar rating.'],

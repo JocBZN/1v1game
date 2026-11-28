@@ -4,8 +4,9 @@ import { chessMode } from './chess';
 import { colorMode } from './color';
 import { cubeMode } from './cube';
 import { flagsMode } from './flags';
-import { followersMode, opinionMode, priceMode, yearMode } from './estimate';
+import { followersMode, opinionMode, photoMode, priceMode, yearMode } from './estimate';
 import { globeMode } from './globe';
+import { vehiclesMode } from './vehicles';
 import { golfMode } from './golf';
 import { splitMode } from './split';
 import { timelineMode } from './timeline';
@@ -13,7 +14,7 @@ import { triviaMode } from './trivia';
 import type { GameMode } from './types';
 
 /** Registry of playable domains. Add new modes here. */
-const REGISTERED: GameMode<any>[] = [triviaMode, chessMode, flagsMode, cubeMode, splitMode, colorMode, golfMode, timelineMode, opinionMode, yearMode, priceMode, followersMode, globeMode];
+const REGISTERED: GameMode<any>[] = [triviaMode, chessMode, flagsMode, cubeMode, splitMode, colorMode, golfMode, timelineMode, opinionMode, yearMode, priceMode, followersMode, globeMode, photoMode, vehiclesMode];
 
 /** For automated tests only: ROUND_TIME_SCALE=0.2 makes every round 5× shorter. */
 const SCALE = Number(process.env.ROUND_TIME_SCALE ?? 1);

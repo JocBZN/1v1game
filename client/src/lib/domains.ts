@@ -1,6 +1,6 @@
-import { Box, Brain, Earth, CalendarRange, Castle, Flag, History, LandPlot, Lightbulb, Palette, Scissors, Tag, Users, type LucideIcon } from 'lucide-react';
+import { Box, Brain, Camera, CarFront, Earth, CalendarRange, Castle, Flag, History, LandPlot, Lightbulb, Palette, Scissors, Tag, Users, type LucideIcon } from 'lucide-react';
 
-export type DomainId = 'trivia' | 'chess' | 'flags' | 'cube' | 'split' | 'color' | 'golf' | 'timeline' | 'opinion' | 'year' | 'price' | 'followers' | 'globe';
+export type DomainId = 'trivia' | 'chess' | 'flags' | 'cube' | 'split' | 'color' | 'golf' | 'timeline' | 'opinion' | 'year' | 'price' | 'followers' | 'globe' | 'photo' | 'vehicles';
 
 export interface DomainMeta {
   id: DomainId;
@@ -35,10 +35,12 @@ export const DOMAINS: Record<DomainId, DomainMeta> = {
   price: { id: 'price', name: 'The right price', short: 'Price', icon: Tag, ...SLATE, tagline: '5 things · guess the price' },
   followers: { id: 'followers', name: 'Followers', short: 'Followers', icon: Users, ...RED, tagline: '5 stars and games · guess the numbers' },
   globe: { id: 'globe', name: 'Pin the country', short: 'Globe', icon: Earth, ...CYAN, tagline: '5 countries · drop a pin on the globe' },
+  photo: { id: 'photo', name: 'Photo year', short: 'Photo', icon: Camera, ...ORANGE, tagline: '5 photos · guess the year they were taken' },
+  vehicles: { id: 'vehicles', name: 'Vehicles', short: 'Vehicles', icon: CarFront, ...SLATE, tagline: '5 cars, planes, bikes and boats · name them' },
 };
 
 export const DOMAIN_LIST: DomainMeta[] = [
-  DOMAINS.trivia, DOMAINS.chess, DOMAINS.flags, DOMAINS.cube, DOMAINS.split, DOMAINS.color, DOMAINS.golf, DOMAINS.timeline, DOMAINS.opinion, DOMAINS.year, DOMAINS.price, DOMAINS.followers, DOMAINS.globe,
+  DOMAINS.trivia, DOMAINS.chess, DOMAINS.flags, DOMAINS.cube, DOMAINS.split, DOMAINS.color, DOMAINS.golf, DOMAINS.timeline, DOMAINS.opinion, DOMAINS.year, DOMAINS.price, DOMAINS.followers, DOMAINS.globe, DOMAINS.photo, DOMAINS.vehicles,
 ];
 
 /** Games that come up in normal matches (the Rubik’s Cube is private-room only). */

@@ -12,13 +12,15 @@ const LETTERS = ['A', 'B', 'C', 'D'];
  * arrives from the server after answering.
  */
 export function ChoiceRound({
-  item, feedback, onAnswer, header, layout = 'list',
+  item, feedback, onAnswer, header, layout = 'list', compact = false,
 }: {
   item: CurrentItem<{ options: string[]; index: number; total: number }> | null;
   feedback: Feedback | null;
   onAnswer: (answer: unknown) => void;
   header: ReactNode;
   layout?: 'list' | 'grid';
+  /** tighter spacing, for questions with a big picture */
+  compact?: boolean;
 }) {
   const [chosen, setChosen] = useState<number | null>(null);
   useEffect(() => setChosen(null), [item?.item, item?.round]);
@@ -53,9 +55,9 @@ export function ChoiceRound({
       </div>
       {item.endsAt && item.limitMs ? (fb ? <div className="h-2" /> : <TimerBar endsAt={item.endsAt} totalMs={item.limitMs} />) : null}
 
-      <div className="flex flex-1 flex-col justify-center py-4">{header}</div>
+      <div className={cn('flex flex-1 flex-col justify-center', compact ? 'py-2' : 'py-4')}>{header}</div>
 
-      <div className={layout === 'grid' ? 'grid grid-cols-2 gap-2.5 pb-2' : 'grid gap-2.5 pb-2'}>
+      <div className={layout === 'grid' ? 'grid grid-cols-2 gap-2.5 pb-2' : cn('grid pb-2', compact ? 'gap-2' : 'gap-2.5')}>
         {item.data.options.map((opt, i) => {
           const isCorrect = correctIndex === i;
           const isChosen = chosen === i || (fb?.chosen as number | null) === i;
@@ -92,7 +94,8 @@ export function ChoiceRound({
                 onAnswer(i);
               }}
               className={cn(
-                'flex min-h-14 items-center gap-3 rounded-2xl border px-3 py-3 text-left text-[15px] leading-tight transition-colors disabled:cursor-default',
+                'flex items-center gap-3 rounded-2xl border px-3 text-left text-[15px] leading-tight transition-colors disabled:cursor-default',
+                compact ? 'min-h-12 py-2' : 'min-h-14 py-3',
                 cls, anim, layout === 'grid' && 'justify-center text-center',
               )}
             >

@@ -134,7 +134,7 @@ describe('room game settings', () => {
   it('the host picks the allowed games (at least one); the guest cannot; duels use them', () => {
     const { rooms, duels, last } = setup();
     const { code } = rooms.create(1);
-    expect(last(1, 'room:state').allowed).toHaveLength(13);
+    expect(last(1, 'room:state').allowed).toHaveLength(15);
     rooms.setAllowed(1, ['chess', 'golf', 'nonsense' as never]);
     expect(last(1, 'room:state').allowed).toEqual(['chess', 'golf']);
     rooms.setAllowed(1, []); // ignored: at least one game must stay

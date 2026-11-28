@@ -10,6 +10,10 @@ export interface EstimateQ {
   unit?: string;
   /** revealed with the answer: the assumption behind it or the source year */
   note?: string;
+  /** a picture shown with the question (photo year game) */
+  img?: string;
+  /** shown with the answer: who made the picture, its licence, and a link to its source page */
+  credit?: { text: string; url: string };
 }
 
 export type EstimateInput =
@@ -27,8 +31,8 @@ export type EstimateContent = RoundContent<EstimateItem>;
  */
 export const yearTolerance = (answer: number) => Math.round(Math.min(60, Math.max(12, (2026 - answer) * 0.03)));
 
-export function estimatePoints(input: EstimateInput, answer: number, guess: number, zeroAt = 10): number {
-  if (input.kind === 'year') return Math.round(1000 * Math.max(0, 1 - Math.abs(guess - answer) / yearTolerance(answer)));
+export function estimatePoints(input: EstimateInput, answer: number, guess: number, zeroAt = 10, yearZero?: number): number {
+  if (input.kind === 'year') return Math.round(1000 * Math.max(0, 1 - Math.abs(guess - answer) / (yearZero ?? yearTolerance(answer))));
   if (guess <= 0 || answer <= 0) return 0;
   const off = Math.abs(Math.log10(guess / answer)) / Math.log10(zeroAt);
   return Math.round(1000 * Math.max(0, 1 - off));
@@ -43,6 +47,8 @@ export function makeEstimateMode(opts: {
   itemMs: number;
   /** log games: how many times off scores 0 */
   zeroAt?: number;
+  /** year games: how many years off scores 0 (default: grows with age, see yearTolerance) */
+  yearZero?: number;
   /** at most `max` questions matching `re` per round (keeps one kind of question from crowding the others) */
   cap?: { re: RegExp; max: number };
   thinkMs: number;
@@ -62,8 +68,9 @@ export function makeEstimateMode(opts: {
       const items = rng
         .shuffle(opts.questions())
         .filter((q) => {
-          if (seen.has(q.q)) return false;
-          seen.add(q.q);
+          const k = q.img ?? q.q;
+          if (seen.has(k)) return false;
+          seen.add(k);
           if (opts.cap?.re.test(q.q)) return capped++ < opts.cap.max;
           return true;
         })
@@ -73,20 +80,21 @@ export function makeEstimateMode(opts: {
 
     publicItem(content, index) {
       const it = content.items[index];
-      return { q: it.q, unit: it.unit ?? '', input: opts.input, seconds: opts.itemMs / 1000, index, total: content.items.length };
+      return { q: it.q, unit: it.unit ?? '', input: opts.input, seconds: opts.itemMs / 1000, index, total: content.items.length, ...(it.img ? { img: it.img } : {}) };
     },
 
     validateAnswer(content, index, answer) {
       const it = content.items[index];
-      const fb = { answer: it.answer, note: it.note ?? null };
+      const fb = { answer: it.answer, note: it.note ?? null, credit: it.credit ?? null };
       if (!isNum(answer)) return { correct: false, points: 0, itemDone: true, feedback: fb };
       const g = opts.input.kind === 'year' ? Math.round(answer) : answer;
-      const points = estimatePoints(opts.input, it.answer, g, opts.zeroAt);
+      const points = estimatePoints(opts.input, it.answer, g, opts.zeroAt, opts.yearZero);
       return { correct: points >= 750, points, itemDone: true, feedback: { ...fb, guess: g } };
     },
 
     timeoutFeedback(content, index) {
-      return { answer: content.items[index].answer, note: content.items[index].note ?? null };
+      const it = content.items[index];
+      return { answer: it.answer, note: it.note ?? null, credit: it.credit ?? null };
     },
 
     scoreRound: sumScore,
@@ -102,6 +110,7 @@ export function makeEstimateMode(opts: {
 }
 
 import { followerQuestions, opinionQuestions, priceQuestions, yearQuestions } from './estimate-data';
+import { photoQuestions } from './photos';
 
 export const opinionMode = makeEstimateMode({
   id: 'opinion', name: 'Opinion', questions: opinionQuestions,
@@ -124,4 +133,9 @@ export const priceMode = makeEstimateMode({
 export const followersMode = makeEstimateMode({
   id: 'followers', name: 'Followers', questions: followerQuestions,
   input: { kind: 'log', min: 1_000, max: 1e11 }, perRound: 5, itemMs: 15_000, zeroAt: 10, thinkMs: 9_000,
+});
+export const photoMode = makeEstimateMode({
+  id: 'photo', name: 'Photo year', questions: photoQuestions,
+  // Photography starts in the 1820s; full points for the exact year, 0 from 20 years off.
+  input: { kind: 'year', min: 1830, max: 2026 }, perRound: 5, itemMs: 15_000, yearZero: 20, thinkMs: 8_000,
 });

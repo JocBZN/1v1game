@@ -12,6 +12,8 @@ interface EstimateData {
   seconds: number;
   index: number;
   total: number;
+  /** photo year game: the picture to date */
+  img?: string;
 }
 
 const GRACE_MS = 700;
@@ -35,13 +37,19 @@ function parseBig(s: string): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-/** Year slider: 0..1000, cubic so recent years get most of the travel (BC years are negative). */
+/**
+ * Year slider: 0..1000. For ranges reaching into antiquity it is cubic, so recent years get most of
+ * the travel (BC years are negative); a modern-only range (e.g. photos, 1830 onwards) is linear.
+ */
 const YEAR_STEPS = 1000;
 const noZero = (y: number) => (y === 0 ? 1 : y);
+const linear = (min: number) => min >= 1000;
 function yearAt(pos: number, min: number, max: number) {
+  if (linear(min)) return Math.round(min + ((max - min) * pos) / YEAR_STEPS);
   return noZero(Math.round(max - (max - min) * (1 - pos / YEAR_STEPS) ** 3));
 }
 function posOf(year: number, min: number, max: number) {
+  if (linear(min)) return Math.round(((Math.max(min, Math.min(max, year)) - min) / (max - min)) * YEAR_STEPS);
   const f = 1 - Math.cbrt(Math.max(0, Math.min(1, (max - year) / (max - min))));
   return Math.round(f * YEAR_STEPS);
 }
@@ -131,25 +139,37 @@ export function EstimateRound({ item, feedback, onAnswer, waiting }: ModeProps<E
         </div>
       )}
 
-      <h2 className="mt-6 text-center text-2xl font-semibold leading-snug tracking-tight">{item.data.q}</h2>
+      {item.data.img ? (
+        <>
+          <Photo src={item.data.img} />
+          <h2 className="mt-2 text-center text-base font-semibold tracking-tight">{item.data.q}</h2>
+        </>
+      ) : (
+        <h2 className="mt-6 text-center text-2xl font-semibold leading-snug tracking-tight">{item.data.q}</h2>
+      )}
 
-      <div className="mt-8 text-center">
-        <div className="font-display text-4xl font-bold tabular-nums tracking-tight">
+      <div className={`${item.data.img ? 'mt-2' : 'mt-8'} text-center`}>
+        <div className={`font-display ${item.data.img ? 'text-3xl' : 'text-4xl'} font-bold tabular-nums tracking-tight`}>
           {fb && guess !== null ? show(guess) : touched && !fb ? show(value) : <span className="text-muted/50">?</span>}
         </div>
-        {!touched && !fb && <div className="mt-1 text-sm text-muted">Move the slider or type your answer</div>}
+        {!touched && !fb && !item.data.img && <div className="mt-1 text-sm text-muted">Move the slider or type your answer</div>}
         {answer !== null && (
           <div className="mt-3 rounded-2xl border border-line bg-surface p-3">
             <div className="label">Answer</div>
             <div className="font-display text-2xl font-bold text-teal">{show(answer)}</div>
             {off && <div className="mt-0.5 text-sm font-semibold text-muted">{off}</div>}
             {typeof fb?.note === 'string' && <div className="mt-1 text-xs text-muted">{fb.note as string}</div>}
+            {isCredit(fb?.credit) && (
+              <a href={fb.credit.url} target="_blank" rel="noopener" className="mt-1 block text-[11px] text-muted/80 underline-offset-2 hover:underline">
+                Photo: {fb.credit.text} · Wikimedia Commons
+              </a>
+            )}
           </div>
         )}
       </div>
 
       {!fb && (
-        <div className="mt-8">
+        <div className={item.data.img ? 'mt-3' : 'mt-8'}>
           {input.kind === 'year' ? (
             <>
               <div className="flex items-center gap-3">
@@ -161,10 +181,10 @@ export function EstimateRound({ item, feedback, onAnswer, waiting }: ModeProps<E
                 />
                 <button className="btn btn-secondary h-11 w-11 p-0" disabled={locked} onClick={() => { touch(); setValue((v) => Math.min(input.max, v + 1 === 0 ? 1 : v + 1)); setText(''); }} aria-label="One year later"><Plus size={18} /></button>
               </div>
-              <div className="mt-1 flex justify-between text-[11px] text-muted"><span>{formatYear(input.min)}</span><span>{formatYear(input.max)}</span></div>
-              <div className="mt-4 flex gap-2">
+              <div className={`${item.data.img ? 'mt-0' : 'mt-1'} flex justify-between text-[11px] text-muted`}><span>{formatYear(input.min)}</span><span>{formatYear(input.max)}</span></div>
+              <div className={`${item.data.img ? 'mt-2' : 'mt-4'} flex gap-2`}>
                 <input
-                  inputMode="numeric" placeholder="or type it: 1066, 44 BC…" value={text} disabled={locked}
+                  inputMode="numeric" placeholder={input.min > 0 ? 'or type it: 1975…' : 'or type it: 1066, 44 BC…'} value={text} disabled={locked}
                   onChange={(e) => {
                     setText(e.target.value);
                     const y = parseYear(e.target.value);
@@ -174,7 +194,7 @@ export function EstimateRound({ item, feedback, onAnswer, waiting }: ModeProps<E
                   onKeyDown={(e) => e.key === 'Enter' && submit()}
                   className="min-w-0 flex-1 rounded-2xl border border-line bg-surface px-4 py-3 text-center text-base font-medium outline-none placeholder:text-muted/60 focus:border-cyan focus:ring-4 focus:ring-cyan-soft"
                 />
-                <button
+                {input.min < 0 && <button
                   type="button"
                   disabled={locked}
                   aria-pressed={bcOn}
@@ -186,7 +206,7 @@ export function EstimateRound({ item, feedback, onAnswer, waiting }: ModeProps<E
                   title="Before Christ"
                 >
                   BC
-                </button>
+                </button>}
               </div>
             </>
           ) : (
@@ -219,9 +239,41 @@ export function EstimateRound({ item, feedback, onAnswer, waiting }: ModeProps<E
         </div>
       )}
 
-      <button onClick={submit} disabled={locked || !touched} className="btn btn-primary mt-auto w-full py-3.5">
+      <button onClick={submit} disabled={locked || !touched} className={`btn btn-primary mt-auto w-full ${item.data.img ? 'mt-3 py-3' : 'py-3.5'}`}>
         {fb ? `+${fb.points}` : sent ? 'Checking…' : 'Lock in'}
       </button>
+    </div>
+  );
+}
+
+export const isCredit = (x: unknown): x is { text: string; url: string } =>
+  !!x && typeof x === 'object' && typeof (x as { text?: unknown }).text === 'string' && typeof (x as { url?: unknown }).url === 'string';
+
+/** The photo to date: fits the screen whatever its shape; a soft placeholder while it loads. */
+export function Photo({ src, className = 'h-[27vh] min-h-40 sm:h-[38vh]' }: { src: string; className?: string }) {
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    setLoaded(false);
+    setFailed(false);
+  }, [src]);
+  return (
+    <div className={`relative mt-3 flex items-center justify-center overflow-hidden rounded-2xl bg-sunken ${className}`}>
+      {!loaded && !failed && <div className="absolute inset-0 animate-pulse bg-sunken" />}
+      {failed ? (
+        <span className="text-sm text-muted">The photo didn’t load. Take your best guess.</span>
+      ) : (
+        <img
+          key={src}
+          src={src}
+          alt="A photo to date"
+          referrerPolicy="no-referrer"
+          draggable={false}
+          onLoad={() => setLoaded(true)}
+          onError={() => setFailed(true)}
+          className={`max-h-full max-w-full select-none object-contain transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        />
+      )}
     </div>
   );
 }

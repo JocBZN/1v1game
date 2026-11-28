@@ -25,6 +25,7 @@ import { GolfRound } from './GolfRound';
 import { SplitRound } from './SplitRound';
 import { TimelineRound } from './TimelineRound';
 import { TriviaRound } from './TriviaRound';
+import { VehiclesRound } from './VehiclesRound';
 import type { ModeProps } from './types';
 
 /** One React component per domain. Add new domains here (and on the server in `modes/index.ts`). */
@@ -40,6 +41,8 @@ export const MODE_COMPONENTS: Partial<Record<DomainId, ComponentType<ModeProps>>
   opinion: EstimateRound,
   year: EstimateRound,
   globe: GlobeRound,
+  photo: EstimateRound,
+  vehicles: VehiclesRound,
   price: EstimateRound,
   followers: EstimateRound,
 };

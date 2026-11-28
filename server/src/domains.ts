@@ -1,4 +1,4 @@
-export const DOMAIN_IDS = ['trivia', 'chess', 'flags', 'cube', 'split', 'color', 'golf', 'timeline', 'opinion', 'year', 'price', 'followers', 'globe'] as const;
+export const DOMAIN_IDS = ['trivia', 'chess', 'flags', 'cube', 'split', 'color', 'golf', 'timeline', 'opinion', 'year', 'price', 'followers', 'globe', 'photo', 'vehicles'] as const;
 export type DomainId = (typeof DOMAIN_IDS)[number];
 
 /** Rating "tracks": one per domain plus the overall one. */
@@ -19,6 +19,8 @@ export const DOMAIN_NAMES: Record<DomainId, string> = {
   price: 'The right price',
   followers: 'Followers',
   globe: 'Pin the country',
+  photo: 'Photo year',
+  vehicles: 'Vehicles',
 };
 
 export function isDomain(x: unknown): x is DomainId {
