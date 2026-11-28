@@ -21,7 +21,8 @@ describe('photo year', () => {
 
   it('never sends the Commons file name before the answer', () => {
     const content = photoMode.generateRound(createRng(5));
-    expect(content.items).toHaveLength(5);
+    expect(content.items).toHaveLength(3);
+    expect(photoMode.itemTimeLimit).toBe(60_000 + 700);
     const pub = JSON.stringify(photoMode.publicItem(content, 0));
     expect(pub).toMatch(/"img":"\/api\/photo\/[\w-]{16}"/);
     expect(pub).not.toContain('wikimedia');

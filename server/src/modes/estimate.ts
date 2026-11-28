@@ -137,5 +137,5 @@ export const followersMode = makeEstimateMode({
 export const photoMode = makeEstimateMode({
   id: 'photo', name: 'Photo year', questions: photoQuestions,
   // Photography starts in the 1820s; full points for the exact year, 0 from 20 years off.
-  input: { kind: 'year', min: 1830, max: 2026 }, perRound: 5, itemMs: 15_000, yearZero: 20, thinkMs: 8_000,
+  input: { kind: 'year', min: 1830, max: 2026 }, perRound: 3, itemMs: 60_000, yearZero: 20, thinkMs: 20_000,
 });
