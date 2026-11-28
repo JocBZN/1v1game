@@ -1,6 +1,6 @@
-import { Box, Brain, CalendarRange, Castle, Flag, History, LandPlot, Lightbulb, Palette, Scissors, Tag, Users, type LucideIcon } from 'lucide-react';
+import { Box, Brain, Earth, CalendarRange, Castle, Flag, History, LandPlot, Lightbulb, Palette, Scissors, Tag, Users, type LucideIcon } from 'lucide-react';
 
-export type DomainId = 'trivia' | 'chess' | 'flags' | 'cube' | 'split' | 'color' | 'golf' | 'timeline' | 'opinion' | 'year' | 'price' | 'followers';
+export type DomainId = 'trivia' | 'chess' | 'flags' | 'cube' | 'split' | 'color' | 'golf' | 'timeline' | 'opinion' | 'year' | 'price' | 'followers' | 'globe';
 
 export interface DomainMeta {
   id: DomainId;
@@ -34,10 +34,11 @@ export const DOMAINS: Record<DomainId, DomainMeta> = {
   year: { id: 'year', name: 'Release year', short: 'Year', icon: CalendarRange, ...CYAN, tagline: '5 questions, from ancient history to today' },
   price: { id: 'price', name: 'The right price', short: 'Price', icon: Tag, ...SLATE, tagline: '5 things · guess the price' },
   followers: { id: 'followers', name: 'Followers', short: 'Followers', icon: Users, ...RED, tagline: '5 stars and games · guess the numbers' },
+  globe: { id: 'globe', name: 'Pin the country', short: 'Globe', icon: Earth, ...CYAN, tagline: '5 countries · drop a pin on the globe' },
 };
 
 export const DOMAIN_LIST: DomainMeta[] = [
-  DOMAINS.trivia, DOMAINS.chess, DOMAINS.flags, DOMAINS.cube, DOMAINS.split, DOMAINS.color, DOMAINS.golf, DOMAINS.timeline, DOMAINS.opinion, DOMAINS.year, DOMAINS.price, DOMAINS.followers,
+  DOMAINS.trivia, DOMAINS.chess, DOMAINS.flags, DOMAINS.cube, DOMAINS.split, DOMAINS.color, DOMAINS.golf, DOMAINS.timeline, DOMAINS.opinion, DOMAINS.year, DOMAINS.price, DOMAINS.followers, DOMAINS.globe,
 ];
 
 /** Games that come up in normal matches (the Rubik’s Cube is private-room only). */

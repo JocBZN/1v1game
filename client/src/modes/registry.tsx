@@ -20,6 +20,7 @@ export function prefetchHeavyModes() {
 import { ColorRound } from './ColorRound';
 import { EstimateRound } from './EstimateRound';
 import { FlagsRound } from './FlagsRound';
+import { GlobeRound } from './GlobeRound';
 import { GolfRound } from './GolfRound';
 import { SplitRound } from './SplitRound';
 import { TimelineRound } from './TimelineRound';
@@ -38,6 +39,7 @@ export const MODE_COMPONENTS: Partial<Record<DomainId, ComponentType<ModeProps>>
   timeline: TimelineRound,
   opinion: EstimateRound,
   year: EstimateRound,
+  globe: GlobeRound,
   price: EstimateRound,
   followers: EstimateRound,
 };
