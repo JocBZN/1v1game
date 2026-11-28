@@ -134,7 +134,6 @@ export function IntroScreen({ found, index, domain, roundWins }: { found: Found;
             <div className="font-display text-xl font-bold" style={{ color: meta.color }}>
               {meta.name}
             </div>
-            <div className="mt-0.5 text-sm text-muted">{meta.tagline}</div>
           </motion.div>
         )}
       </div>

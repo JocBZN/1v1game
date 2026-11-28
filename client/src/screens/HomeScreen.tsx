@@ -140,7 +140,6 @@ function GameTiles() {
         >
           <TopicIcon domain={d.id} size={36} solid />
           <div className="text-sm font-bold leading-tight" style={{ color: d.color }}>{d.name}</div>
-          <div className="text-[11px] leading-snug text-text/70">{d.tagline}</div>
         </motion.li>
       ))}
     </ul>

@@ -21,10 +21,7 @@ export function SelectGameScreen({ connected, onPick, onBack }: {
             className="card flex items-center gap-3 px-4 py-3 text-left transition hover:-translate-y-px disabled:opacity-50"
           >
             <TopicIcon domain={d.id} size={40} />
-            <span className="min-w-0 flex-1">
-              <span className="block font-semibold" style={{ color: d.color }}>{d.name}</span>
-              <span className="block truncate text-xs text-muted">{d.tagline}</span>
-            </span>
+            <span className="min-w-0 flex-1 font-semibold" style={{ color: d.color }}>{d.name}</span>
             <span aria-hidden className="text-lg text-muted">→</span>
           </button>
         ))}
