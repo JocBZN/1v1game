@@ -76,3 +76,13 @@ describe('the right price: sold things', () => {
     }
   });
 });
+
+describe('opinion mix', () => {
+  it('"how many X would fit in Y" questions are about 12% of the pool (40% fewer than the old ~20%)', async () => {
+    const { opinionQuestions } = await import('../src/modes/estimate-data');
+    const all = opinionQuestions();
+    const fit = all.filter((q) => /would fit/.test(q.q)).length / all.length;
+    expect(fit).toBeGreaterThan(0.09);
+    expect(fit).toBeLessThan(0.135);
+  });
+});

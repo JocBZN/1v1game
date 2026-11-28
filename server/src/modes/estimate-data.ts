@@ -149,7 +149,17 @@ const FACTS: [string, number, string?][] = [
 
 export function opinionQuestions(): EstimateQ[] {
   const facts = [...FACTS, ...EXTRA_OPINION].map(([q, answer, note]) => ({ q, answer, note }));
-  return [...facts, ...facts, ...packingQuestions()]; // facts weighted twice so rounds mix both kinds
+  // Facts are weighted twice; only about 55% of the "how many X would fit in Y" questions are used
+  // (a fixed set, picked by a hash of the question), so they come up ~40% less often than before.
+  const fits = packingQuestions().filter((q) => keepFit(q.q));
+  return [...facts, ...facts, ...fits];
+}
+
+/** Stable pick of ~55% of the packing questions (same set on every server start). */
+function keepFit(q: string): boolean {
+  let h = 2166136261;
+  for (let i = 0; i < q.length; i++) h = Math.imul(h ^ q.charCodeAt(i), 16777619);
+  return (h >>> 0) % 100 < 55;
 }
 
 // ------------------------------------------------------------------ RELEASE YEAR (any year, BC as negative)
