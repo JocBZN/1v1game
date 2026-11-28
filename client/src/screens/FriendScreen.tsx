@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { LogOut } from 'lucide-react';
 import type { RoomError, RoomState } from '../state/duel';
 import { track } from '../lib/analytics';
 import { Avatar, PageHeader, Screen, TopicIcon } from '../components/ui';
@@ -118,7 +119,12 @@ export function RoomScreen({ room, onLeave, onRematch, onGames }: {
     <Screen className="pb-4">
       <header className="flex items-center justify-between">
         <h1 className="text-xl font-semibold tracking-tight">Private room</h1>
-        <button onClick={onLeave} className="btn btn-ghost px-3 py-2 text-sm">Leave</button>
+        <button
+          onClick={onLeave}
+          className="btn h-11 gap-1.5 rounded-full border-2 border-red bg-surface px-4 text-sm font-bold text-red hover:bg-red-soft"
+        >
+          <LogOut size={16} strokeWidth={2.5} /> Leave room
+        </button>
       </header>
 
       <section className="card mt-5 p-5 text-center animate-rise">

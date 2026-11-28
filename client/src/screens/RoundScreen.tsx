@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
+import { Flag } from 'lucide-react';
 import { SoundToggle } from '../components/SoundToggle';
 import { DOMAINS } from '../lib/domains';
 import { MODE_COMPONENTS } from '../modes/registry';
@@ -85,16 +86,28 @@ export function RoundScreen() {
         )}
       </div>
 
-      <div className="relative flex justify-center pb-1">
-        <SoundToggle className="absolute left-0 top-1/2 h-7 w-7 -translate-y-1/2" />
+      <div className="flex items-center gap-2 pb-1 pt-2">
+        <SoundToggle className="h-11 w-11 shrink-0" />
         {confirmQuit ? (
-          <div className="flex items-center gap-3 text-xs">
-            <span className="text-muted">Forfeit the duel?</span>
-            <button className="font-semibold text-red" onClick={forfeit}>Yes</button>
-            <button className="font-semibold text-muted" onClick={() => setConfirmQuit(false)}>No</button>
+          <div className="flex flex-1 items-center gap-2">
+            <span className="hidden text-sm font-semibold text-text min-[380px]:inline">Give up?</span>
+            <button
+              className="btn h-11 flex-1 rounded-full bg-red px-3 text-sm font-bold text-cream hover:brightness-95"
+              onClick={forfeit}
+            >
+              <Flag size={16} strokeWidth={2.5} /> Forfeit
+            </button>
+            <button className="btn btn-secondary h-11 flex-1 rounded-full px-3 text-sm font-bold" onClick={() => setConfirmQuit(false)}>
+              Keep playing
+            </button>
           </div>
         ) : (
-          <button className="text-xs text-muted/70 hover:text-text" onClick={() => setConfirmQuit(true)}>Forfeit</button>
+          <button
+            className="btn ml-auto h-11 gap-1.5 rounded-full border-2 border-red/70 bg-surface px-5 text-sm font-bold text-red hover:bg-red-soft"
+            onClick={() => setConfirmQuit(true)}
+          >
+            <Flag size={16} strokeWidth={2.5} /> Forfeit
+          </button>
         )}
       </div>
     </div>
